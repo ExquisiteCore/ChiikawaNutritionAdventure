@@ -233,7 +233,7 @@ void LoginWindow::applyStyles()
         "QWidget {"
         "    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, "
         "                                stop:0 #e8f4fd, stop:1 #c8e6f5);"
-        "    font-family: 'Microsoft YaHei', 'SimHei', sans-serif;"
+        "    font-family: 'PingFang SC', 'Hiragino Sans GB', 'Arial Unicode MS', 'Helvetica Neue';"
         "}"
         
         "#titleLabel {"

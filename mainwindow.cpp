@@ -165,7 +165,7 @@ void MainWindow::applyGameStyles()
         "}"
         
         "QWidget {"
-        "    font-family: 'Microsoft YaHei', 'SimHei', sans-serif;"
+        "    font-family: 'PingFang SC', 'Hiragino Sans GB', 'Arial Unicode MS', 'Helvetica Neue';"
         "}"
         
         "#welcomeLabel {"
