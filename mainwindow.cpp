@@ -72,26 +72,38 @@ void MainWindow::setupGameUI()
     buttonLayout = new QHBoxLayout();
     buttonLayout->setSpacing(20);
     
-    // 创建四个主要按钮
-    gameIntroButton = new QPushButton("游戏简介", this);
-    gameIntroButton->setObjectName("gameButton");
-    gameIntroButton->setIcon(QIcon("素材/chiikawa/img/ui/detailBtn.png"));
-    gameIntroButton->setIconSize(QSize(32, 32));
+    // 创建四个主要按钮（只显示图标，不显示文字）
+    gameIntroButton = new QPushButton("", this);
+    gameIntroButton->setObjectName("imageButton");
+    gameIntroButton->setIcon(QIcon("img/ui/detailBtn.png"));
+    gameIntroButton->setIconSize(QSize(120, 80));
+    gameIntroButton->setFixedSize(120, 80);
+    gameIntroButton->setFlat(true);
+    gameIntroButton->setToolTip("游戏简介");
     
-    levelsButton = new QPushButton("关卡选择", this);
-    levelsButton->setObjectName("gameButton");
-    levelsButton->setIcon(QIcon("素材/chiikawa/img/ui/startBtn.png"));
-    levelsButton->setIconSize(QSize(32, 32));
+    levelsButton = new QPushButton("", this);
+    levelsButton->setObjectName("imageButton");
+    levelsButton->setIcon(QIcon("img/ui/startBtn.png"));
+    levelsButton->setIconSize(QSize(120, 80));
+    levelsButton->setFixedSize(120, 80);
+    levelsButton->setFlat(true);
+    levelsButton->setToolTip("关卡选择");
     
-    settingsButton = new QPushButton("游戏设置", this);
-    settingsButton->setObjectName("gameButton");
-    settingsButton->setIcon(QIcon("素材/chiikawa/img/ui/checkRecordBtn.png"));
-    settingsButton->setIconSize(QSize(32, 32));
+    settingsButton = new QPushButton("", this);
+    settingsButton->setObjectName("imageButton");
+    settingsButton->setIcon(QIcon("img/ui/checkRecordBtn.png"));
+    settingsButton->setIconSize(QSize(120, 80));
+    settingsButton->setFixedSize(120, 80);
+    settingsButton->setFlat(true);
+    settingsButton->setToolTip("游戏设置");
     
-    logoutButton = new QPushButton("退出登录", this);
-    logoutButton->setObjectName("logoutButton");
-    logoutButton->setIcon(QIcon("素材/chiikawa/img/ui/exitBtn.png"));
-    logoutButton->setIconSize(QSize(32, 32));
+    logoutButton = new QPushButton("", this);
+    logoutButton->setObjectName("imageButton");
+    logoutButton->setIcon(QIcon("img/ui/exitBtn.png"));
+    logoutButton->setIconSize(QSize(120, 80));
+    logoutButton->setFixedSize(120, 80);
+    logoutButton->setFlat(true);
+    logoutButton->setToolTip("退出登录");
     
     // 添加按钮到布局
     buttonLayout->addWidget(gameIntroButton);
@@ -187,30 +199,21 @@ void MainWindow::applyGameStyles()
         "    padding: 20px;"
         "}"
         
-        "#gameButton {"
-        "    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, "
-        "                                stop:0 #74b9ff, stop:1 #0984e3);"
-        "    color: white;"
+        "#imageButton {"
+        "    background: transparent;"
         "    border: none;"
-        "    border-radius: 15px;"
-        "    padding: 20px 30px;"
-        "    font-size: 18px;"
-        "    font-weight: bold;"
-        "    min-width: 200px;"
-        "    min-height: 80px;"
-        "    text-align: left;"
-        "    icon-size: 32px;"
+        "    padding: 0px;"
+        "    margin: 5px;"
         "}"
         
-        "#gameButton:hover {"
-        "    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, "
-        "                                stop:0 #0984e3, stop:1 #0770c4);"
-        "    transform: translateY(-2px);"
+        "#imageButton:hover {"
+        "    background: rgba(255, 255, 255, 0.1);"
+        "    border-radius: 10px;"
         "}"
         
-        "#gameButton:pressed {"
-        "    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, "
-        "                                stop:0 #0770c4, stop:1 #055a9c);"
+        "#imageButton:pressed {"
+        "    background: rgba(255, 255, 255, 0.2);"
+        "    border-radius: 10px;"
         "}"
         
         "#logoutButton {"
