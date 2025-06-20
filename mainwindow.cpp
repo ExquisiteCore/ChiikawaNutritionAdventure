@@ -24,7 +24,7 @@ MainWindow::MainWindow(QWidget *parent)
     move(x, y);
     
     // 创建并显示登录窗口
-    loginWindow = new LoginWindow(this);
+    loginWindow = new LoginWindow(nullptr);
     connect(loginWindow, &LoginWindow::loginSuccessful, this, &MainWindow::onLoginSuccessful);
     
     // 隐藏主窗口，先显示登录窗口
@@ -43,13 +43,14 @@ MainWindow::~MainWindow()
 void MainWindow::onLoginSuccessful()
 {
     // 登录成功后显示主窗口
-    setupGameUI();
-    applyGameStyles();
-    this->show();
-    
+    // 先隐藏登录窗口
     if (loginWindow) {
         loginWindow->hide();
     }
+    
+    setupGameUI();
+    applyGameStyles();
+    this->show();
 }
 
 void MainWindow::setupGameUI()
@@ -72,17 +73,25 @@ void MainWindow::setupGameUI()
     buttonLayout->setSpacing(20);
     
     // 创建四个主要按钮
-    gameIntroButton = new QPushButton("🎯 游戏简介", this);
+    gameIntroButton = new QPushButton("游戏简介", this);
     gameIntroButton->setObjectName("gameButton");
+    gameIntroButton->setIcon(QIcon("素材/chiikawa/img/ui/detailBtn.png"));
+    gameIntroButton->setIconSize(QSize(32, 32));
     
-    levelsButton = new QPushButton("🎮 关卡选择", this);
+    levelsButton = new QPushButton("关卡选择", this);
     levelsButton->setObjectName("gameButton");
+    levelsButton->setIcon(QIcon("素材/chiikawa/img/ui/startBtn.png"));
+    levelsButton->setIconSize(QSize(32, 32));
     
-    settingsButton = new QPushButton("⚙️ 游戏设置", this);
+    settingsButton = new QPushButton("游戏设置", this);
     settingsButton->setObjectName("gameButton");
+    settingsButton->setIcon(QIcon("素材/chiikawa/img/ui/checkRecordBtn.png"));
+    settingsButton->setIconSize(QSize(32, 32));
     
-    logoutButton = new QPushButton("🚪 退出登录", this);
+    logoutButton = new QPushButton("退出登录", this);
     logoutButton->setObjectName("logoutButton");
+    logoutButton->setIcon(QIcon("素材/chiikawa/img/ui/exitBtn.png"));
+    logoutButton->setIconSize(QSize(32, 32));
     
     // 添加按钮到布局
     buttonLayout->addWidget(gameIntroButton);
@@ -187,8 +196,10 @@ void MainWindow::applyGameStyles()
         "    padding: 20px 30px;"
         "    font-size: 18px;"
         "    font-weight: bold;"
-        "    min-width: 180px;"
+        "    min-width: 200px;"
         "    min-height: 80px;"
+        "    text-align: left;"
+        "    icon-size: 32px;"
         "}"
         
         "#gameButton:hover {"
