@@ -1,6 +1,5 @@
 #include <QApplication>
 #include "mainwindow.h"
-#include "loginwindow.h"
 
 int main(int argc, char *argv[])
 {
@@ -11,9 +10,8 @@ int main(int argc, char *argv[])
     a.setApplicationVersion("1.0");
     a.setOrganizationName("ChiikawaGame");
     
-    // 创建并显示登录窗口
-    LoginWindow loginWindow;
-    loginWindow.show();
+    // 创建主窗口（会自动显示登录窗口）
+    MainWindow w;
     
     return a.exec();
 }

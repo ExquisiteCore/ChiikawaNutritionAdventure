@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ChooseLevelScene</class>
+ <widget class="QWidget" name="ChooseLevelScene">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>800</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QPushButton" name="LevelButton_1">
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>170</y>
+     <width>161</width>
+     <height>151</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="LevelButton_2">
+   <property name="geometry">
+    <rect>
+     <x>180</x>
+     <y>490</y>
+     <width>151</width>
+     <height>131</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="LevelButton_3">
+   <property name="geometry">
+    <rect>
+     <x>490</x>
+     <y>440</y>
+     <width>131</width>
+     <height>111</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="LevelButton_4">
+   <property name="geometry">
+    <rect>
+     <x>580</x>
+     <y>180</y>
+     <width>101</width>
+     <height>91</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="BackButton">
+   <property name="geometry">
+    <rect>
+     <x>650</x>
+     <y>720</y>
+     <width>120</width>
+     <height>54</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="Line_1">
+   <property name="geometry">
+    <rect>
+     <x>150</x>
+     <y>320</y>
+     <width>64</width>
+     <height>174</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Line_1</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="Line_2">
+   <property name="geometry">
+    <rect>
+     <x>330</x>
+     <y>520</y>
+     <width>167</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>TextLabel</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="Line_3">
+   <property name="geometry">
+    <rect>
+     <x>600</x>
+     <y>280</y>
+     <width>43</width>
+     <height>174</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>TextLabel</string>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
