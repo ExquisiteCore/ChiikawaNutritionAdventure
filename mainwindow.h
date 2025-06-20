@@ -2,6 +2,12 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QPushButton>
+#include <QLabel>
+#include <QStackedWidget>
+#include "loginwindow.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -17,7 +23,28 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+private slots:
+    void onLoginSuccessful();
+    void onGameIntroClicked();
+    void onLevelsClicked();
+    void onSettingsClicked();
+    void onLogoutClicked();
+
 private:
+    void setupGameUI();
+    void applyGameStyles();
+    
     Ui::MainWindow *ui;
+    LoginWindow *loginWindow;
+    QWidget *gameWidget;
+    QVBoxLayout *gameLayout;
+    QHBoxLayout *buttonLayout;
+    
+    QLabel *welcomeLabel;
+    QPushButton *gameIntroButton;
+    QPushButton *levelsButton;
+    QPushButton *settingsButton;
+    QPushButton *logoutButton;
 };
+
 #endif // MAINWINDOW_H
