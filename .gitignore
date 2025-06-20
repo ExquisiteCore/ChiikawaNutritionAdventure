@@ -29,6 +29,38 @@ Makefile*
 moc_*.cpp
 ui_*.h
 qrc_*.cpp
+Ui_*.h
+Qrc_*.cpp
+*-build-*
+*.qmlc
+*.jsc
+Build/
+
+# Qt unit tests
+target_wrapper.*
+
+# QtCreator
+*.autosave
+
+# QtCreator Qml
+*.qmlproject.user
+*.qmlproject.user.*
+
+# QtCreator CMake
+CMakeLists.txt.user*
+
+# QtCreator 4.8< compilation database
+compile_commands.json
+
+# QtCreator local machine specific files for imported projects
+*creator.user*
+
+*_qmlcache.qrc
+
+# Additional build files
+moc_predefs.h
+*.dylib
+*.framework
 Thumbs.db
 *.res
 *.rc
@@ -38,7 +70,6 @@ Thumbs.db
 # qtcreator generated files
 *.pro.user*
 *.qbs.user*
-CMakeLists.txt.user*
 
 # xemacs temporary files
 *.flc

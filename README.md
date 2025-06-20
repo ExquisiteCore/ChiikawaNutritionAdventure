@@ -28,10 +28,11 @@
 
 ## 技术栈
 
-- **开发框架**: Qt 6.x (C++)
-- **数据库**: MySQL 8.0+
+- **开发语言**: C++17
+- **GUI框架**: Qt 6.x (Qt Widgets)
+- **数据库**: SQLite
 - **构建工具**: qmake
-- **UI设计**: Qt Widgets + CSS样式
+- **平台支持**: Windows, macOS, Linux
 
 ## 安装和运行
 
@@ -43,8 +44,7 @@
    - 支持C++17的编译器
 
 2. **数据库环境**
-   - MySQL 8.0 或更高版本
-   - MySQL服务正在运行
+   - 无需额外配置，使用内置SQLite数据库
 
 ### 安装步骤
 
@@ -54,27 +54,7 @@
    cd ChiikawaNutritionAdventure
    ```
 
-2. **设置数据库**
-   ```bash
-   # 登录MySQL
-   mysql -u root -p
-   
-   # 执行数据库初始化脚本
-   source database_setup.sql
-   ```
-
-3. **配置数据库连接**
-   
-   编辑 `loginwindow.cpp` 文件中的数据库连接参数：
-   ```cpp
-   database.setHostName("localhost");     // 数据库主机
-   database.setDatabaseName("chiikawa_game"); // 数据库名
-   database.setUserName("root");          // 用户名
-   database.setPassword("your_password");  // 密码
-   database.setPort(3306);                // 端口
-   ```
-
-4. **编译和运行**
+2. **编译和运行**
    
    **方法一：使用Qt Creator**
    - 打开Qt Creator
@@ -134,24 +114,14 @@ ChiikawaNutritionAdventure/
 
 ## 数据库结构
 
-### 主要数据表
+目前使用SQLite数据库，包含以下数据表：
 
-1. **users** - 用户信息表
-   - 用户名、密码、邮箱
-   - 游戏等级、总分数
-   - 创建时间、最后登录时间
+1. **users** - 用户表
+   - 用户名、密码
+   - 创建时间
+   - 自动创建测试用户：admin/admin123, test_user/test123
 
-2. **nutrition_knowledge** - 营养知识表
-   - 知识标题、内容、分类
-   - 难度等级
-
-3. **question_bank** - 题库表
-   - 题目、选项、正确答案
-   - 答案解释、分类、难度
-
-4. **game_records** - 游戏记录表
-   - 用户ID、游戏模式、得分
-   - 游戏时长、胜负结果
+*注：其他数据表（营养知识、题库、游戏记录等）将在后续开发中添加*
 
 ## 开发计划
 

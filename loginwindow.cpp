@@ -102,36 +102,48 @@ void LoginWindow::setupUI()
 
 void LoginWindow::setupDatabase()
 {
-    // 设置MySQL数据库连接
-    database = QSqlDatabase::addDatabase("QMYSQL");
-    database.setHostName("localhost");
-    database.setDatabaseName("chiikawa_game");
-    database.setUserName("root");
-    database.setPassword(""); // 根据实际情况修改密码
-    database.setPort(3306);
+    // 使用SQLite数据库（无需额外配置）
+    database = QSqlDatabase::addDatabase("QSQLITE");
+    database.setDatabaseName("chiikawa_game.db");
     
     if (!database.open()) {
-        qDebug() << "数据库连接失败:" << database.lastError().text();
+        qDebug() << "SQLite数据库连接失败:" << database.lastError().text();
         QMessageBox::warning(this, "数据库错误", 
-                           "无法连接到数据库，请检查MySQL服务是否启动\n" + 
+                           "无法创建本地数据库\n" + 
                            database.lastError().text());
     } else {
-        qDebug() << "数据库连接成功";
+        qDebug() << "SQLite数据库连接成功";
         
         // 创建用户表（如果不存在）
         QSqlQuery query(database);
         QString createTableSQL = 
             "CREATE TABLE IF NOT EXISTS users ("
-            "id INT AUTO_INCREMENT PRIMARY KEY,"
-            "username VARCHAR(50) UNIQUE NOT NULL,"
-            "password VARCHAR(255) NOT NULL,"
-            "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+            "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "username TEXT UNIQUE NOT NULL,"
+            "password TEXT NOT NULL,"
+            "created_at DATETIME DEFAULT CURRENT_TIMESTAMP"
             ")";
         
         if (!query.exec(createTableSQL)) {
             qDebug() << "创建用户表失败:" << query.lastError().text();
+        } else {
+            // 插入默认测试用户
+            QSqlQuery insertQuery(database);
+            insertQuery.prepare("INSERT OR IGNORE INTO users (username, password) VALUES (?, ?)");
+            insertQuery.addBindValue("admin");
+            insertQuery.addBindValue("admin123");
+            insertQuery.exec();
+            
+            insertQuery.prepare("INSERT OR IGNORE INTO users (username, password) VALUES (?, ?)");
+            insertQuery.addBindValue("test_user");
+            insertQuery.addBindValue("test123");
+            insertQuery.exec();
+            
+            qDebug() << "默认用户创建完成";
         }
     }
+    
+
 }
 
 void LoginWindow::onLoginClicked()
