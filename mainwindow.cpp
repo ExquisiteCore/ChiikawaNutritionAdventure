@@ -181,8 +181,10 @@ void MainWindow::applyGameStyles()
 {
     setStyleSheet(
         "QMainWindow {"
-        "    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, "
-        "                                stop:0 #ffeaa7, stop:1 #fab1a0);"
+        "    background-image: url(img/gameoverBackground.png);"
+        "    background-repeat: no-repeat;"
+        "    background-position: center;"
+        "    background-size: cover;"
         "}"
         
         "QWidget {"
