@@ -6,7 +6,7 @@
 Player::Player(GameMap* gameMap, QObject *parent)
     : QObject(parent), QGraphicsPixmapItem()
     , map(gameMap)
-    , currentDirection(DIR_NONE)
+    , currentDirection(DIR_DOWN)  // 初始方向设为向下
     , nextDirection(DIR_NONE)
     , currentRow(10), currentCol(12) // 起始位置在地图中央
     , fiberValue(INITIAL_FIBER_VALUE)
@@ -66,8 +66,8 @@ void Player::loadSprites()
         
         // 为不同方向设置精灵
         for (int frame = 0; frame < 3; ++frame) {
-            sprites[DIR_LEFT][frame] = usagiMirSprite;
-            sprites[DIR_RIGHT][frame] = usagiSprite;
+            sprites[DIR_LEFT][frame] = usagiSprite;
+            sprites[DIR_RIGHT][frame] = usagiMirSprite;
             sprites[DIR_UP][frame] = usagiSprite;
             sprites[DIR_DOWN][frame] = usagiSprite;
         }
@@ -88,6 +88,11 @@ void Player::updatePixmap()
 void Player::setDirection(Direction dir)
 {
     nextDirection = dir;
+    // 如果角色没有在移动，立即更新方向和贴图（用于原地转向）
+    if (currentDirection != dir) {
+        currentDirection = dir;
+        updatePixmap();
+    }
 }
 
 void Player::move()
@@ -99,6 +104,7 @@ void Player::move()
         if (canMoveTo(newRow, newCol)) {
             currentDirection = nextDirection;
             setPosition(newRow, newCol);
+            updatePixmap(); // 更新贴图以匹配新方向
         }
         nextDirection = DIR_NONE;
     }
@@ -106,7 +112,7 @@ void Player::move()
 
 void Player::stopMovement()
 {
-    currentDirection = DIR_NONE;
+    // 保持最后的方向用于攻击，不设置为DIR_NONE
     nextDirection = DIR_NONE;
 }
 
@@ -122,7 +128,7 @@ void Player::useFiberSword()
         emit fiberValueChanged(fiberValue);
         
         // 发射膳食纤维剑
-        Direction swordDirection = (currentDirection != DIR_NONE) ? currentDirection : DIR_DOWN;
+        Direction swordDirection = currentDirection;
         QPointF swordPosition = pos();
         emit fiberSwordUsed(swordPosition, swordDirection);
     }
