@@ -59,17 +59,17 @@ void MainWindow::setupGameUI()
     gameWidget = new QWidget();
     setCentralWidget(gameWidget);
     
-    gameLayout = new QVBoxLayout(gameWidget);
+    gameLayout = new QHBoxLayout(gameWidget);
     gameLayout->setSpacing(30);
     gameLayout->setContentsMargins(50, 50, 50, 50);
     
-    // 欢迎标题
-    welcomeLabel = new QLabel("🎮 ちいかわ营养大冒险 🎮", this);
-    welcomeLabel->setAlignment(Qt::AlignCenter);
-    welcomeLabel->setObjectName("welcomeLabel");
+    // 左侧按钮布局
+    QVBoxLayout* leftLayout = new QVBoxLayout();
+    leftLayout->setSpacing(20);
+    leftLayout->setContentsMargins(0, 0, 20, 0);
     
-    // 按钮布局
-    buttonLayout = new QHBoxLayout();
+    // 按钮布局（垂直排列）
+    buttonLayout = new QVBoxLayout();
     buttonLayout->setSpacing(20);
     
     // 创建四个主要按钮（只显示图标，不显示文字）
@@ -110,13 +110,27 @@ void MainWindow::setupGameUI()
     buttonLayout->addWidget(levelsButton);
     buttonLayout->addWidget(settingsButton);
     buttonLayout->addWidget(logoutButton);
+    buttonLayout->addStretch();
+    
+    // 将按钮布局添加到左侧布局
+    leftLayout->addLayout(buttonLayout);
+    
+    // 右侧内容布局
+    QVBoxLayout* rightLayout = new QVBoxLayout();
+    rightLayout->setSpacing(30);
+    
+    // 欢迎标题
+    welcomeLabel = new QLabel("🎮 ちいかわ营养大冒险 🎮", this);
+    welcomeLabel->setAlignment(Qt::AlignCenter);
+    welcomeLabel->setObjectName("welcomeLabel");
+    
+    rightLayout->addStretch();
+    rightLayout->addWidget(welcomeLabel);
+    rightLayout->addStretch();
     
     // 添加到主布局
-    gameLayout->addStretch();
-    gameLayout->addWidget(welcomeLabel);
-    gameLayout->addStretch();
-    gameLayout->addLayout(buttonLayout);
-    gameLayout->addStretch();
+    gameLayout->addLayout(leftLayout);
+    gameLayout->addLayout(rightLayout);
     
     // 连接信号槽
     connect(gameIntroButton, &QPushButton::clicked, this, &MainWindow::onGameIntroClicked);
@@ -127,18 +141,50 @@ void MainWindow::setupGameUI()
 
 void MainWindow::onGameIntroClicked()
 {
-    QString introText = 
-        "🎮 游戏简介 🎮\n\n"
-        "• 吉伊、小八和乌萨奇三小只前来冒险！\n"
-        "• 在游戏中，你将扮演乌萨奇，与奇美拉们战斗。\n"
-        "• 使用 WASD 键控制移动，鼠标左键进行攻击。\n\n"
-        "🎯 游戏模式：\n"
-        "模式一（碳水化合物之战）：\n"
-        "使用\"膳食纤维剑\"技能击败\"伪蔬菜\"BOSS\n\n"
-        "模式二（糖油混合物歼灭战）：\n"
-        "存活300秒，击败高糖油敌人（如奶茶、炸鸡）";
+    // 创建自定义对话框显示游戏简介图片
+    QDialog *introDialog = new QDialog(this);
+    introDialog->setWindowTitle("游戏简介");
+    introDialog->setModal(true);
+    introDialog->resize(800, 600);
     
-    QMessageBox::information(this, "游戏简介", introText);
+    QVBoxLayout *layout = new QVBoxLayout(introDialog);
+    
+    // 创建标签显示图片
+    QLabel *imageLabel = new QLabel(introDialog);
+    QPixmap pixmap(":/img/ui/details.png");
+    
+    if (!pixmap.isNull()) {
+        // 缩放图片以适应对话框
+        pixmap = pixmap.scaled(750, 500, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        imageLabel->setPixmap(pixmap);
+        imageLabel->setAlignment(Qt::AlignCenter);
+    } else {
+        imageLabel->setText("无法加载游戏简介图片");
+        imageLabel->setAlignment(Qt::AlignCenter);
+    }
+    
+    // 创建关闭按钮
+    QPushButton *closeButton = new QPushButton("关闭", introDialog);
+    closeButton->setFixedSize(100, 30);
+    
+    // 连接关闭按钮
+    connect(closeButton, &QPushButton::clicked, introDialog, &QDialog::accept);
+    
+    // 添加到布局
+    layout->addWidget(imageLabel);
+    
+    QHBoxLayout *buttonLayout = new QHBoxLayout();
+    buttonLayout->addStretch();
+    buttonLayout->addWidget(closeButton);
+    buttonLayout->addStretch();
+    
+    layout->addLayout(buttonLayout);
+    
+    // 显示对话框
+    introDialog->exec();
+    
+    // 清理内存
+    introDialog->deleteLater();
 }
 
 void MainWindow::onLevelsClicked()
@@ -181,7 +227,7 @@ void MainWindow::applyGameStyles()
 {
     setStyleSheet(
         "QMainWindow {"
-        "    background-image: url(img/gameoverBackground.png);"
+        "    background-image: url(:/img/gameoverBackground.png);"
         "    background-repeat: no-repeat;"
         "    background-position: center;"
         "    background-size: cover;"
@@ -196,8 +242,7 @@ void MainWindow::applyGameStyles()
         "    font-weight: bold;"
         "    color: #2d3436;"
         "    margin: 20px 0;"
-        "    background: rgba(255, 255, 255, 0.8);"
-        "    border-radius: 15px;"
+        "    background: transparent;"
         "    padding: 20px;"
         "}"
         

@@ -7,6 +7,8 @@
 #include <QPushButton>
 #include <QLabel>
 #include <QStackedWidget>
+#include <QDialog>
+#include <QPixmap>
 #include "loginwindow.h"
 
 QT_BEGIN_NAMESPACE
@@ -37,8 +39,8 @@ private:
     Ui::MainWindow *ui;
     LoginWindow *loginWindow;
     QWidget *gameWidget;
-    QVBoxLayout *gameLayout;
-    QHBoxLayout *buttonLayout;
+    QHBoxLayout *gameLayout;
+    QVBoxLayout *buttonLayout;
     
     QLabel *welcomeLabel;
     QPushButton *gameIntroButton;
