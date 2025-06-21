@@ -56,6 +56,9 @@ private:
     void findPathToPlayer();
     bool canMoveTo(int row, int col) const;
     Direction getDirectionTo(QPoint target) const;
+    Direction getSurroundDirection(QPoint target) const;
+    Direction getSmartPathDirection(QPoint target) const;
+    Direction getFallbackDirection(Direction blockedDir) const;
     void moveToNextCell();
     
     GameMap* map;

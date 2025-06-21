@@ -45,6 +45,7 @@ public:
     
     // 音频控制
     void playBackgroundMusic();
+    void playStartBackgroundMusic();
     void stopBackgroundMusic();
     void playSound(const QString& soundName);
     void setMusicVolume(float volume);
@@ -62,11 +63,13 @@ signals:
     
 private slots:
     void updateGame();
+    void updateCountdown();
     void onFiberSwordUsed(QPointF position, Direction direction);
     void onFiberSwordHit(QGraphicsItem* target);
     void onFiberSwordDestroyed();
     void onBossDefeated();
     void onPlayerCaught();
+    void onTimeUp(); // 时间到达胜利条件
     void onFiberValueChanged(int newValue);
     void onBossHealthChanged(int newHealth);
     void onFakeVegetableCollected();
@@ -91,11 +94,14 @@ private:
     // 游戏状态
     GameState currentState;
     QTimer* gameTimer;
+    QTimer* countdownTimer;
+    int gameTimeRemaining; // 剩余游戏时间（秒）
     
     // UI元素
     QLabel* fiberValueLabel;
     QProgressBar* bossHealthBar;
     QLabel* gameStatusLabel;
+    QLabel* timeLabel; // 倒计时显示
     QPushButton* pauseButton;
     QPushButton* resumeButton;
     QGraphicsProxyWidget* uiWidget;

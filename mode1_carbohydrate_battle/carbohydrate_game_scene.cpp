@@ -12,9 +12,11 @@ CarbohydrateGameScene::CarbohydrateGameScene(QObject *parent)
     , player(nullptr)
     , boss(nullptr)
     , currentState(GAME_READY)
+    , gameTimeRemaining(300) // 300秒游戏时间
     , fiberValueLabel(nullptr)
     , bossHealthBar(nullptr)
     , gameStatusLabel(nullptr)
+    , timeLabel(nullptr)
     , pauseButton(nullptr)
     , resumeButton(nullptr)
     , uiWidget(nullptr)
@@ -37,6 +39,10 @@ CarbohydrateGameScene::CarbohydrateGameScene(QObject *parent)
     gameTimer = new QTimer(this);
     connect(gameTimer, &QTimer::timeout, this, &CarbohydrateGameScene::updateGame);
     
+    // 创建倒计时定时器
+    countdownTimer = new QTimer(this);
+    connect(countdownTimer, &QTimer::timeout, this, &CarbohydrateGameScene::updateCountdown);
+    
     // 初始化音频系统
     backgroundMusicPlayer = new QMediaPlayer(this);
     
@@ -52,6 +58,7 @@ CarbohydrateGameScene::CarbohydrateGameScene(QObject *parent)
     
     // 初始化音频路径映射
     soundPaths["background"] = "qrc:/Sounds/Game_sound.wav";
+    soundPaths["start_bgm"] = "qrc:/Sounds/Win.wav"; // 游戏开始前的背景音乐
     soundPaths["collect"] = "qrc:/Sounds/Bean_sound_short.wav";
     soundPaths["attack"] = "qrc:/Sounds/TapButton.wav";
     soundPaths["win"] = "qrc:/Sounds/Win.wav";
@@ -67,6 +74,9 @@ CarbohydrateGameScene::CarbohydrateGameScene(QObject *parent)
     
     // 初始化游戏
     initializeGame();
+    
+    // 播放游戏开始前的背景音乐
+    playStartBackgroundMusic();
 }
 
 CarbohydrateGameScene::~CarbohydrateGameScene()
@@ -129,6 +139,17 @@ void CarbohydrateGameScene::createUI()
     gameStatusLabel->setAlignment(Qt::AlignCenter);
     gameStatusLabel->setWordWrap(true);  // 允许文字换行
     mainLayout->addWidget(gameStatusLabel);
+    
+    // 时间显示
+    QHBoxLayout* timeLayout = new QHBoxLayout();
+    QLabel* timeTextLabel = new QLabel("剩余时间:");
+    timeTextLabel->setStyleSheet("color: white; font-size: 12px;");
+    timeLabel = new QLabel("05:00");
+    timeLabel->setStyleSheet("color: yellow; font-size: 14px; font-weight: bold;");
+    timeLayout->addWidget(timeTextLabel);
+    timeLayout->addWidget(timeLabel);
+    timeLayout->addStretch();
+    mainLayout->addLayout(timeLayout);
     
     // 纤维值显示
     QHBoxLayout* fiberLayout = new QHBoxLayout();
@@ -251,8 +272,16 @@ void CarbohydrateGameScene::drawFakeVegetables()
 void CarbohydrateGameScene::startGame()
 {
     if (currentState == GAME_READY || currentState == GAME_PAUSED) {
+        // 重置游戏时间（仅在新游戏开始时）
+        if (currentState == GAME_READY) {
+            gameTimeRemaining = 300;
+        }
+        
         currentState = GAME_RUNNING;
         gameTimer->start(16); // 约60FPS
+        
+        // 启动倒计时定时器
+        countdownTimer->start(1000); // 每秒更新一次
         
         if (boss) {
             boss->startMovement();
@@ -271,6 +300,7 @@ void CarbohydrateGameScene::pauseGame()
     if (currentState == GAME_RUNNING) {
         currentState = GAME_PAUSED;
         gameTimer->stop();
+        countdownTimer->stop();
         
         if (player) {
             player->pauseAnimation();
@@ -289,6 +319,7 @@ void CarbohydrateGameScene::resumeGame()
     if (currentState == GAME_PAUSED) {
         currentState = GAME_RUNNING;
         gameTimer->start();
+        countdownTimer->start();
         
         if (player) {
             player->resumeAnimation();
@@ -305,6 +336,7 @@ void CarbohydrateGameScene::resumeGame()
 void CarbohydrateGameScene::endGame(bool won)
 {
     gameTimer->stop();
+    countdownTimer->stop();
     
     if (player) {
         player->pauseAnimation();
@@ -342,6 +374,47 @@ void CarbohydrateGameScene::updateGame()
     
     // 更新假蔬菜显示
     drawFakeVegetables();
+}
+
+void CarbohydrateGameScene::updateCountdown()
+{
+    if (currentState != GAME_RUNNING) {
+        return;
+    }
+    
+    gameTimeRemaining--;
+    
+    // 更新时间显示
+    if (timeLabel) {
+        int minutes = gameTimeRemaining / 60;
+        int seconds = gameTimeRemaining % 60;
+        QString timeText = QString("%1:%2").arg(minutes, 2, 10, QChar('0')).arg(seconds, 2, 10, QChar('0'));
+        timeLabel->setText(timeText);
+        
+        // 时间不足30秒时变红色警告
+        if (gameTimeRemaining <= 30) {
+            timeLabel->setStyleSheet("color: red; font-size: 14px; font-weight: bold;");
+        } else if (gameTimeRemaining <= 60) {
+            timeLabel->setStyleSheet("color: orange; font-size: 14px; font-weight: bold;");
+        }
+    }
+    
+    // 检查是否时间到达胜利条件
+    if (gameTimeRemaining <= 0) {
+        onTimeUp();
+    }
+}
+
+void CarbohydrateGameScene::onTimeUp()
+{
+    currentState = GAME_WIN;
+    
+    // 播放特殊胜利音效（坚持到最后）
+    playSound("dominating");
+    
+    endGame(true);
+    updateUI();
+    emit gameWon();
 }
 
 void CarbohydrateGameScene::checkCollisions()
@@ -475,7 +548,11 @@ void CarbohydrateGameScene::updateUI()
         resumeButton->setVisible(true);
         break;
     case GAME_WIN:
-        gameStatusLabel->setText("胜利！BOSS被击败了！");
+        if (gameTimeRemaining <= 0) {
+            gameStatusLabel->setText("胜利！坚持300秒成功！\n成为贵州版彭于晏！");
+        } else {
+            gameStatusLabel->setText("胜利！BOSS被击败了！");
+        }
         pauseButton->setVisible(false);
         resumeButton->setVisible(false);
         break;
@@ -596,6 +673,27 @@ void CarbohydrateGameScene::playBackgroundMusic()
                 backgroundMusicPlayer->play();
             }
         });
+        backgroundMusicPlayer->play();
+    }
+}
+
+void CarbohydrateGameScene::playStartBackgroundMusic()
+{
+    if (backgroundMusicPlayer && soundPaths.contains("start_bgm")) {
+        #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+            backgroundMusicPlayer->setSource(QUrl(soundPaths["start_bgm"]));
+        #else
+            backgroundMusicPlayer->setMedia(QUrl(soundPaths["start_bgm"]));
+        #endif
+        
+        // 设置循环播放
+        connect(backgroundMusicPlayer, &QMediaPlayer::mediaStatusChanged, this, [this](QMediaPlayer::MediaStatus status) {
+            if (status == QMediaPlayer::EndOfMedia) {
+                backgroundMusicPlayer->setPosition(0);
+                backgroundMusicPlayer->play();
+            }
+        });
+        
         backgroundMusicPlayer->play();
     }
 }

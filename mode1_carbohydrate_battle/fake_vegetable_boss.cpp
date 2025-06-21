@@ -149,9 +149,38 @@ void FakeVegetableBoss::updateAI()
         return;
     }
     
-    // 简单的追踪AI：朝玩家方向移动
+    // 智能AI逻辑：根据与玩家的距离采用不同策略
     if (!targetCell.isNull()) {
-        Direction moveDir = getDirectionTo(targetCell);
+        int distanceToPlayer = qAbs(targetCell.x() - currentCol) + qAbs(targetCell.y() - currentRow);
+        
+        Direction moveDir = DIR_NONE;
+        
+        // 根据距离采用不同的AI策略
+        if (distanceToPlayer <= 2) {
+            // 近距离：尝试包围玩家
+            moveDir = getSurroundDirection(targetCell);
+        } else if (distanceToPlayer <= 5) {
+            // 中距离：直接追击
+            moveDir = getDirectionTo(targetCell);
+        } else {
+            // 远距离：智能寻路追击
+            moveDir = getSmartPathDirection(targetCell);
+        }
+        
+        // 添加随机性，避免过于机械
+        if (QRandomGenerator::global()->bounded(100) < 15) { // 15%概率随机移动
+            QList<Direction> validDirections;
+            for (Direction dir : {DIR_LEFT, DIR_UP, DIR_RIGHT, DIR_DOWN}) {
+                int testRow = currentRow + DIR_OFFSET[dir][1];
+                int testCol = currentCol + DIR_OFFSET[dir][0];
+                if (canMoveTo(testRow, testCol)) {
+                    validDirections.append(dir);
+                }
+            }
+            if (!validDirections.isEmpty()) {
+                moveDir = validDirections[QRandomGenerator::global()->bounded(validDirections.size())];
+            }
+        }
         
         if (moveDir != DIR_NONE) {
             int newRow = currentRow + DIR_OFFSET[moveDir][1];
@@ -161,18 +190,14 @@ void FakeVegetableBoss::updateAI()
                 currentDirection = moveDir;
                 moveToNextCell();
             } else {
-                // 如果不能直接移动，尝试其他方向
-                QList<Direction> directions = {DIR_LEFT, DIR_UP, DIR_RIGHT, DIR_DOWN};
-                directions.removeOne(moveDir);
-                
-                for (Direction dir : directions) {
-                    int testRow = currentRow + DIR_OFFSET[dir][1];
-                    int testCol = currentCol + DIR_OFFSET[dir][0];
-                    
+                // 如果不能直接移动，使用备用路径
+                Direction fallbackDir = getFallbackDirection(moveDir);
+                if (fallbackDir != DIR_NONE) {
+                    int testRow = currentRow + DIR_OFFSET[fallbackDir][1];
+                    int testCol = currentCol + DIR_OFFSET[fallbackDir][0];
                     if (canMoveTo(testRow, testCol)) {
-                        currentDirection = dir;
+                        currentDirection = fallbackDir;
                         moveToNextCell();
-                        break;
                     }
                 }
             }
@@ -236,4 +261,130 @@ void FakeVegetableBoss::moveToNextCell()
         currentRow = newRow;
         currentCol = newCol;
     }
+}
+
+// 包围策略：尝试移动到玩家周围的位置
+Direction FakeVegetableBoss::getSurroundDirection(QPoint target) const
+{
+    // 计算到玩家的相对位置
+    int deltaX = target.x() - currentCol;
+    int deltaY = target.y() - currentRow;
+    
+    // 如果已经在玩家旁边，尝试绕到玩家的另一侧
+    if (qAbs(deltaX) <= 1 && qAbs(deltaY) <= 1) {
+        // 尝试绕到玩家的对面
+        QList<Direction> surroundDirs;
+        
+        // 优先选择垂直于当前方向的移动
+        if (qAbs(deltaX) > qAbs(deltaY)) {
+            surroundDirs << DIR_UP << DIR_DOWN;
+            if (deltaX > 0) surroundDirs << DIR_RIGHT;
+            else surroundDirs << DIR_LEFT;
+        } else {
+            surroundDirs << DIR_LEFT << DIR_RIGHT;
+            if (deltaY > 0) surroundDirs << DIR_DOWN;
+            else surroundDirs << DIR_UP;
+        }
+        
+        for (Direction dir : surroundDirs) {
+            int testRow = currentRow + DIR_OFFSET[dir][1];
+            int testCol = currentCol + DIR_OFFSET[dir][0];
+            if (canMoveTo(testRow, testCol)) {
+                return dir;
+            }
+        }
+    }
+    
+    // 否则直接朝玩家移动
+    return getDirectionTo(target);
+}
+
+// 智能寻路：考虑障碍物的路径规划
+Direction FakeVegetableBoss::getSmartPathDirection(QPoint target) const
+{
+    Direction directDir = getDirectionTo(target);
+    
+    // 如果直接路径可行，使用直接路径
+    if (directDir != DIR_NONE) {
+        int testRow = currentRow + DIR_OFFSET[directDir][1];
+        int testCol = currentCol + DIR_OFFSET[directDir][0];
+        if (canMoveTo(testRow, testCol)) {
+            return directDir;
+        }
+    }
+    
+    // 如果直接路径被阻挡，尝试绕路
+    int deltaX = target.x() - currentCol;
+    int deltaY = target.y() - currentRow;
+    
+    QList<Direction> alternatives;
+    
+    // 根据目标位置确定备选路径
+    if (qAbs(deltaX) > qAbs(deltaY)) {
+        // 水平距离更大，优先尝试垂直移动绕路
+        if (deltaY != 0) {
+            alternatives << ((deltaY > 0) ? DIR_DOWN : DIR_UP);
+        }
+        alternatives << ((deltaX > 0) ? DIR_RIGHT : DIR_LEFT);
+        if (deltaY != 0) {
+            alternatives << ((deltaY > 0) ? DIR_UP : DIR_DOWN);
+        }
+    } else {
+        // 垂直距离更大，优先尝试水平移动绕路
+        if (deltaX != 0) {
+            alternatives << ((deltaX > 0) ? DIR_RIGHT : DIR_LEFT);
+        }
+        alternatives << ((deltaY > 0) ? DIR_DOWN : DIR_UP);
+        if (deltaX != 0) {
+            alternatives << ((deltaX > 0) ? DIR_LEFT : DIR_RIGHT);
+        }
+    }
+    
+    // 尝试备选路径
+    for (Direction dir : alternatives) {
+        int testRow = currentRow + DIR_OFFSET[dir][1];
+        int testCol = currentCol + DIR_OFFSET[dir][0];
+        if (canMoveTo(testRow, testCol)) {
+            return dir;
+        }
+    }
+    
+    return DIR_NONE;
+}
+
+// 备用方向：当主要方向被阻挡时的替代选择
+Direction FakeVegetableBoss::getFallbackDirection(Direction blockedDir) const
+{
+    QList<Direction> fallbacks;
+    
+    // 根据被阻挡的方向确定备用方向
+    switch (blockedDir) {
+        case DIR_UP:
+        case DIR_DOWN:
+            fallbacks << DIR_LEFT << DIR_RIGHT;
+            break;
+        case DIR_LEFT:
+        case DIR_RIGHT:
+            fallbacks << DIR_UP << DIR_DOWN;
+            break;
+        default:
+            fallbacks << DIR_LEFT << DIR_UP << DIR_RIGHT << DIR_DOWN;
+            break;
+    }
+    
+    // 随机选择一个可行的备用方向
+    QList<Direction> validFallbacks;
+    for (Direction dir : fallbacks) {
+        int testRow = currentRow + DIR_OFFSET[dir][1];
+        int testCol = currentCol + DIR_OFFSET[dir][0];
+        if (canMoveTo(testRow, testCol)) {
+            validFallbacks.append(dir);
+        }
+    }
+    
+    if (!validFallbacks.isEmpty()) {
+        return validFallbacks[QRandomGenerator::global()->bounded(validFallbacks.size())];
+    }
+    
+    return DIR_NONE;
 }
