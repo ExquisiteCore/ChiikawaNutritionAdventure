@@ -182,9 +182,9 @@ void CarbohydrateGameScene::createUI()
     instructionLabel->setWordWrap(true);
     mainLayout->addWidget(instructionLabel);
     
-    // 添加UI到场景 - 移动到右上角，避免覆盖游戏主要区域
+    // 添加UI到场景 - 放在游戏场景内部右上角
     uiWidget = addWidget(uiContainer);
-    uiWidget->setPos(GAME_SCENE_WIDTH - 220, 10);  // 右上角位置，留20px边距
+    uiWidget->setPos(GAME_SCENE_WIDTH - 220, 10);  // 放在游戏场景内部右上角，避免与控制面板重叠
     uiWidget->setZValue(100);
 }
 
