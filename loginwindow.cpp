@@ -104,7 +104,12 @@ void LoginWindow::setupDatabase()
 {
     // 使用SQLite数据库（无需额外配置）
     database = QSqlDatabase::addDatabase("QSQLITE");
-    database.setDatabaseName("chiikawa_game.db");
+    
+    // 使用应用程序目录下的数据库文件
+    QString dbPath = QApplication::applicationDirPath() + "/chiikawa_game.db";
+    database.setDatabaseName(dbPath);
+    
+    qDebug() << "数据库文件路径:" << dbPath;
     
     if (!database.open()) {
         qDebug() << "SQLite数据库连接失败:" << database.lastError().text();

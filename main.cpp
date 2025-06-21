@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
     
     // 创建主窗口（会自动显示登录窗口）
     MainWindow w;
-    w.show();
+    // 不在这里显示主窗口，由登录成功后显示
     
     return a.exec();
 }
