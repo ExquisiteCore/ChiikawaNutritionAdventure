@@ -75,7 +75,7 @@ void MainWindow::setupGameUI()
     // 创建四个主要按钮（只显示图标，不显示文字）
     gameIntroButton = new QPushButton("", this);
     gameIntroButton->setObjectName("imageButton");
-    gameIntroButton->setIcon(QIcon("img/ui/detailBtn.png"));
+    gameIntroButton->setIcon(QIcon(":/img/ui/detailBtn.png"));
     gameIntroButton->setIconSize(QSize(120, 80));
     gameIntroButton->setFixedSize(120, 80);
     gameIntroButton->setFlat(true);
@@ -83,7 +83,7 @@ void MainWindow::setupGameUI()
     
     levelsButton = new QPushButton("", this);
     levelsButton->setObjectName("imageButton");
-    levelsButton->setIcon(QIcon("img/ui/startBtn.png"));
+    levelsButton->setIcon(QIcon(":/img/ui/startBtn.png"));
     levelsButton->setIconSize(QSize(120, 80));
     levelsButton->setFixedSize(120, 80);
     levelsButton->setFlat(true);
@@ -91,7 +91,7 @@ void MainWindow::setupGameUI()
     
     settingsButton = new QPushButton("", this);
     settingsButton->setObjectName("imageButton");
-    settingsButton->setIcon(QIcon("img/ui/checkRecordBtn.png"));
+    settingsButton->setIcon(QIcon(":/img/ui/checkRecordBtn.png"));
     settingsButton->setIconSize(QSize(120, 80));
     settingsButton->setFixedSize(120, 80);
     settingsButton->setFlat(true);
@@ -99,7 +99,7 @@ void MainWindow::setupGameUI()
     
     logoutButton = new QPushButton("", this);
     logoutButton->setObjectName("imageButton");
-    logoutButton->setIcon(QIcon("img/ui/exitBtn.png"));
+    logoutButton->setIcon(QIcon(":/img/ui/exitBtn.png"));
     logoutButton->setIconSize(QSize(120, 80));
     logoutButton->setFixedSize(120, 80);
     logoutButton->setFlat(true);
