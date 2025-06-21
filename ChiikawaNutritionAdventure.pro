@@ -11,11 +11,24 @@ CONFIG += c++17
 SOURCES += \
     main.cpp \
     mainwindow.cpp \
-    loginwindow.cpp
+    loginwindow.cpp \
+    mode1_carbohydrate_battle/carbohydrate_game_window.cpp \
+    mode1_carbohydrate_battle/carbohydrate_game_scene.cpp \
+    mode1_carbohydrate_battle/game_map.cpp \
+    mode1_carbohydrate_battle/player.cpp \
+    mode1_carbohydrate_battle/fake_vegetable_boss.cpp \
+    mode1_carbohydrate_battle/fiber_sword.cpp
 
 HEADERS += \
     mainwindow.h \
-    loginwindow.h
+    loginwindow.h \
+    mode1_carbohydrate_battle/carbohydrate_config.h \
+    mode1_carbohydrate_battle/carbohydrate_game_window.h \
+    mode1_carbohydrate_battle/carbohydrate_game_scene.h \
+    mode1_carbohydrate_battle/game_map.h \
+    mode1_carbohydrate_battle/player.h \
+    mode1_carbohydrate_battle/fake_vegetable_boss.h \
+    mode1_carbohydrate_battle/fiber_sword.h
 
 FORMS += \
     mainwindow.ui

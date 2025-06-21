@@ -9,6 +9,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
     , loginWindow(nullptr)
     , gameWidget(nullptr)
+    , carbohydrateGameWindow(nullptr)
 {
     ui->setupUi(this);
     
@@ -189,12 +190,86 @@ void MainWindow::onGameIntroClicked()
 
 void MainWindow::onLevelsClicked()
 {
-    QMessageBox::information(this, "关卡选择", 
-                           "🎮 关卡选择 🎮\n\n"
-                           "请选择游戏模式：\n\n"
-                           "🥬 模式一：碳水化合物之战\n"
-                           "🍗 模式二：糖油混合物歼灭战\n\n"
-                           "（具体关卡功能将在后续开发中实现）");
+    // 创建关卡选择对话框
+    QDialog *levelDialog = new QDialog(this);
+    levelDialog->setWindowTitle("关卡选择");
+    levelDialog->setModal(true);
+    levelDialog->resize(400, 300);
+    
+    QVBoxLayout *layout = new QVBoxLayout(levelDialog);
+    
+    // 标题
+    QLabel *titleLabel = new QLabel("🎮 选择游戏模式 🎮");
+    titleLabel->setAlignment(Qt::AlignCenter);
+    titleLabel->setStyleSheet("font-size: 18px; font-weight: bold; margin: 20px;");
+    layout->addWidget(titleLabel);
+    
+    // 模式一按钮
+    QPushButton *mode1Button = new QPushButton("🥬 模式一：碳水化合物之战");
+    mode1Button->setStyleSheet(
+        "QPushButton {"
+        "    background-color: #74b9ff;"
+        "    color: white;"
+        "    border: none;"
+        "    border-radius: 10px;"
+        "    padding: 15px;"
+        "    font-size: 14px;"
+        "    font-weight: bold;"
+        "}"
+        "QPushButton:hover {"
+        "    background-color: #0984e3;"
+        "}"
+    );
+    
+    // 模式二按钮（暂未实现）
+    QPushButton *mode2Button = new QPushButton("🍗 模式二：糖油混合物歼灭战（开发中）");
+    mode2Button->setEnabled(false);
+    mode2Button->setStyleSheet(
+        "QPushButton {"
+        "    background-color: #ddd;"
+        "    color: #999;"
+        "    border: none;"
+        "    border-radius: 10px;"
+        "    padding: 15px;"
+        "    font-size: 14px;"
+        "}"
+    );
+    
+    // 关闭按钮
+    QPushButton *closeButton = new QPushButton("关闭");
+    closeButton->setStyleSheet(
+        "QPushButton {"
+        "    background-color: #636e72;"
+        "    color: white;"
+        "    border: none;"
+        "    border-radius: 5px;"
+        "    padding: 10px 20px;"
+        "}"
+        "QPushButton:hover {"
+        "    background-color: #2d3436;"
+        "}"
+    );
+    
+    layout->addWidget(mode1Button);
+    layout->addWidget(mode2Button);
+    layout->addStretch();
+    
+    QHBoxLayout *buttonLayout = new QHBoxLayout();
+    buttonLayout->addStretch();
+    buttonLayout->addWidget(closeButton);
+    buttonLayout->addStretch();
+    layout->addLayout(buttonLayout);
+    
+    // 连接信号
+    connect(mode1Button, &QPushButton::clicked, [this, levelDialog]() {
+        levelDialog->accept();
+        onCarbohydrateBattleClicked();
+    });
+    connect(closeButton, &QPushButton::clicked, levelDialog, &QDialog::accept);
+    
+    // 显示对话框
+    levelDialog->exec();
+    levelDialog->deleteLater();
 }
 
 void MainWindow::onSettingsClicked()
@@ -221,6 +296,30 @@ void MainWindow::onLogoutClicked()
             loginWindow->show();
         }
     }
+}
+
+void MainWindow::onCarbohydrateBattleClicked()
+{
+    // 创建并显示碳水化合物之战游戏窗口
+    if (!carbohydrateGameWindow) {
+        carbohydrateGameWindow = new CarbohydrateGameWindow();
+        connect(carbohydrateGameWindow, &CarbohydrateGameWindow::gameWindowClosed,
+                this, &MainWindow::onCarbohydrateGameClosed);
+    }
+    
+    // 隐藏主窗口，显示游戏窗口
+    this->hide();
+    carbohydrateGameWindow->show();
+    carbohydrateGameWindow->startNewGame();
+}
+
+void MainWindow::onCarbohydrateGameClosed()
+{
+    // 游戏窗口关闭时，重新显示主窗口
+    if (carbohydrateGameWindow) {
+        carbohydrateGameWindow->hide();
+    }
+    this->show();
 }
 
 void MainWindow::applyGameStyles()

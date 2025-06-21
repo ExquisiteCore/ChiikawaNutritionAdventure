@@ -10,6 +10,7 @@
 #include <QDialog>
 #include <QPixmap>
 #include "loginwindow.h"
+#include "mode1_carbohydrate_battle/carbohydrate_game_window.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -31,6 +32,8 @@ private slots:
     void onLevelsClicked();
     void onSettingsClicked();
     void onLogoutClicked();
+    void onCarbohydrateBattleClicked();
+    void onCarbohydrateGameClosed();
 
 private:
     void setupGameUI();
@@ -47,6 +50,9 @@ private:
     QPushButton *levelsButton;
     QPushButton *settingsButton;
     QPushButton *logoutButton;
+    
+    // 游戏窗口
+    CarbohydrateGameWindow *carbohydrateGameWindow;
 };
 
 #endif // MAINWINDOW_H
