@@ -11,6 +11,9 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 #include <QGraphicsProxyWidget>
+#include <QMediaPlayer>
+#include <QAudioOutput>
+#include <QSoundEffect>
 #include "carbohydrate_config.h"
 #include "game_map.h"
 #include "player.h"
@@ -40,6 +43,13 @@ public:
     GameState getCurrentState() const { return currentState; }
     bool isGameRunning() const { return currentState == GAME_RUNNING; }
     
+    // 音频控制
+    void playBackgroundMusic();
+    void stopBackgroundMusic();
+    void playSound(const QString& soundName);
+    void setMusicVolume(float volume);
+    void setSoundVolume(float volume);
+    
 protected:
     void drawBackground(QPainter *painter, const QRectF &rect) override;
     void keyPressEvent(QKeyEvent *event) override;
@@ -59,6 +69,7 @@ private slots:
     void onPlayerCaught();
     void onFiberValueChanged(int newValue);
     void onBossHealthChanged(int newHealth);
+    void onFakeVegetableCollected();
     void onPauseButtonClicked();
     void onResumeButtonClicked();
     
@@ -95,6 +106,12 @@ private:
     
     // 背景
     QPixmap backgroundPixmap;
+    
+    // 音频系统
+    QMediaPlayer* backgroundMusicPlayer;
+    QAudioOutput* musicAudioOutput;
+    QSoundEffect* soundEffect;
+    QMap<QString, QString> soundPaths;
 };
 
 class CarbohydrateGameView : public QGraphicsView

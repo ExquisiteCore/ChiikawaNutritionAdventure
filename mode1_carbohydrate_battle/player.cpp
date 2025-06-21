@@ -147,7 +147,8 @@ void Player::setPosition(int row, int col)
         // 检查是否吃到假蔬菜
         if (map->hasFakeVegetable(row, col)) {
             map->removeFakeVegetable(row, col);
-            // 可以在这里添加得分或其他效果
+            // 发出收集信号，让场景播放音效
+            emit fakeVegetableCollected();
         }
     }
 }

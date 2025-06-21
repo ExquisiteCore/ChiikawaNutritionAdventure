@@ -18,6 +18,9 @@ CarbohydrateGameScene::CarbohydrateGameScene(QObject *parent)
     , pauseButton(nullptr)
     , resumeButton(nullptr)
     , uiWidget(nullptr)
+    , backgroundMusicPlayer(nullptr)
+    , musicAudioOutput(nullptr)
+    , soundEffect(nullptr)
 {
     // 设置场景大小
     setSceneRect(0, 0, GAME_SCENE_WIDTH, GAME_SCENE_HEIGHT);
@@ -33,6 +36,34 @@ CarbohydrateGameScene::CarbohydrateGameScene(QObject *parent)
     // 创建游戏定时器
     gameTimer = new QTimer(this);
     connect(gameTimer, &QTimer::timeout, this, &CarbohydrateGameScene::updateGame);
+    
+    // 初始化音频系统
+    backgroundMusicPlayer = new QMediaPlayer(this);
+    
+    // Qt 5/6兼容的音频输出设置
+    #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        musicAudioOutput = new QAudioOutput(this);
+        backgroundMusicPlayer->setAudioOutput(musicAudioOutput);
+    #else
+        musicAudioOutput = nullptr; // Qt 5中不需要单独的QAudioOutput
+    #endif
+    
+    soundEffect = new QSoundEffect(this);
+    
+    // 初始化音频路径映射
+    soundPaths["background"] = "qrc:/Sounds/Game_sound.wav";
+    soundPaths["collect"] = "qrc:/Sounds/Bean_sound_short.wav";
+    soundPaths["attack"] = "qrc:/Sounds/TapButton.wav";
+    soundPaths["win"] = "qrc:/Sounds/Win.wav";
+    soundPaths["lose"] = "qrc:/Sounds/Lose.wav";
+    soundPaths["boss_hit"] = "qrc:/Sounds/Cough_sound.wav";
+    soundPaths["double_kill"] = "qrc:/Sounds/Double_Kill.wav";
+    soundPaths["triple_kill"] = "qrc:/Sounds/Triple_Kill.wav";
+    soundPaths["dominating"] = "qrc:/Sounds/Dominating.wav";
+    
+    // 设置默认音量
+    musicAudioOutput->setVolume(0.3f);
+    soundEffect->setVolume(0.5f);
     
     // 初始化游戏
     initializeGame();
@@ -63,6 +94,7 @@ void CarbohydrateGameScene::initializeGame()
     // 连接玩家信号
     connect(player, &Player::fiberSwordUsed, this, &CarbohydrateGameScene::onFiberSwordUsed);
     connect(player, &Player::fiberValueChanged, this, &CarbohydrateGameScene::onFiberValueChanged);
+    connect(player, &Player::fakeVegetableCollected, this, &CarbohydrateGameScene::onFakeVegetableCollected);
     
     // 创建BOSS
     boss = new FakeVegetableBoss(gameMap, this);
@@ -85,37 +117,41 @@ void CarbohydrateGameScene::createUI()
 {
     // 创建UI容器
     QWidget* uiContainer = new QWidget();
-    uiContainer->setStyleSheet("background: rgba(0, 0, 0, 150); border-radius: 10px; padding: 10px;");
+    uiContainer->setStyleSheet("background: rgba(0, 0, 0, 120); border-radius: 8px; padding: 8px;");
+    uiContainer->setFixedWidth(200);  // 固定宽度，避免过度占用空间
     
     QVBoxLayout* mainLayout = new QVBoxLayout(uiContainer);
+    mainLayout->setSpacing(5);  // 减少间距，使UI更紧凑
     
     // 游戏状态标签
     gameStatusLabel = new QLabel("准备开始游戏");
-    gameStatusLabel->setStyleSheet("color: white; font-size: 18px; font-weight: bold;");
+    gameStatusLabel->setStyleSheet("color: white; font-size: 14px; font-weight: bold;");
     gameStatusLabel->setAlignment(Qt::AlignCenter);
+    gameStatusLabel->setWordWrap(true);  // 允许文字换行
     mainLayout->addWidget(gameStatusLabel);
     
     // 纤维值显示
     QHBoxLayout* fiberLayout = new QHBoxLayout();
-    QLabel* fiberLabel = new QLabel("膳食纤维值:");
-    fiberLabel->setStyleSheet("color: white; font-size: 14px;");
+    QLabel* fiberLabel = new QLabel("纤维值:");
+    fiberLabel->setStyleSheet("color: white; font-size: 12px;");
     fiberValueLabel = new QLabel(QString::number(INITIAL_FIBER_VALUE));
-    fiberValueLabel->setStyleSheet("color: lime; font-size: 14px; font-weight: bold;");
+    fiberValueLabel->setStyleSheet("color: lime; font-size: 12px; font-weight: bold;");
     fiberLayout->addWidget(fiberLabel);
     fiberLayout->addWidget(fiberValueLabel);
     fiberLayout->addStretch();
     mainLayout->addLayout(fiberLayout);
     
     // BOSS血量条
-    QLabel* bossLabel = new QLabel("伪蔬菜BOSS血量:");
-    bossLabel->setStyleSheet("color: white; font-size: 14px;");
+    QLabel* bossLabel = new QLabel("BOSS血量:");
+    bossLabel->setStyleSheet("color: white; font-size: 12px;");
     mainLayout->addWidget(bossLabel);
     
     bossHealthBar = new QProgressBar();
     bossHealthBar->setRange(0, BOSS_HEALTH);
     bossHealthBar->setValue(BOSS_HEALTH);
+    bossHealthBar->setFixedHeight(20);  // 固定高度，使其更紧凑
     bossHealthBar->setStyleSheet(
-        "QProgressBar { border: 2px solid grey; border-radius: 5px; text-align: center; }"
+        "QProgressBar { border: 1px solid grey; border-radius: 3px; text-align: center; font-size: 10px; }"
         "QProgressBar::chunk { background-color: red; }"
     );
     mainLayout->addWidget(bossHealthBar);
@@ -124,11 +160,13 @@ void CarbohydrateGameScene::createUI()
     QHBoxLayout* buttonLayout = new QHBoxLayout();
     
     pauseButton = new QPushButton("暂停");
-    pauseButton->setStyleSheet("QPushButton { background-color: orange; color: white; font-weight: bold; padding: 5px; border-radius: 3px; }");
+    pauseButton->setFixedHeight(25);  // 固定按钮高度
+    pauseButton->setStyleSheet("QPushButton { background-color: orange; color: white; font-weight: bold; padding: 3px; border-radius: 3px; font-size: 11px; }");
     connect(pauseButton, &QPushButton::clicked, this, &CarbohydrateGameScene::onPauseButtonClicked);
     
     resumeButton = new QPushButton("继续");
-    resumeButton->setStyleSheet("QPushButton { background-color: green; color: white; font-weight: bold; padding: 5px; border-radius: 3px; }");
+    resumeButton->setFixedHeight(25);  // 固定按钮高度
+    resumeButton->setStyleSheet("QPushButton { background-color: green; color: white; font-weight: bold; padding: 3px; border-radius: 3px; font-size: 11px; }");
     resumeButton->setVisible(false);
     connect(resumeButton, &QPushButton::clicked, this, &CarbohydrateGameScene::onResumeButtonClicked);
     
@@ -138,14 +176,15 @@ void CarbohydrateGameScene::createUI()
     mainLayout->addLayout(buttonLayout);
     
     // 操作说明
-    QLabel* instructionLabel = new QLabel("WASD/方向键移动\n空格键发射膳食纤维剑");
-    instructionLabel->setStyleSheet("color: lightgray; font-size: 12px;");
+    QLabel* instructionLabel = new QLabel("WASD/方向键移动\n空格键发射纤维剑");
+    instructionLabel->setStyleSheet("color: lightgray; font-size: 10px;");
     instructionLabel->setAlignment(Qt::AlignCenter);
+    instructionLabel->setWordWrap(true);
     mainLayout->addWidget(instructionLabel);
     
-    // 添加UI到场景
+    // 添加UI到场景 - 移动到右上角，避免覆盖游戏主要区域
     uiWidget = addWidget(uiContainer);
-    uiWidget->setPos(10, 10);
+    uiWidget->setPos(GAME_SCENE_WIDTH - 220, 10);  // 右上角位置，留20px边距
     uiWidget->setZValue(100);
 }
 
@@ -219,6 +258,9 @@ void CarbohydrateGameScene::startGame()
             boss->startMovement();
         }
         
+        // 播放背景音乐
+        playBackgroundMusic();
+        
         updateUI();
         emit gameStateChanged(currentState);
     }
@@ -262,7 +304,6 @@ void CarbohydrateGameScene::resumeGame()
 
 void CarbohydrateGameScene::endGame(bool won)
 {
-    Q_UNUSED(won);
     gameTimer->stop();
     
     if (player) {
@@ -270,6 +311,16 @@ void CarbohydrateGameScene::endGame(bool won)
     }
     if (boss) {
         boss->stopMovement();
+    }
+    
+    // 停止背景音乐
+    stopBackgroundMusic();
+    
+    // 播放结束音效
+    if (won) {
+        playSound("win");
+    } else {
+        playSound("lose");
     }
     
     cleanupFiberSwords();
@@ -315,6 +366,9 @@ void CarbohydrateGameScene::onFiberSwordUsed(QPointF position, Direction directi
         return;
     }
     
+    // 播放攻击音效
+    playSound("attack");
+    
     FiberSword* sword = new FiberSword(position, direction, gameMap, this);
     connect(sword, &FiberSword::hitTarget, this, &CarbohydrateGameScene::onFiberSwordHit);
     connect(sword, &FiberSword::swordDestroyed, this, &CarbohydrateGameScene::onFiberSwordDestroyed);
@@ -329,6 +383,9 @@ void CarbohydrateGameScene::onFiberSwordHit(QGraphicsItem* target)
     if (target && target->type() == TYPE_BOSS) {
         FakeVegetableBoss* hitBoss = static_cast<FakeVegetableBoss*>(target);
         hitBoss->takeDamage(FIBER_SWORD_DAMAGE);
+        
+        // 播放Boss受击音效
+        playSound("boss_hit");
     }
 }
 
@@ -345,6 +402,10 @@ void CarbohydrateGameScene::onFiberSwordDestroyed()
 void CarbohydrateGameScene::onBossDefeated()
 {
     currentState = GAME_WIN;
+    
+    // 播放特殊胜利音效（主宰）
+    playSound("dominating");
+    
     endGame(true);
     updateUI();
     emit gameWon();
@@ -363,6 +424,15 @@ void CarbohydrateGameScene::onFiberValueChanged(int newValue)
     if (fiberValueLabel) {
         fiberValueLabel->setText(QString::number(newValue));
     }
+}
+
+void CarbohydrateGameScene::onFakeVegetableCollected()
+{
+    // 播放收集音效
+    playSound("collect");
+    
+    // 更新假蔬菜显示
+    drawFakeVegetables();
 }
 
 void CarbohydrateGameScene::onBossHealthChanged(int newHealth)
@@ -482,9 +552,6 @@ CarbohydrateGameView::CarbohydrateGameView(CarbohydrateGameScene* scene, QWidget
     
     // 设置视图大小
     setFixedSize(GAME_WINDOW_WIDTH, GAME_WINDOW_HEIGHT);
-    
-    // 居中显示场景
-    centerOn(GAME_SCENE_WIDTH/2, GAME_SCENE_HEIGHT/2);
 }
 
 void CarbohydrateGameView::keyPressEvent(QKeyEvent *event)
@@ -506,5 +573,58 @@ void CarbohydrateGameView::keyReleaseEvent(QKeyEvent *event)
 void CarbohydrateGameView::resizeEvent(QResizeEvent *event)
 {
     QGraphicsView::resizeEvent(event);
-    fitInView(sceneRect(), Qt::KeepAspectRatio);
+    if (scene()) {
+        fitInView(scene()->sceneRect(), Qt::KeepAspectRatio);
+    }
+}
+
+// 音频控制方法实现
+void CarbohydrateGameScene::playBackgroundMusic()
+{
+    if (backgroundMusicPlayer && soundPaths.contains("background")) {
+        // Qt 5/6兼容的媒体设置
+        #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+            backgroundMusicPlayer->setSource(QUrl(soundPaths["background"]));
+        #else
+            backgroundMusicPlayer->setMedia(QUrl(soundPaths["background"]));
+        #endif
+        
+        // 连接信号实现循环播放
+        connect(backgroundMusicPlayer, &QMediaPlayer::mediaStatusChanged, this, [this](QMediaPlayer::MediaStatus status) {
+            if (status == QMediaPlayer::EndOfMedia) {
+                backgroundMusicPlayer->setPosition(0);
+                backgroundMusicPlayer->play();
+            }
+        });
+        backgroundMusicPlayer->play();
+    }
+}
+
+void CarbohydrateGameScene::stopBackgroundMusic()
+{
+    if (backgroundMusicPlayer) {
+        backgroundMusicPlayer->stop();
+    }
+}
+
+void CarbohydrateGameScene::playSound(const QString& soundName)
+{
+    if (soundEffect && soundPaths.contains(soundName)) {
+        soundEffect->setSource(QUrl(soundPaths[soundName]));
+        soundEffect->play();
+    }
+}
+
+void CarbohydrateGameScene::setMusicVolume(float volume)
+{
+    if (musicAudioOutput) {
+        musicAudioOutput->setVolume(qBound(0.0f, volume, 1.0f));
+    }
+}
+
+void CarbohydrateGameScene::setSoundVolume(float volume)
+{
+    if (soundEffect) {
+        soundEffect->setVolume(qBound(0.0f, volume, 1.0f));
+    }
 }

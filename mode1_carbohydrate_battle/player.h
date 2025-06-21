@@ -47,6 +47,7 @@ signals:
     void fiberSwordUsed(QPointF position, Direction direction);
     void fiberValueChanged(int newValue);
     void positionChanged(QPoint newCell);
+    void fakeVegetableCollected();
     
 public slots:
     void handleKeyPress(int key);
