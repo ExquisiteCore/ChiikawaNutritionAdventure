@@ -47,6 +47,7 @@ public:
     void playBackgroundMusic();
     void playStartBackgroundMusic();
     void stopBackgroundMusic();
+    void playEndMusic(const QString& musicName);
     void playSound(const QString& soundName);
     void setMusicVolume(float volume);
     void setSoundVolume(float volume);

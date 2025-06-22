@@ -57,8 +57,8 @@ CarbohydrateGameScene::CarbohydrateGameScene(QObject *parent)
     soundEffect = new QSoundEffect(this);
     
     // 初始化音频路径映射
-    soundPaths["background"] = "qrc:/Sounds/Game_sound.wav";
-    soundPaths["start_bgm"] = "qrc:/Sounds/Win.wav"; // 游戏开始前的背景音乐
+    soundPaths["start_bgm"] = "qrc:/Sounds/Main_sound.wav"; // 游戏开始前的背景音乐
+    soundPaths["background"] = "qrc:/Sounds/Game_sound.wav"; // 游戏进行中的背景音乐
     soundPaths["collect"] = "qrc:/Sounds/Bean_sound_short.wav";
     soundPaths["attack"] = "qrc:/Sounds/TapButton.wav";
     soundPaths["win"] = "qrc:/Sounds/Win.wav";
@@ -67,9 +67,17 @@ CarbohydrateGameScene::CarbohydrateGameScene(QObject *parent)
     soundPaths["double_kill"] = "qrc:/Sounds/Double_Kill.wav";
     soundPaths["triple_kill"] = "qrc:/Sounds/Triple_Kill.wav";
     soundPaths["dominating"] = "qrc:/Sounds/Dominating.wav";
+    soundPaths["win_bgm"] = "qrc:/Sounds/Win.wav"; // 胜利背景音乐
+    soundPaths["lose_bgm"] = "qrc:/Sounds/Lose_1.wav"; // 失败背景音乐
     
     // 设置默认音量
-    musicAudioOutput->setVolume(0.3f);
+    #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        if (musicAudioOutput) {
+            musicAudioOutput->setVolume(0.3f);
+        }
+    #else
+        backgroundMusicPlayer->setVolume(30); // Qt 5使用0-100的音量范围
+    #endif
     soundEffect->setVolume(0.5f);
     
     // 初始化游戏
@@ -287,7 +295,8 @@ void CarbohydrateGameScene::startGame()
             boss->startMovement();
         }
         
-        // 播放背景音乐
+        // 停止开始前音乐，播放游戏背景音乐
+        stopBackgroundMusic();
         playBackgroundMusic();
         
         updateUI();
@@ -348,7 +357,14 @@ void CarbohydrateGameScene::endGame(bool won)
     // 停止背景音乐
     stopBackgroundMusic();
     
-    // 播放结束音效
+    // 播放结束音乐（较长的背景音乐而非短音效）
+    if (won) {
+        playEndMusic("win_bgm");
+    } else {
+        playEndMusic("lose_bgm");
+    }
+    
+    // 同时播放短音效
     if (won) {
         playSound("win");
     } else {
@@ -412,6 +428,11 @@ void CarbohydrateGameScene::onTimeUp()
     // 播放特殊胜利音效（坚持到最后）
     playSound("dominating");
     
+    // 延迟播放胜利背景音乐
+    QTimer::singleShot(2000, this, [this]() {
+        playEndMusic("win_bgm");
+    });
+    
     endGame(true);
     updateUI();
     emit gameWon();
@@ -459,6 +480,39 @@ void CarbohydrateGameScene::onFiberSwordHit(QGraphicsItem* target)
         
         // 播放Boss受击音效
         playSound("boss_hit");
+        
+        // 检查连击数并播放相应音效
+        static int hitCount = 0;
+        static QTimer* resetTimer = nullptr;
+        
+        hitCount++;
+        
+        // 重置连击计数器（3秒后重置）
+        if (resetTimer) {
+            resetTimer->stop();
+            delete resetTimer;
+        }
+        resetTimer = new QTimer();
+        resetTimer->setSingleShot(true);
+        connect(resetTimer, &QTimer::timeout, []() {
+            hitCount = 0;
+        });
+        resetTimer->start(3000);
+        
+        // 根据连击数播放特殊音效
+        if (hitCount == 2) {
+            QTimer::singleShot(500, this, [this]() {
+                playSound("double_kill");
+            });
+        } else if (hitCount == 3) {
+            QTimer::singleShot(500, this, [this]() {
+                playSound("triple_kill");
+            });
+        } else if (hitCount >= 5) {
+            QTimer::singleShot(500, this, [this]() {
+                playSound("dominating");
+            });
+        }
     }
 }
 
@@ -478,6 +532,11 @@ void CarbohydrateGameScene::onBossDefeated()
     
     // 播放特殊胜利音效（主宰）
     playSound("dominating");
+    
+    // 延迟播放胜利背景音乐
+    QTimer::singleShot(2000, this, [this]() {
+        playEndMusic("win_bgm");
+    });
     
     endGame(true);
     updateUI();
@@ -659,6 +718,9 @@ void CarbohydrateGameView::resizeEvent(QResizeEvent *event)
 void CarbohydrateGameScene::playBackgroundMusic()
 {
     if (backgroundMusicPlayer && soundPaths.contains("background")) {
+        // 先停止当前音乐并清理连接
+        stopBackgroundMusic();
+        
         // Qt 5/6兼容的媒体设置
         #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
             backgroundMusicPlayer->setSource(QUrl(soundPaths["background"]));
@@ -680,6 +742,9 @@ void CarbohydrateGameScene::playBackgroundMusic()
 void CarbohydrateGameScene::playStartBackgroundMusic()
 {
     if (backgroundMusicPlayer && soundPaths.contains("start_bgm")) {
+        // 先停止当前音乐并清理连接
+        stopBackgroundMusic();
+        
         #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
             backgroundMusicPlayer->setSource(QUrl(soundPaths["start_bgm"]));
         #else
@@ -702,6 +767,33 @@ void CarbohydrateGameScene::stopBackgroundMusic()
 {
     if (backgroundMusicPlayer) {
         backgroundMusicPlayer->stop();
+        // 断开之前的循环播放连接
+        disconnect(backgroundMusicPlayer, &QMediaPlayer::mediaStatusChanged, nullptr, nullptr);
+    }
+}
+
+void CarbohydrateGameScene::playEndMusic(const QString& musicName)
+{
+    if (backgroundMusicPlayer && soundPaths.contains(musicName)) {
+        // 先停止当前音乐
+        stopBackgroundMusic();
+        
+        // Qt 5/6兼容的媒体设置
+        #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+            backgroundMusicPlayer->setSource(QUrl(soundPaths[musicName]));
+        #else
+            backgroundMusicPlayer->setMedia(QUrl(soundPaths[musicName]));
+        #endif
+        
+        // 设置循环播放（结束音乐也循环播放）
+        connect(backgroundMusicPlayer, &QMediaPlayer::mediaStatusChanged, this, [this](QMediaPlayer::MediaStatus status) {
+            if (status == QMediaPlayer::EndOfMedia) {
+                backgroundMusicPlayer->setPosition(0);
+                backgroundMusicPlayer->play();
+            }
+        });
+        
+        backgroundMusicPlayer->play();
     }
 }
 
