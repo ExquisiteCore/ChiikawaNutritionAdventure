@@ -22,17 +22,25 @@ SugarOilGameScene::SugarOilGameScene(QObject *parent)
     , itemsSpawned(0)
     , creaturesSpawned(0)
 {
+    qDebug() << "SugarOilGameScene构造函数开始";
+    
     // 设置场景大小
     setSceneRect(0, 0, SUGAR_OIL_SCENE_WIDTH, SUGAR_OIL_SCENE_HEIGHT);
+    qDebug() << "场景大小设置完成:" << SUGAR_OIL_SCENE_WIDTH << "x" << SUGAR_OIL_SCENE_HEIGHT;
     
     // 加载背景图片
     backgroundPixmap = QPixmap(":/img/GameBackground.png");
     if (backgroundPixmap.isNull()) {
+        qDebug() << "背景图片加载失败，使用默认背景";
         backgroundPixmap = QPixmap(SUGAR_OIL_SCENE_WIDTH, SUGAR_OIL_SCENE_HEIGHT);
         backgroundPixmap.fill(QColor(34, 139, 34)); // 森林绿色背景
+    } else {
+        qDebug() << "背景图片加载成功";
     }
     
+    qDebug() << "开始初始化游戏";
     initializeGame();
+    qDebug() << "SugarOilGameScene构造函数完成";
 }
 
 SugarOilGameScene::~SugarOilGameScene()
@@ -110,12 +118,19 @@ void SugarOilGameScene::setupAudio()
 
 void SugarOilGameScene::startGame()
 {
-    if (currentState == SUGAR_OIL_RUNNING) return;
+    qDebug() << "SugarOilGameScene::startGame开始";
     
+    if (currentState == SUGAR_OIL_RUNNING) {
+        qDebug() << "游戏已经在运行中，返回";
+        return;
+    }
+    
+    qDebug() << "重置游戏";
     resetGame();
     
     // 创建玩家
     if (!player) {
+        qDebug() << "创建新的UsagiPlayer";
         player = new UsagiPlayer(this);
         addItem(player);
         player->setPosition(QPointF(SUGAR_OIL_SCENE_WIDTH / 2, SUGAR_OIL_SCENE_HEIGHT / 2));
@@ -161,9 +176,15 @@ void SugarOilGameScene::pauseGame()
     creatureSpawnTimer->stop();
     
     // 暂停音乐
-    if (backgroundMusicPlayer->state() == QMediaPlayer::PlayingState) {
-        backgroundMusicPlayer->pause();
-    }
+    #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        if (backgroundMusicPlayer->playbackState() == QMediaPlayer::PlayingState) {
+            backgroundMusicPlayer->pause();
+        }
+    #else
+        if (backgroundMusicPlayer->state() == QMediaPlayer::PlayingState) {
+            backgroundMusicPlayer->pause();
+        }
+    #endif
     
     // 暂停所有动画
     if (player) player->pauseAnimation();
@@ -193,9 +214,15 @@ void SugarOilGameScene::resumeGame()
     creatureSpawnTimer->start(CREATURE_SPAWN_INTERVAL);
     
     // 恢复音乐
-    if (backgroundMusicPlayer->state() == QMediaPlayer::PausedState) {
-        backgroundMusicPlayer->play();
-    }
+    #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        if (backgroundMusicPlayer->playbackState() == QMediaPlayer::PausedState) {
+            backgroundMusicPlayer->play();
+        }
+    #else
+        if (backgroundMusicPlayer->state() == QMediaPlayer::PausedState) {
+            backgroundMusicPlayer->play();
+        }
+    #endif
     
     // 恢复所有动画
     if (player) player->resumeAnimation();

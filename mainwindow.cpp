@@ -329,15 +329,38 @@ void MainWindow::onCarbohydrateGameClosed()
 
 void MainWindow::onSugarOilBattleClicked()
 {
+    qDebug() << "模式2按钮被点击";
+    
     if (!sugarOilGameWindow) {
+        qDebug() << "创建新的SugarOilGameWindow";
         sugarOilGameWindow = new SugarOilGameWindow(this);
         connect(sugarOilGameWindow, &SugarOilGameWindow::gameWindowClosed,
                 this, &MainWindow::onSugarOilGameClosed);
     }
     
+    qDebug() << "隐藏主窗口";
     this->hide();
+    
+    qDebug() << "显示游戏窗口";
     sugarOilGameWindow->show();
+    sugarOilGameWindow->raise();
+    sugarOilGameWindow->activateWindow();
+    
+    // 强制刷新和重绘
+    sugarOilGameWindow->repaint();
+    sugarOilGameWindow->update();
+    QApplication::processEvents();
+    
+    qDebug() << "游戏窗口显示状态:" << sugarOilGameWindow->isVisible();
+    qDebug() << "游戏窗口大小:" << sugarOilGameWindow->size();
+    qDebug() << "游戏窗口位置:" << sugarOilGameWindow->pos();
+    qDebug() << "游戏窗口是否为活动窗口:" << sugarOilGameWindow->isActiveWindow();
+    qDebug() << "游戏窗口窗口标志:" << sugarOilGameWindow->windowFlags();
+    
+    qDebug() << "启动新游戏";
     sugarOilGameWindow->startNewGame();
+    
+    qDebug() << "模式2启动完成";
 }
 
 void MainWindow::onSugarOilGameClosed()

@@ -17,11 +17,16 @@ SugarOilGameWindow::SugarOilGameWindow(QWidget *parent)
     , currentScore(0)
     , gameActive(false)
 {
-    setupUI();
+    qDebug() << "SugarOilGameWindow构造函数开始";
     
-    // 设置窗口属性
+    // 设置窗口属性 - 在setupUI之前设置
     setWindowTitle("ちいかわ营养大冒险 - 糖油混合物歼灭战");
     setFixedSize(SUGAR_OIL_WINDOW_WIDTH, SUGAR_OIL_WINDOW_HEIGHT);
+    
+    // 设置窗口标志，确保窗口可以正常显示
+    setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
+    setAttribute(Qt::WA_DeleteOnClose, false);
+    setAttribute(Qt::WA_ShowWithoutActivating, false);
     
     // 居中显示
     QScreen *screen = QApplication::primaryScreen();
@@ -29,6 +34,9 @@ SugarOilGameWindow::SugarOilGameWindow(QWidget *parent)
     int x = (screenGeometry.width() - width()) / 2;
     int y = (screenGeometry.height() - height()) / 2;
     move(x, y);
+    
+    setupUI();
+    qDebug() << "SugarOilGameWindow构造函数完成";
     
     // 设置样式
     setStyleSheet(
@@ -196,7 +204,10 @@ void SugarOilGameWindow::setupControlPanel()
 
 void SugarOilGameWindow::startNewGame()
 {
+    qDebug() << "startNewGame方法开始";
+    
     if (gameScene) {
+        qDebug() << "重置并启动游戏场景";
         gameScene->resetGame();
         gameScene->startGame();
         gameActive = true;
@@ -214,6 +225,10 @@ void SugarOilGameWindow::startNewGame()
                 pauseButton->setText("暂停");
             }
         });
+        
+        qDebug() << "startNewGame方法完成";
+    } else {
+        qDebug() << "错误：gameScene为空";
     }
 }
 
