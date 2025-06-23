@@ -90,9 +90,19 @@ void SugarOilGameScene::setupTimers()
 
 void SugarOilGameScene::setupAudio()
 {
-    // 背景音乐
+    // 背景音乐 - Qt版本兼容
     backgroundMusicPlayer = new QMediaPlayer(this);
-    backgroundMusicPlayer->setVolume(50); // 设置音量
+    
+    #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        // Qt6版本
+        musicAudioOutput = new QAudioOutput(this);
+        backgroundMusicPlayer->setAudioOutput(musicAudioOutput);
+        musicAudioOutput->setVolume(0.5); // Qt6中音量范围是0.0-1.0
+    #else
+        // Qt5版本
+        musicAudioOutput = nullptr;
+        backgroundMusicPlayer->setVolume(50); // Qt5中音量范围是0-100
+    #endif
     
     // 音效
     soundEffect = new QSoundEffect(this);
@@ -712,7 +722,13 @@ int SugarOilGameScene::getPlayerScore() const
 void SugarOilGameScene::playBackgroundMusic()
 {
     if (backgroundMusicPlayer) {
-        backgroundMusicPlayer->setMedia(QUrl("qrc:/Sounds/Game_sound.wav"));
+        #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+            // Qt6使用setSource
+            backgroundMusicPlayer->setSource(QUrl("qrc:/Sounds/Game_sound.wav"));
+        #else
+            // Qt5使用setMedia
+            backgroundMusicPlayer->setMedia(QUrl("qrc:/Sounds/Game_sound.wav"));
+        #endif
         
         // 连接信号实现循环播放
         connect(backgroundMusicPlayer, &QMediaPlayer::mediaStatusChanged, this, [this](QMediaPlayer::MediaStatus status) {
@@ -743,9 +759,17 @@ void SugarOilGameScene::playSound(const QString& soundName)
 
 void SugarOilGameScene::setMusicVolume(float volume)
 {
-    if (backgroundMusicPlayer) {
-        backgroundMusicPlayer->setVolume(volume * 100); // Qt5中音量范围是0-100
-    }
+    #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        // Qt6版本
+        if (musicAudioOutput) {
+            musicAudioOutput->setVolume(qBound(0.0f, volume, 1.0f)); // Qt6中音量范围是0.0-1.0
+        }
+    #else
+        // Qt5版本
+        if (backgroundMusicPlayer) {
+            backgroundMusicPlayer->setVolume(qBound(0, int(volume * 100), 100)); // Qt5中音量范围是0-100
+        }
+    #endif
 }
 
 void SugarOilGameScene::setSoundVolume(float volume)

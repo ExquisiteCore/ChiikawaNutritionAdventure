@@ -12,6 +12,7 @@
 #include <QPushButton>
 #include <QGraphicsProxyWidget>
 #include <QMediaPlayer>
+#include <QAudioOutput>
 #include <QSoundEffect>
 #include <QRandomGenerator>
 #include <QList>
@@ -117,6 +118,7 @@ private:
     
     // 音频
     QMediaPlayer* backgroundMusicPlayer;
+    QAudioOutput* musicAudioOutput;
     QSoundEffect* soundEffect;
     
     // 游戏计数器
