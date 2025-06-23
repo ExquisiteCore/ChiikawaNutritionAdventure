@@ -287,6 +287,7 @@ void SugarOilGameSceneNew::handleMouseMove(const QPointF &scenePos)
 
 void SugarOilGameSceneNew::handleMouseRelease(const QPointF &scenePos)
 {
+    Q_UNUSED(scenePos)
     mMousePressed = false;
 }
 

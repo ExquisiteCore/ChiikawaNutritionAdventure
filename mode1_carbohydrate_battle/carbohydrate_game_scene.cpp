@@ -46,13 +46,9 @@ CarbohydrateGameScene::CarbohydrateGameScene(QObject *parent)
     // 初始化音频系统
     backgroundMusicPlayer = new QMediaPlayer(this);
     
-    // Qt 5/6兼容的音频输出设置
-    #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-        musicAudioOutput = new QAudioOutput(this);
-        backgroundMusicPlayer->setAudioOutput(musicAudioOutput);
-    #else
-        musicAudioOutput = nullptr; // Qt 5中不需要单独的QAudioOutput
-    #endif
+    // Qt6音频输出设置
+    musicAudioOutput = new QAudioOutput(this);
+    backgroundMusicPlayer->setAudioOutput(musicAudioOutput);
     
     soundEffect = new QSoundEffect(this);
     
@@ -71,13 +67,9 @@ CarbohydrateGameScene::CarbohydrateGameScene(QObject *parent)
     soundPaths["lose_bgm"] = "qrc:/Sounds/Lose_1.wav"; // 失败背景音乐
     
     // 设置默认音量
-    #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-        if (musicAudioOutput) {
-            musicAudioOutput->setVolume(0.3f);
-        }
-    #else
-        backgroundMusicPlayer->setVolume(30); // Qt 5使用0-100的音量范围
-    #endif
+    if (musicAudioOutput) {
+        musicAudioOutput->setVolume(0.3f);
+    }
     soundEffect->setVolume(0.5f);
     
     // 初始化游戏
@@ -721,12 +713,8 @@ void CarbohydrateGameScene::playBackgroundMusic()
         // 先停止当前音乐并清理连接
         stopBackgroundMusic();
         
-        // Qt 5/6兼容的媒体设置
-        #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-            backgroundMusicPlayer->setSource(QUrl(soundPaths["background"]));
-        #else
-            backgroundMusicPlayer->setMedia(QUrl(soundPaths["background"]));
-        #endif
+        // Qt6媒体设置
+        backgroundMusicPlayer->setSource(QUrl(soundPaths["background"]));
         
         // 连接信号实现循环播放
         connect(backgroundMusicPlayer, &QMediaPlayer::mediaStatusChanged, this, [this](QMediaPlayer::MediaStatus status) {
@@ -745,11 +733,7 @@ void CarbohydrateGameScene::playStartBackgroundMusic()
         // 先停止当前音乐并清理连接
         stopBackgroundMusic();
         
-        #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-            backgroundMusicPlayer->setSource(QUrl(soundPaths["start_bgm"]));
-        #else
-            backgroundMusicPlayer->setMedia(QUrl(soundPaths["start_bgm"]));
-        #endif
+        backgroundMusicPlayer->setSource(QUrl(soundPaths["start_bgm"]));
         
         // 设置循环播放
         connect(backgroundMusicPlayer, &QMediaPlayer::mediaStatusChanged, this, [this](QMediaPlayer::MediaStatus status) {
@@ -778,12 +762,8 @@ void CarbohydrateGameScene::playEndMusic(const QString& musicName)
         // 先停止当前音乐
         stopBackgroundMusic();
         
-        // Qt 5/6兼容的媒体设置
-        #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-            backgroundMusicPlayer->setSource(QUrl(soundPaths[musicName]));
-        #else
-            backgroundMusicPlayer->setMedia(QUrl(soundPaths[musicName]));
-        #endif
+        // Qt6媒体设置
+        backgroundMusicPlayer->setSource(QUrl(soundPaths[musicName]));
         
         // 设置循环播放（结束音乐也循环播放）
         connect(backgroundMusicPlayer, &QMediaPlayer::mediaStatusChanged, this, [this](QMediaPlayer::MediaStatus status) {
