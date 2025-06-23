@@ -84,7 +84,7 @@ EnemyBase::EnemyBase(SugarOilPlayer* player, int hp, int attackPoint, qreal spee
     mDeathSoundPlayer->setSource(QUrl("qrc:/sounds/enemy_death.wav"));
     
     updatePixmap();
-    setScale(0.6);
+    setScale(0.2);
     setZValue(3);
 }
 

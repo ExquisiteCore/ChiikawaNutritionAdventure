@@ -20,6 +20,10 @@ CarbohydrateGameWindow::CarbohydrateGameWindow(QWidget *parent)
 
 CarbohydrateGameWindow::~CarbohydrateGameWindow()
 {
+    // 确保析构时停止背景音乐
+    if (gameScene) {
+        gameScene->stopBackgroundMusic();
+    }
 }
 
 void CarbohydrateGameWindow::setupUI()
@@ -271,6 +275,11 @@ void CarbohydrateGameWindow::keyReleaseEvent(QKeyEvent *event)
 
 void CarbohydrateGameWindow::closeEvent(QCloseEvent *event)
 {
+    // 停止背景音乐
+    if (gameScene) {
+        gameScene->stopBackgroundMusic();
+    }
+    
     emit gameWindowClosed();
     event->accept();
 }

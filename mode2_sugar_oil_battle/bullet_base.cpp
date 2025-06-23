@@ -18,7 +18,7 @@ BulletBase::BulletBase(QObject *parent)
     
     // 设置默认图像
     updateBulletPixmap();
-    setScale(0.5);
+    setScale(0.15);
     setZValue(5);
 }
 

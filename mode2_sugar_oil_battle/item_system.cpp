@@ -27,7 +27,7 @@ GameItem::GameItem(ItemType type, QObject *parent)
     
     setupEffect();
     updatePixmap();
-    setScale(0.5);
+    setScale(0.2);
     setZValue(2);
 }
 

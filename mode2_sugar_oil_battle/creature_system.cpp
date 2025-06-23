@@ -37,7 +37,7 @@ GameCreature::GameCreature(CreatureType type, QObject *parent)
     
     setupEffect();
     updatePixmap();
-    setScale(0.7);
+    setScale(0.25);
     setZValue(2);
 }
 

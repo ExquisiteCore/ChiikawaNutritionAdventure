@@ -3,6 +3,7 @@
 #include <QScreen>
 #include <QFont>
 #include <QGraphicsDropShadowEffect>
+#include <QSpacerItem>
 
 SugarOilGameWindow::SugarOilGameWindow(QWidget *parent)
     : QWidget(parent)
@@ -91,21 +92,25 @@ void SugarOilGameWindow::setupUI()
     mainLayout->setSpacing(10);
     mainLayout->setContentsMargins(10, 10, 10, 10);
     
+    // 创建水平布局用于游戏区域和控制面板
+    gameAreaLayout = new QHBoxLayout();
+    gameAreaLayout->setSpacing(10);
+    
     setupGameArea();
     setupControlPanel();
+    
+    // 添加水平布局到主布局
+    mainLayout->addLayout(gameAreaLayout);
     
     setLayout(mainLayout);
 }
 
 void SugarOilGameWindow::setupGameArea()
 {
-    gameAreaLayout = new QHBoxLayout();
-    gameAreaLayout->setSpacing(10);
-    
     // 创建游戏场景和视图
     gameScene = new SugarOilGameSceneNew(this);
     gameView = new QGraphicsView(gameScene);
-    gameView->setFixedSize(SUGAR_OIL_SCENE_WIDTH + 20, SUGAR_OIL_SCENE_HEIGHT + 20);
+    gameView->setFixedSize(SUGAR_OIL_SCENE_WIDTH, SUGAR_OIL_SCENE_HEIGHT);
     gameView->setRenderHint(QPainter::Antialiasing);
     gameView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     gameView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -131,85 +136,105 @@ void SugarOilGameWindow::setupGameArea()
         onLivesChanged(hp);
     });
     
+    // 添加游戏视图到水平布局
     gameAreaLayout->addWidget(gameView);
-    mainLayout->addLayout(gameAreaLayout);
 }
 
 void SugarOilGameWindow::setupControlPanel()
 {
-    controlPanel = new QWidget();
-    controlPanel->setFixedHeight(120);
-    controlPanelLayout = new QVBoxLayout(controlPanel);
+    // 创建控制面板布局
+    controlPanelLayout = new QVBoxLayout();
+    controlPanelLayout->setSpacing(15);
     
     // 标题
     titleLabel = new QLabel("🍗 糖油混合物歼灭战 🍗");
     titleLabel->setAlignment(Qt::AlignCenter);
-    titleLabel->setFont(QFont("Arial", 16, QFont::Bold));
+    QFont titleFont = titleLabel->font();
+    titleFont.setPointSize(14);
+    titleFont.setBold(true);
+    titleLabel->setFont(titleFont);
+    titleLabel->setStyleSheet("color: #ffcc00; margin-bottom: 10px;");
+    controlPanelLayout->addWidget(titleLabel);
     
-    // 游戏信息布局
-    QHBoxLayout* infoLayout = new QHBoxLayout();
+    // 游戏信息区域
+    QVBoxLayout* infoLayout = new QVBoxLayout();
     
     // 时间显示
-    QVBoxLayout* timeLayout = new QVBoxLayout();
     timeLabel = new QLabel("时间: 05:00");
-    timeLabel->setFont(QFont("Arial", 12, QFont::Bold));
+    timeLabel->setFont(QFont("Arial", 11, QFont::Bold));
+    timeLabel->setStyleSheet("color: #cccccc;");
+    infoLayout->addWidget(timeLabel);
+    
     timeProgressBar = new QProgressBar();
     timeProgressBar->setRange(0, GAME_DURATION_SECONDS);
     timeProgressBar->setValue(GAME_DURATION_SECONDS);
     timeProgressBar->setFormat("%v 秒");
-    timeLayout->addWidget(timeLabel);
-    timeLayout->addWidget(timeProgressBar);
+    timeProgressBar->setMaximumHeight(20);
+    infoLayout->addWidget(timeProgressBar);
     
     // 生命值显示
     livesLabel = new QLabel("生命: ❤️❤️❤️");
-    livesLabel->setFont(QFont("Arial", 12, QFont::Bold));
+    livesLabel->setFont(QFont("Arial", 11, QFont::Bold));
+    livesLabel->setStyleSheet("color: #cccccc;");
+    infoLayout->addWidget(livesLabel);
     
     // 分数显示
     scoreLabel = new QLabel("分数: 0");
-    scoreLabel->setFont(QFont("Arial", 12, QFont::Bold));
-    
-    infoLayout->addLayout(timeLayout);
-    infoLayout->addWidget(livesLabel);
+    scoreLabel->setFont(QFont("Arial", 11, QFont::Bold));
+    scoreLabel->setStyleSheet("color: #cccccc;");
     infoLayout->addWidget(scoreLabel);
     
-    // 按钮布局
-    QHBoxLayout* buttonLayout = new QHBoxLayout();
+    controlPanelLayout->addLayout(infoLayout);
+    
+    // 添加弹性空间
+    controlPanelLayout->addItem(new QSpacerItem(20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding));
+    
+    // 控制按钮
+    restartButton = new QPushButton("重新开始");
+    connect(restartButton, &QPushButton::clicked, this, &SugarOilGameWindow::onRestartButtonClicked);
+    controlPanelLayout->addWidget(restartButton);
+    
+    instructionsButton = new QPushButton("游戏说明");
+    connect(instructionsButton, &QPushButton::clicked, this, &SugarOilGameWindow::onInstructionsButtonClicked);
+    controlPanelLayout->addWidget(instructionsButton);
+    
+    pauseButton = new QPushButton("暂停");
+    controlPanelLayout->addWidget(pauseButton);
     
     backButton = new QPushButton("返回主菜单");
-    restartButton = new QPushButton("重新开始");
-    instructionsButton = new QPushButton("游戏说明");
-    pauseButton = new QPushButton("暂停");
-    
     connect(backButton, &QPushButton::clicked, this, &SugarOilGameWindow::onBackButtonClicked);
-    connect(restartButton, &QPushButton::clicked, this, &SugarOilGameWindow::onRestartButtonClicked);
-    connect(instructionsButton, &QPushButton::clicked, this, &SugarOilGameWindow::onInstructionsButtonClicked);
+    controlPanelLayout->addWidget(backButton);
     
-    buttonLayout->addWidget(backButton);
-    buttonLayout->addWidget(restartButton);
-    buttonLayout->addWidget(instructionsButton);
-    buttonLayout->addWidget(pauseButton);
+    // 添加弹性空间
+    controlPanelLayout->addItem(new QSpacerItem(20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding));
     
     // 状态信息
     statusLabel = new QLabel("准备开始游戏...");
     statusLabel->setAlignment(Qt::AlignCenter);
-    statusLabel->setFont(QFont("Arial", 10));
+    statusLabel->setWordWrap(true);
+    statusLabel->setStyleSheet("color: #cccccc; font-size: 12px;");
+    controlPanelLayout->addWidget(statusLabel);
     
+    // 道具和生物信息
     itemInfoLabel = new QLabel("");
     itemInfoLabel->setAlignment(Qt::AlignCenter);
-    itemInfoLabel->setFont(QFont("Arial", 9));
+    itemInfoLabel->setWordWrap(true);
+    itemInfoLabel->setStyleSheet("color: #aaaaaa; font-size: 10px;");
+    controlPanelLayout->addWidget(itemInfoLabel);
     
     creatureInfoLabel = new QLabel("");
     creatureInfoLabel->setAlignment(Qt::AlignCenter);
-    creatureInfoLabel->setFont(QFont("Arial", 9));
-    
-    controlPanelLayout->addWidget(titleLabel);
-    controlPanelLayout->addLayout(infoLayout);
-    controlPanelLayout->addLayout(buttonLayout);
-    controlPanelLayout->addWidget(statusLabel);
-    controlPanelLayout->addWidget(itemInfoLabel);
+    creatureInfoLabel->setWordWrap(true);
+    creatureInfoLabel->setStyleSheet("color: #aaaaaa; font-size: 10px;");
     controlPanelLayout->addWidget(creatureInfoLabel);
     
-    mainLayout->addWidget(controlPanel);
+    // 设置控制面板固定宽度
+    controlPanel = new QWidget();
+    controlPanel->setLayout(controlPanelLayout);
+    controlPanel->setFixedWidth(200);
+    
+    // 添加控制面板到水平布局
+    gameAreaLayout->addWidget(controlPanel);
 }
 
 void SugarOilGameWindow::startNewGame()
