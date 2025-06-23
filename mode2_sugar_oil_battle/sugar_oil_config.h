@@ -8,7 +8,7 @@
 #define SUGAR_OIL_SCENE_HEIGHT 800
 
 // 游戏时间配置
-#define GAME_DURATION_SECONDS 300  // 5分钟 = 300秒
+#define GAME_DURATION_SECONDS 300  // 5分钟 = 300秒 - 坚持300秒即可取得胜利
 #define TIMER_UPDATE_INTERVAL 16   // 约60FPS
 
 // 角色配置
@@ -76,50 +76,55 @@ const int SUGAR_OIL_DIR_OFFSET[4][2] = {
     {0, 1}    // DOWN
 };
 
-// 道具类型
+// 道具类型 - 24种物品
 enum ItemType {
-    ITEM_SPEED_BOOST = 0,
-    ITEM_DAMAGE_BOOST = 1,
-    ITEM_SHIELD = 2,
-    ITEM_HEALTH = 3,
-    ITEM_SCORE_BONUS = 4,
-    ITEM_TIME_SLOW = 5,
-    ITEM_INVINCIBLE = 6,
-    ITEM_DOUBLE_SCORE = 7,
-    ITEM_EXTRA_LIFE = 8,
-    ITEM_FREEZE_ENEMIES = 9,
-    ITEM_MAGNET = 10,
-    ITEM_BOMB = 11,
-    ITEM_RAPID_FIRE = 12,
-    ITEM_ENERGY_DRINK = 13,
-    ITEM_PROTEIN_BAR = 14,
-    ITEM_VITAMIN = 15,
-    ITEM_MINERAL = 16,
-    ITEM_FIBER = 17,
-    ITEM_ANTIOXIDANT = 18,
-    ITEM_OMEGA3 = 19,
-    ITEM_CALCIUM = 20,
-    ITEM_IRON = 21,
-    ITEM_ZINC = 22,
-    ITEM_MULTIVITAMIN = 23
+    // 基础营养素 (8种)
+    ITEM_SPEED_BOOST = 0,     // 速度提升
+    ITEM_DAMAGE_BOOST = 1,    // 攻击力提升
+    ITEM_SHIELD = 2,          // 护盾
+    ITEM_HEALTH = 3,          // 生命恢复
+    ITEM_SCORE_BONUS = 4,     // 分数加成
+    ITEM_TIME_SLOW = 5,       // 时间减缓
+    ITEM_INVINCIBLE = 6,      // 无敌
+    ITEM_DOUBLE_SCORE = 7,    // 双倍分数
+    
+    // 健身装备 (8种)
+    ITEM_EXTRA_LIFE = 8,      // 额外生命
+    ITEM_FREEZE_ENEMIES = 9,  // 冰冻敌人
+    ITEM_MAGNET = 10,         // 磁力吸引
+    ITEM_BOMB = 11,           // 炸弹
+    ITEM_RAPID_FIRE = 12,     // 快速射击
+    ITEM_ENERGY_DRINK = 13,   // 能量饮料
+    ITEM_PROTEIN_BAR = 14,    // 蛋白棒
+    ITEM_VITAMIN = 15,        // 维生素
+    
+    // 特殊道具 (8种)
+    ITEM_MINERAL = 16,        // 矿物质
+    ITEM_FIBER = 17,          // 纤维
+    ITEM_ANTIOXIDANT = 18,    // 抗氧化剂
+    ITEM_OMEGA3 = 19,         // 欧米伽3
+    ITEM_CALCIUM = 20,        // 钙
+    ITEM_IRON = 21,           // 铁
+    ITEM_ZINC = 22,           // 锌
+    ITEM_MULTIVITAMIN = 23    // 复合维生素
 };
 
-// 生物类型
+// 生物类型 - 5种奇异生物
 enum CreatureType {
-    CREATURE_HELPER = 0,
-    CREATURE_GUARDIAN = 1,
-    CREATURE_HEALER = 2,
-    CREATURE_SPEEDSTER = 3,
-    CREATURE_WARRIOR = 4
+    CREATURE_HELPER = 0,      // 健身教练 - 提供攻击力加成
+    CREATURE_GUARDIAN = 1,    // 营养师 - 提供生命恢复
+    CREATURE_HEALER = 2,      // 私人教练 - 提供速度加成
+    CREATURE_SPEEDSTER = 3,   // 励志大师 - 提供经验加成
+    CREATURE_WARRIOR = 4      // 健康专家 - 提供防御加成
 };
 
-// 敌人类型
+// 敌人类型 - 5种糖油混合物
 enum SugarOilEnemyType {
-    ENEMY_FRIED_CHICKEN = 0,
-    ENEMY_BARBECUE = 1,
-    ENEMY_MILK_TEA = 2,
-    ENEMY_SNAIL_NOODLES = 3,
-    ENEMY_CAKE = 4
+    ENEMY_FRIED_CHICKEN = 0,  // 炸鸡
+    ENEMY_BARBECUE = 1,       // 烧烤
+    ENEMY_MILK_TEA = 2,       // 奶茶
+    ENEMY_SNAIL_NOODLES = 3,  // 螺蛳粉
+    ENEMY_CAKE = 4            // 小蛋糕
 };
 
 #endif // SUGAR_OIL_CONFIG_H

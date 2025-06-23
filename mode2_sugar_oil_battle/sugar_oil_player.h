@@ -44,7 +44,17 @@ public:
     void setInvincible(bool invincible);
     bool isInvincible() const { return mInvincible; }
     
-    // 重置玩家状态
+    // 道具效果支持
+    void applySpeedMultiplier(double multiplier, int duration);
+    void applyAttackMultiplier(double multiplier, int duration);
+    void applyDefenseMultiplier(double multiplier, int duration);
+    void enableFastShooting(int duration);
+    void enableMagnetism(int duration);
+    
+    // 生物效果支持
+    void applyExperienceMultiplier(double multiplier, int duration);
+    
+    // 重置功能
     void resetPlayer();
     
     // 更新动画帧
@@ -91,6 +101,22 @@ private:
     // 定时器
     QTimer* mInvincibilityTimer;
     QTimer* mAnimationTimer;
+    
+    // 效果定时器
+    QTimer* mSpeedEffectTimer;
+    QTimer* mAttackEffectTimer;
+    QTimer* mDefenseEffectTimer;
+    QTimer* mFastShootingTimer;
+    QTimer* mMagnetismTimer;
+    QTimer* mExperienceEffectTimer;
+    
+    // 效果倍数
+    double mSpeedMultiplier;
+    double mAttackMultiplier;
+    double mDefenseMultiplier;
+    double mExperienceMultiplier;
+    bool mFastShootingEnabled;
+    bool mMagnetismEnabled;
     
     // 音效
     QMediaPlayer* mShootSoundPlayer;

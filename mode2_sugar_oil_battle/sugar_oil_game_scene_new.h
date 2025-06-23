@@ -13,6 +13,8 @@
 #include "sugar_oil_player.h"
 #include "enemy_base.h"
 #include "bullet_base.h"
+#include "item_system.h"
+#include "creature_system.h"
 
 class SugarOilGameSceneNew : public QGraphicsScene
 {
@@ -79,6 +81,8 @@ private slots:
     void updateCollisions();
     void updatePlayerMovement();
     void cleanupObjects();
+    void updateItems();
+    void updateCreatures();
     
 private:
     // 初始化方法
@@ -86,6 +90,7 @@ private:
     void initializePlayer();
     void initializeTimers();
     void initializeAudio();
+    void initializeManagers();
     void loadBackground();
     
     // 游戏逻辑
@@ -97,20 +102,32 @@ private:
     void checkPlayerEnemyCollisions();
     void checkPlayerBulletEnemyCollisions();
     void checkEnemyBulletPlayerCollisions();
+    void checkPlayerItemCollisions();
+    void checkPlayerCreatureCollisions();
     
     // 清理方法
     void removeDeadEnemies();
     void removeOutOfBoundsBullets();
+    void removeCollectedItems();
+    void removeActivatedCreatures();
     
     // 敌人生成逻辑
     void updateEnemySpawning();
     QPointF getRandomSpawnPosition();
+    
+    // 道具和生物生成逻辑
+    void spawnRandomItem();
+    void spawnRandomCreature();
+    void updateItemSpawning();
+    void updateCreatureSpawning();
     
     // 游戏对象
     SugarOilPlayer* mPlayer;
     QList<EnemyBase*> mEnemies;
     QList<BulletBase*> mPlayerBullets;
     QList<BulletBase*> mEnemyBullets;
+    QList<GameItem*> mItems;
+    QList<GameCreature*> mCreatures;
     
     // 背景
     QGraphicsPixmapItem* mBackground;
@@ -134,6 +151,16 @@ private:
     // 音频
     QMediaPlayer* mBackgroundMusicPlayer;
     QAudioOutput* mBackgroundMusicAudioOutput;
+    
+    // 系统管理器
+    ItemManager* mItemManager;
+    CreatureManager* mCreatureManager;
+    
+    // 生成计时器
+    QTimer* mItemSpawnTimer;
+    QTimer* mCreatureSpawnTimer;
+    int mItemSpawnCounter;
+    int mCreatureSpawnCounter;
     
     // 游戏配置
     static const int GAME_DURATION = 300; // 5分钟

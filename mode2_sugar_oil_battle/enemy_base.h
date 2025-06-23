@@ -14,11 +14,12 @@ class EnemyBase : public GameObjectBase
     Q_OBJECT
 
 public:
-    enum EnemyType {
-        SmallEnemy = 1,
-        MediumEnemy = 2,
-        LargeEnemy = 3,
-        BossEnemy = 4
+    enum class EnemyType {
+        FriedChicken = 0,    // 炸鸡
+        Barbecue = 1,        // 烧烤
+        MilkTea = 2,         // 奶茶
+        SpiralShellNoodles = 3, // 螺蛳粉
+        SmallCake = 4        // 小蛋糕
     };
 
     explicit EnemyBase(QObject *parent = nullptr);

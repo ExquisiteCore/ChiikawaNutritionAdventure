@@ -11,7 +11,7 @@ EnemyBase::EnemyBase(QObject *parent)
     , mAttackPoint(10)
     , mSpeed(1.0)
     , mExpValue(10)
-    , mEnemyType(SmallEnemy)
+    , mEnemyType(EnemyType::FriedChicken)
     , mMoveRight(true)
     , mFaceRight(true)
     , mPlayer(nullptr)
@@ -162,24 +162,24 @@ void EnemyBase::updateAI()
     // 移动
     moveEnemy();
     
-    // 根据敌人类型执行不同的AI行为
+    // 根据糖油混合物敌人类型执行不同的AI行为
     switch (mEnemyType) {
-    case SmallEnemy:
-        // 小敌人：每2秒攻击一次
+    case EnemyType::FriedChicken:
+        // 炸鸡：每2秒攻击一次
         if (mAICounter % 20 == 0) {
             attack();
         }
         break;
         
-    case MediumEnemy:
-        // 中等敌人：每1.5秒攻击一次
+    case EnemyType::Barbecue:
+        // 烧烤：每1.5秒攻击一次
         if (mAICounter % 15 == 0) {
             attack();
         }
         break;
         
-    case LargeEnemy:
-        // 大敌人：每1秒攻击一次，偶尔使用技能
+    case EnemyType::MilkTea:
+        // 奶茶：每1秒攻击一次，偶尔使用技能
         if (mAICounter % 10 == 0) {
             attack();
         }
@@ -188,13 +188,20 @@ void EnemyBase::updateAI()
         }
         break;
         
-    case BossEnemy:
-        // Boss：频繁攻击和技能
+    case EnemyType::SpiralShellNoodles:
+        // 螺蛳粉：频繁攻击和技能
         if (mAICounter % 8 == 0) {
             attack();
         }
         if (mAICounter % 30 == 0) {
             startSkill();
+        }
+        break;
+        
+    case EnemyType::SmallCake:
+        // 小蛋糕：快速攻击
+        if (mAICounter % 12 == 0) {
+            attack();
         }
         break;
     }
@@ -244,19 +251,22 @@ void EnemyBase::updatePixmap()
 {
     QString imagePath;
     
-    // 根据敌人类型和面朝方向选择图像
+    // 根据糖油混合物敌人类型选择图像
     switch (mEnemyType) {
-    case SmallEnemy:
-        imagePath = mFaceRight ? ":/img/enemies/small_enemy.png" : ":/img/enemies/small_enemy_left.png";
+    case EnemyType::FriedChicken:
+        imagePath = mFaceRight ? ":/img/roles/chimera1.png" : ":/img/roles/chimera1-mir.png";
         break;
-    case MediumEnemy:
-        imagePath = mFaceRight ? ":/img/enemies/medium_enemy.png" : ":/img/enemies/medium_enemy_left.png";
+    case EnemyType::Barbecue:
+        imagePath = mFaceRight ? ":/img/roles/chimera2.png" : ":/img/roles/chimera2-mir.png";
         break;
-    case LargeEnemy:
-        imagePath = mFaceRight ? ":/img/enemies/large_enemy.png" : ":/img/enemies/large_enemy_left.png";
+    case EnemyType::MilkTea:
+        imagePath = mFaceRight ? ":/img/roles/chimera3.png" : ":/img/roles/chimera3-mir.png";
         break;
-    case BossEnemy:
-        imagePath = mFaceRight ? ":/img/enemies/boss_enemy.png" : ":/img/enemies/boss_enemy_left.png";
+    case EnemyType::SpiralShellNoodles:
+        imagePath = mFaceRight ? ":/img/roles/chimera4.png" : ":/img/roles/chimera4-mir.png";
+        break;
+    case EnemyType::SmallCake:
+        imagePath = mFaceRight ? ":/img/roles/chimera5.png" : ":/img/roles/chimera5-mir.png";
         break;
     }
     
@@ -267,17 +277,20 @@ void EnemyBase::updatePixmap()
         // 如果找不到图像，创建一个简单的彩色矩形
         QPixmap defaultPixmap(40, 40);
         switch (mEnemyType) {
-        case SmallEnemy:
-            defaultPixmap.fill(Qt::green);
+        case EnemyType::FriedChicken:
+            defaultPixmap.fill(QColor(255, 165, 0)); // 橙色 - 炸鸡
             break;
-        case MediumEnemy:
-            defaultPixmap.fill(Qt::yellow);
+        case EnemyType::Barbecue:
+            defaultPixmap.fill(QColor(139, 69, 19)); // 棕色 - 烧烤
             break;
-        case LargeEnemy:
-            defaultPixmap.fill(Qt::magenta);
+        case EnemyType::MilkTea:
+            defaultPixmap.fill(QColor(210, 180, 140)); // 奶茶色
             break;
-        case BossEnemy:
-            defaultPixmap.fill(Qt::darkRed);
+        case EnemyType::SpiralShellNoodles:
+            defaultPixmap.fill(QColor(255, 0, 0)); // 红色 - 螺蛳粉
+            break;
+        case EnemyType::SmallCake:
+            defaultPixmap.fill(QColor(255, 192, 203)); // 粉色 - 小蛋糕
             break;
         }
         setPixmap(defaultPixmap);

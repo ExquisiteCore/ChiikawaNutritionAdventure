@@ -19,11 +19,18 @@ SugarOilGameSceneNew::SugarOilGameSceneNew(QObject *parent)
     , mSpawnCounter(0)
     , mMousePressed(false)
     , mBackgroundMusicPlayer(nullptr)
+    , mItemManager(nullptr)
+    , mCreatureManager(nullptr)
+    , mItemSpawnTimer(nullptr)
+    , mCreatureSpawnTimer(nullptr)
+    , mItemSpawnCounter(0)
+    , mCreatureSpawnCounter(0)
 {
     initializeScene();
     initializePlayer();
     initializeTimers();
     initializeAudio();
+    initializeManagers();
     loadBackground();
 }
 
@@ -35,6 +42,8 @@ SugarOilGameSceneNew::~SugarOilGameSceneNew()
     qDeleteAll(mEnemies);
     qDeleteAll(mPlayerBullets);
     qDeleteAll(mEnemyBullets);
+    qDeleteAll(mItems);
+    qDeleteAll(mCreatures);
     
     if (mPlayer) {
         delete mPlayer;
@@ -76,6 +85,14 @@ void SugarOilGameSceneNew::initializeTimers()
     mSpawnTimer = new QTimer(this);
     mSpawnTimer->setInterval(SPAWN_INTERVAL);
     connect(mSpawnTimer, &QTimer::timeout, this, &SugarOilGameSceneNew::spawnEnemies);
+    
+    // 道具生成定时器
+    mItemSpawnTimer = new QTimer(this);
+    connect(mItemSpawnTimer, &QTimer::timeout, this, &SugarOilGameSceneNew::updateItemSpawning);
+    
+    // 生物生成定时器
+    mCreatureSpawnTimer = new QTimer(this);
+    connect(mCreatureSpawnTimer, &QTimer::timeout, this, &SugarOilGameSceneNew::updateCreatureSpawning);
 }
 
 void SugarOilGameSceneNew::initializeAudio()
@@ -85,6 +102,12 @@ void SugarOilGameSceneNew::initializeAudio()
     mBackgroundMusicPlayer->setAudioOutput(mBackgroundMusicAudioOutput);
     mBackgroundMusicPlayer->setSource(QUrl("qrc:/sounds/background_music.mp3"));
     mBackgroundMusicAudioOutput->setVolume(0.3f); // Qt6使用0.0-1.0的音量范围
+}
+
+void SugarOilGameSceneNew::initializeManagers()
+{
+    mItemManager = new ItemManager(this);
+    mCreatureManager = new CreatureManager(this);
 }
 
 void SugarOilGameSceneNew::loadBackground()
@@ -116,6 +139,8 @@ void SugarOilGameSceneNew::startGame()
     mGameTimer->start();
     mUpdateTimer->start();
     mSpawnTimer->start();
+    mItemSpawnTimer->start(8000); // 每8秒生成一个道具
+    mCreatureSpawnTimer->start(15000); // 每15秒生成一个生物
     
     // 播放背景音乐
     if (mBackgroundMusicPlayer) {
@@ -138,6 +163,8 @@ void SugarOilGameSceneNew::pauseGame()
     mGameTimer->stop();
     mUpdateTimer->stop();
     mSpawnTimer->stop();
+    mItemSpawnTimer->stop();
+    mCreatureSpawnTimer->stop();
     
     // 暂停背景音乐
     if (mBackgroundMusicPlayer) {
@@ -165,6 +192,8 @@ void SugarOilGameSceneNew::resumeGame()
     mGameTimer->start();
     mUpdateTimer->start();
     mSpawnTimer->start();
+    mItemSpawnTimer->start();
+    mCreatureSpawnTimer->start();
     
     // 恢复背景音乐
     if (mBackgroundMusicPlayer) {
@@ -193,6 +222,8 @@ void SugarOilGameSceneNew::stopGame()
     if (mGameTimer) mGameTimer->stop();
     if (mUpdateTimer) mUpdateTimer->stop();
     if (mSpawnTimer) mSpawnTimer->stop();
+    if (mItemSpawnTimer) mItemSpawnTimer->stop();
+    if (mCreatureSpawnTimer) mCreatureSpawnTimer->stop();
     
     // 停止背景音乐
     if (mBackgroundMusicPlayer) {
@@ -310,6 +341,8 @@ void SugarOilGameSceneNew::updateGame()
     }
     
     updatePlayerMovement();
+    updateItems();
+    updateCreatures();
     updateCollisions();
     cleanupObjects();
 }
@@ -369,45 +402,32 @@ void SugarOilGameSceneNew::spawnEnemies()
 
 void SugarOilGameSceneNew::updateEnemySpawning()
 {
-    // 根据游戏时间调整敌人生成
-    int enemyCount = 1;
-    EnemyBase::EnemyType enemyType = EnemyBase::EnemyType::SmallEnemy;
+    mSpawnCounter++;
     
-    if (mGameTime < 60) {
-        // 前1分钟：只生成普通敌人
-        enemyCount = 1;
-        enemyType = EnemyBase::EnemyType::SmallEnemy;
-    } else if (mGameTime < 120) {
-        // 1-2分钟：增加生成数量
-        enemyCount = QRandomGenerator::global()->bounded(1, 3);
-        enemyType = EnemyBase::EnemyType::SmallEnemy;
-    } else if (mGameTime < 180) {
-        // 2-3分钟：引入快速敌人
-        enemyCount = QRandomGenerator::global()->bounded(1, 3);
-        enemyType = QRandomGenerator::global()->bounded(2) == 0 ? 
-                   EnemyBase::EnemyType::SmallEnemy : EnemyBase::EnemyType::MediumEnemy;
-    } else if (mGameTime < 240) {
-        // 3-4分钟：引入强壮敌人
-        enemyCount = QRandomGenerator::global()->bounded(2, 4);
-        int typeRand = QRandomGenerator::global()->bounded(3);
-        if (typeRand == 0) enemyType = EnemyBase::EnemyType::SmallEnemy;
-        else if (typeRand == 1) enemyType = EnemyBase::EnemyType::MediumEnemy;
-        else enemyType = EnemyBase::EnemyType::LargeEnemy;
-    } else {
-        // 最后1分钟：所有类型敌人
-        enemyCount = QRandomGenerator::global()->bounded(2, 5);
-        int typeRand = QRandomGenerator::global()->bounded(4);
-        if (typeRand == 0) enemyType = EnemyBase::EnemyType::SmallEnemy;
-        else if (typeRand == 1) enemyType = EnemyBase::EnemyType::MediumEnemy;
-        else if (typeRand == 2) enemyType = EnemyBase::EnemyType::LargeEnemy;
-        else enemyType = EnemyBase::EnemyType::BossEnemy;
+    // 根据游戏时间调整生成频率
+    int spawnInterval = 2000; // 基础间隔2秒
+    if (mGameTime > 60) {
+        spawnInterval = 1500; // 1分钟后加快到1.5秒
     }
+    if (mGameTime > 120) {
+        spawnInterval = 1000; // 2分钟后加快到1秒
+    }
+    if (mGameTime > 180) {
+        spawnInterval = 800; // 3分钟后加快到0.8秒
+    }
+    if (mGameTime > 240) {
+        spawnInterval = 600; // 4分钟后加快到0.6秒
+    }
+    
+    mSpawnTimer->setInterval(spawnInterval);
     
     // 生成敌人
-    for (int i = 0; i < enemyCount; ++i) {
-        QPointF spawnPos = getRandomSpawnPosition();
-        spawnEnemy(enemyType, spawnPos);
-    }
+    QPointF spawnPos = getRandomSpawnPosition();
+    
+    // 随机选择糖油混合物敌人类型
+    EnemyBase::EnemyType enemyType = static_cast<EnemyBase::EnemyType>(QRandomGenerator::global()->bounded(5));
+    
+    spawnEnemy(enemyType, spawnPos);
 }
 
 QPointF SugarOilGameSceneNew::getRandomSpawnPosition()
@@ -454,6 +474,8 @@ void SugarOilGameSceneNew::updateCollisions()
     checkPlayerEnemyCollisions();
     checkPlayerBulletEnemyCollisions();
     checkEnemyBulletPlayerCollisions();
+    checkPlayerItemCollisions();
+    checkPlayerCreatureCollisions();
 }
 
 void SugarOilGameSceneNew::checkPlayerEnemyCollisions()
@@ -520,6 +542,8 @@ void SugarOilGameSceneNew::cleanupObjects()
 {
     removeDeadEnemies();
     removeOutOfBoundsBullets();
+    removeCollectedItems();
+    removeActivatedCreatures();
 }
 
 void SugarOilGameSceneNew::removeDeadEnemies()
@@ -532,6 +556,137 @@ void SugarOilGameSceneNew::removeDeadEnemies()
             delete enemy;
         }
     }
+}
+
+// 道具系统方法
+void SugarOilGameSceneNew::updateItemSpawning()
+{
+    mItemSpawnCounter++;
+    spawnRandomItem();
+}
+
+void SugarOilGameSceneNew::spawnRandomItem()
+{
+    if (!mItemManager) return;
+    
+    // 在屏幕边缘随机位置生成道具
+    QPointF spawnPos = getRandomSpawnPosition();
+    GameItem* item = mItemManager->spawnRandomItem(spawnPos);
+    if (item) {
+        addItem(item);
+        mItems.append(item);
+    }
+}
+
+void SugarOilGameSceneNew::updateItems()
+{
+    for (GameItem* item : mItems) {
+        if (item) {
+            item->updateAnimation();
+        }
+    }
+}
+
+void SugarOilGameSceneNew::checkPlayerItemCollisions()
+{
+    if (!mPlayer) return;
+    
+    QRectF playerRect = mPlayer->boundingRect().translated(mPlayer->pos());
+    
+    for (int i = mItems.size() - 1; i >= 0; --i) {
+        GameItem* item = mItems[i];
+        if (item) {
+            QRectF itemRect = item->boundingRect().translated(item->pos());
+            if (playerRect.intersects(itemRect)) {
+                // 应用道具效果
+                item->applyEffect(mPlayer);
+                // 移除道具
+                removeItem(item);
+                mItems.removeAt(i);
+                delete item;
+            }
+        }
+    }
+}
+
+void SugarOilGameSceneNew::removeCollectedItems()
+{
+    // 道具在碰撞检测中已经被移除，这里可以处理其他清理逻辑
+    // 例如：移除超出屏幕边界的道具
+    for (int i = mItems.size() - 1; i >= 0; --i) {
+        GameItem* item = mItems[i];
+        if (item) {
+            QPointF itemPos = item->pos();
+            // 如果道具超出屏幕边界，移除它
+            if (itemPos.x() < -100 || itemPos.x() > width() + 100 ||
+                itemPos.y() < -100 || itemPos.y() > height() + 100) {
+                removeItem(item);
+                mItems.removeAt(i);
+                delete item;
+            }
+        }
+    }
+}
+
+// 生物系统方法
+void SugarOilGameSceneNew::updateCreatureSpawning()
+{
+    mCreatureSpawnCounter++;
+    spawnRandomCreature();
+}
+
+void SugarOilGameSceneNew::spawnRandomCreature()
+{
+    if (!mCreatureManager) return;
+    
+    // 在屏幕边缘随机位置生成生物
+    QPointF spawnPos = getRandomSpawnPosition();
+    GameCreature* creature = mCreatureManager->spawnRandomCreature(spawnPos);
+    if (creature) {
+        addItem(creature);
+        mCreatures.append(creature);
+    }
+}
+
+void SugarOilGameSceneNew::updateCreatures()
+{
+    if (!mPlayer) return;
+    
+    for (GameCreature* creature : mCreatures) {
+        if (creature) {
+            creature->updateCreature();
+            
+            // 检查是否靠近玩家
+            if (creature->isNearPlayer(mPlayer->pos(), 50.0)) {
+                creature->activateEffect(mPlayer);
+            } else {
+                // 向玩家移动
+                creature->moveTowardsPlayer(mPlayer->pos());
+            }
+        }
+    }
+}
+
+void SugarOilGameSceneNew::checkPlayerCreatureCollisions()
+{
+    if (!mPlayer) return;
+    
+    QRectF playerRect = mPlayer->boundingRect().translated(mPlayer->pos());
+    
+    for (GameCreature* creature : mCreatures) {
+        if (creature) {
+            QRectF creatureRect = creature->boundingRect().translated(creature->pos());
+            if (playerRect.intersects(creatureRect)) {
+                creature->activateEffect(mPlayer);
+            }
+        }
+    }
+}
+
+void SugarOilGameSceneNew::removeActivatedCreatures()
+{
+    // 暂时保留所有生物，可以根据需要添加移除逻辑
+    // 例如：生物激活效果后一段时间后自动消失
 }
 
 void SugarOilGameSceneNew::removeOutOfBoundsBullets()

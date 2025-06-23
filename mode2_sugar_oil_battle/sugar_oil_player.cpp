@@ -19,6 +19,18 @@ SugarOilPlayer::SugarOilPlayer(QObject *parent)
     , mAnimationFrame(0)
     , mInvincibilityTimer(nullptr)
     , mAnimationTimer(nullptr)
+    , mSpeedEffectTimer(nullptr)
+    , mAttackEffectTimer(nullptr)
+    , mDefenseEffectTimer(nullptr)
+    , mFastShootingTimer(nullptr)
+    , mMagnetismTimer(nullptr)
+    , mExperienceEffectTimer(nullptr)
+    , mSpeedMultiplier(1.0)
+    , mAttackMultiplier(1.0)
+    , mDefenseMultiplier(1.0)
+    , mExperienceMultiplier(1.0)
+    , mFastShootingEnabled(false)
+    , mMagnetismEnabled(false)
     , mShootSoundPlayer(nullptr)
     , mHurtSoundPlayer(nullptr)
     , mShootSoundAudioOutput(nullptr)
@@ -39,6 +51,31 @@ SugarOilPlayer::SugarOilPlayer(QObject *parent)
     mAnimationTimer->setInterval(ANIMATION_INTERVAL);
     connect(mAnimationTimer, &QTimer::timeout, this, &SugarOilPlayer::onAnimationTimeout);
     mAnimationTimer->start();
+    
+    // 初始化效果定时器
+    mSpeedEffectTimer = new QTimer(this);
+    mSpeedEffectTimer->setSingleShot(true);
+    connect(mSpeedEffectTimer, &QTimer::timeout, [this]() { mSpeedMultiplier = 1.0; });
+    
+    mAttackEffectTimer = new QTimer(this);
+    mAttackEffectTimer->setSingleShot(true);
+    connect(mAttackEffectTimer, &QTimer::timeout, [this]() { mAttackMultiplier = 1.0; });
+    
+    mDefenseEffectTimer = new QTimer(this);
+    mDefenseEffectTimer->setSingleShot(true);
+    connect(mDefenseEffectTimer, &QTimer::timeout, [this]() { mDefenseMultiplier = 1.0; });
+    
+    mFastShootingTimer = new QTimer(this);
+    mFastShootingTimer->setSingleShot(true);
+    connect(mFastShootingTimer, &QTimer::timeout, [this]() { mFastShootingEnabled = false; });
+    
+    mMagnetismTimer = new QTimer(this);
+    mMagnetismTimer->setSingleShot(true);
+    connect(mMagnetismTimer, &QTimer::timeout, [this]() { mMagnetismEnabled = false; });
+    
+    mExperienceEffectTimer = new QTimer(this);
+    mExperienceEffectTimer->setSingleShot(true);
+    connect(mExperienceEffectTimer, &QTimer::timeout, [this]() { mExperienceMultiplier = 1.0; });
     
     // 初始化音效播放器 (Qt5兼容)
     mShootSoundPlayer = new QMediaPlayer(this);
@@ -78,7 +115,8 @@ void SugarOilPlayer::takeDamage(int damage)
         return;
     }
     
-    int actualDamage = qMax(1, damage - mDefence);
+    int effectiveDefense = static_cast<int>(mDefence * mDefenseMultiplier);
+    int actualDamage = qMax(1, damage - effectiveDefense);
     mHP = qMax(0, mHP - actualDamage);
     
     // 播放受伤音效
@@ -110,7 +148,8 @@ void SugarOilPlayer::heal(int amount)
 
 void SugarOilPlayer::gainExp(int exp)
 {
-    mExp += exp;
+    int effectiveExp = static_cast<int>(exp * mExperienceMultiplier);
+    mExp += effectiveExp;
     emit expChanged(mExp, EXP_PER_LEVEL);
     checkLevelUp();
 }
@@ -123,8 +162,11 @@ void SugarOilPlayer::shoot(const QPointF &direction)
         mShootSoundPlayer->play();
     }
     
+    // 计算有效攻击力
+    int effectiveAttack = static_cast<int>(mAttackPoint * mAttackMultiplier);
+    
     // 发射子弹信号
-    emit playerShoot(getCenterPos(), direction, mAttackPoint);
+    emit playerShoot(getCenterPos(), direction, effectiveAttack);
 }
 
 void SugarOilPlayer::setInvincible(bool invincible)
@@ -139,6 +181,43 @@ void SugarOilPlayer::setInvincible(bool invincible)
     }
 }
 
+// 道具效果方法
+void SugarOilPlayer::applySpeedMultiplier(double multiplier, int duration)
+{
+    mSpeedMultiplier = multiplier;
+    mSpeedEffectTimer->start(duration);
+}
+
+void SugarOilPlayer::applyAttackMultiplier(double multiplier, int duration)
+{
+    mAttackMultiplier = multiplier;
+    mAttackEffectTimer->start(duration);
+}
+
+void SugarOilPlayer::applyDefenseMultiplier(double multiplier, int duration)
+{
+    mDefenseMultiplier = multiplier;
+    mDefenseEffectTimer->start(duration);
+}
+
+void SugarOilPlayer::enableFastShooting(int duration)
+{
+    mFastShootingEnabled = true;
+    mFastShootingTimer->start(duration);
+}
+
+void SugarOilPlayer::enableMagnetism(int duration)
+{
+    mMagnetismEnabled = true;
+    mMagnetismTimer->start(duration);
+}
+
+void SugarOilPlayer::applyExperienceMultiplier(double multiplier, int duration)
+{
+    mExperienceMultiplier = multiplier;
+    mExperienceEffectTimer->start(duration);
+}
+
 void SugarOilPlayer::resetPlayer()
 {
     mHP = mMaxHP;
@@ -149,6 +228,14 @@ void SugarOilPlayer::resetPlayer()
     mIsMoving = false;
     mAnimationFrame = 0;
     
+    // 重置所有效果
+    mSpeedMultiplier = 1.0;
+    mAttackMultiplier = 1.0;
+    mDefenseMultiplier = 1.0;
+    mExperienceMultiplier = 1.0;
+    mFastShootingEnabled = false;
+    mMagnetismEnabled = false;
+    
     setOpacity(1.0);
     setPosition(400, 300); // 重置到中心位置
     
@@ -157,6 +244,26 @@ void SugarOilPlayer::resetPlayer()
     }
     if (mBlinkAnimation) {
         mBlinkAnimation->stop();
+    }
+    
+    // 停止所有效果定时器
+    if (mSpeedEffectTimer && mSpeedEffectTimer->isActive()) {
+        mSpeedEffectTimer->stop();
+    }
+    if (mAttackEffectTimer && mAttackEffectTimer->isActive()) {
+        mAttackEffectTimer->stop();
+    }
+    if (mDefenseEffectTimer && mDefenseEffectTimer->isActive()) {
+        mDefenseEffectTimer->stop();
+    }
+    if (mFastShootingTimer && mFastShootingTimer->isActive()) {
+        mFastShootingTimer->stop();
+    }
+    if (mMagnetismTimer && mMagnetismTimer->isActive()) {
+        mMagnetismTimer->stop();
+    }
+    if (mExperienceEffectTimer && mExperienceEffectTimer->isActive()) {
+        mExperienceEffectTimer->stop();
     }
     
     updatePixmap();
