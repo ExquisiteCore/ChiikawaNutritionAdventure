@@ -10,6 +10,7 @@
 #include <QRandomGenerator>
 #include <QGraphicsPixmapItem>
 
+#include "sugar_oil_config.h"
 #include "sugar_oil_player.h"
 #include "enemy_base.h"
 #include "bullet_base.h"
@@ -167,8 +168,8 @@ private:
     static const int GAME_DURATION = 300; // 5分钟
     static const int UPDATE_INTERVAL = 25; // ~40 FPS，降低更新频率减少卡顿
     static const int SPAWN_INTERVAL = 1500; // 1.5秒，降低生成频率
-    static const int SCENE_WIDTH = 1000;
-    static const int SCENE_HEIGHT = 700;
+    static const int SCENE_WIDTH = SUGAR_OIL_SCENE_WIDTH;
+    static const int SCENE_HEIGHT = SUGAR_OIL_SCENE_HEIGHT;
 };
 
 #endif // SUGAR_OIL_GAME_SCENE_NEW_H

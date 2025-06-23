@@ -215,20 +215,21 @@ void UsagiPlayer::updatePosition()
 void UsagiPlayer::constrainToScene(const QRectF& sceneRect)
 {
     QPointF currentPos = pos();
-    QRectF playerRect = boundingRect().translated(currentPos);
-    const int borderWidth = 8; // 与场景边界宽度保持一致
+    QRectF playerRect = boundingRect();
     
-    // 限制玩家在场景边界内（考虑边界宽度）
-    if (playerRect.left() < sceneRect.left() + borderWidth) {
-        currentPos.setX(sceneRect.left() + borderWidth);
-    } else if (playerRect.right() > sceneRect.right() - borderWidth) {
-        currentPos.setX(sceneRect.right() - borderWidth - boundingRect().width());
+    // 允许角色移动到场景边缘，只要角色中心点在场景内即可
+    const qreal margin = playerRect.width() / 2; // 使用角色宽度的一半作为边距
+    
+    if (currentPos.x() < sceneRect.left() - margin) {
+        currentPos.setX(sceneRect.left() - margin);
+    } else if (currentPos.x() > sceneRect.right() - margin) {
+        currentPos.setX(sceneRect.right() - margin);
     }
     
-    if (playerRect.top() < sceneRect.top() + borderWidth) {
-        currentPos.setY(sceneRect.top() + borderWidth);
-    } else if (playerRect.bottom() > sceneRect.bottom() - borderWidth) {
-        currentPos.setY(sceneRect.bottom() - borderWidth - boundingRect().height());
+    if (currentPos.y() < sceneRect.top() - margin) {
+        currentPos.setY(sceneRect.top() - margin);
+    } else if (currentPos.y() > sceneRect.bottom() - margin) {
+        currentPos.setY(sceneRect.bottom() - margin);
     }
     
     setPos(currentPos);

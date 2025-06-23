@@ -387,18 +387,20 @@ void SugarOilGameSceneNew::updatePlayerMovement()
     if (movement.x() != 0 || movement.y() != 0) {
         mPlayer->setPos(mPlayer->pos() + movement);
         
-        // 确保玩家不会移出场景边界（考虑边界宽度）
+        // 确保玩家不会移出场景边界
         QPointF newPos = mPlayer->pos();
         QRectF playerRect = mPlayer->boundingRect();
-        const int borderWidth = 8; // 与drawMapBoundaries中的边界宽度保持一致
         
-        if (newPos.x() < borderWidth) newPos.setX(borderWidth);
-        if (newPos.y() < borderWidth) newPos.setY(borderWidth);
-        if (newPos.x() + playerRect.width() > SCENE_WIDTH - borderWidth) {
-            newPos.setX(SCENE_WIDTH - borderWidth - playerRect.width());
+        // 允许角色移动到场景边缘，只要角色中心点在场景内即可
+        const qreal margin = playerRect.width() / 2; // 使用角色宽度的一半作为边距
+        
+        if (newPos.x() < -margin) newPos.setX(-margin);
+        if (newPos.y() < -margin) newPos.setY(-margin);
+        if (newPos.x() > SCENE_WIDTH - margin) {
+            newPos.setX(SCENE_WIDTH - margin);
         }
-        if (newPos.y() + playerRect.height() > SCENE_HEIGHT - borderWidth) {
-            newPos.setY(SCENE_HEIGHT - borderWidth - playerRect.height());
+        if (newPos.y() > SCENE_HEIGHT - margin) {
+            newPos.setY(SCENE_HEIGHT - margin);
         }
         
         mPlayer->setPos(newPos);
@@ -806,7 +808,7 @@ void SugarOilGameSceneNew::drawMapBoundaries()
     QPen boundaryPen(QColor(100, 50, 0), 4); // 棕色边界线，4像素宽度
     QBrush boundaryBrush(QColor(100, 50, 0, 100)); // 半透明棕色填充
     
-    const int borderWidth = 8; // 边界宽度
+    const int borderWidth = 4; // 减少边界宽度，给角色更多移动空间
     
     // 上边界
     QGraphicsRectItem* topBorder = addRect(0, 0, SCENE_WIDTH, borderWidth, boundaryPen, boundaryBrush);
