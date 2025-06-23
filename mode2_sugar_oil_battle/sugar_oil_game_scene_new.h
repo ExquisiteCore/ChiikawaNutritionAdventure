@@ -6,6 +6,7 @@
 #include <QList>
 #include <QKeyEvent>
 #include <QMediaPlayer>
+#include <QAudioOutput>
 #include <QRandomGenerator>
 #include <QGraphicsPixmapItem>
 
@@ -132,6 +133,7 @@ private:
     
     // 音频
     QMediaPlayer* mBackgroundMusicPlayer;
+    QAudioOutput* mBackgroundMusicAudioOutput;
     
     // 游戏配置
     static const int GAME_DURATION = 300; // 5分钟

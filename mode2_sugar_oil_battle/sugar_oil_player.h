@@ -4,6 +4,7 @@
 #include "game_object_base.h"
 #include <QTimer>
 #include <QMediaPlayer>
+#include <QAudioOutput>
 #include <QPropertyAnimation>
 
 class SugarOilPlayer : public GameObjectBase
@@ -94,6 +95,8 @@ private:
     // 音效
     QMediaPlayer* mShootSoundPlayer;
     QMediaPlayer* mHurtSoundPlayer;
+    QAudioOutput* mShootSoundAudioOutput;
+    QAudioOutput* mHurtSoundAudioOutput;
     
     // 动画相关
     QPropertyAnimation* mBlinkAnimation;

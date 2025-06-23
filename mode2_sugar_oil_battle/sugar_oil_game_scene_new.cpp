@@ -81,8 +81,10 @@ void SugarOilGameSceneNew::initializeTimers()
 void SugarOilGameSceneNew::initializeAudio()
 {
     mBackgroundMusicPlayer = new QMediaPlayer(this);
-    mBackgroundMusicPlayer->setMedia(QUrl("qrc:/sounds/background_music.mp3"));
-    mBackgroundMusicPlayer->setVolume(30); // Qt5使用0-100的音量范围
+    mBackgroundMusicAudioOutput = new QAudioOutput(this);
+    mBackgroundMusicPlayer->setAudioOutput(mBackgroundMusicAudioOutput);
+    mBackgroundMusicPlayer->setSource(QUrl("qrc:/sounds/background_music.mp3"));
+    mBackgroundMusicAudioOutput->setVolume(0.3f); // Qt6使用0.0-1.0的音量范围
 }
 
 void SugarOilGameSceneNew::loadBackground()

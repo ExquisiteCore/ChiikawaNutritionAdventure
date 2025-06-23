@@ -4,6 +4,7 @@
 #include "game_object_base.h"
 #include <QTimer>
 #include <QMediaPlayer>
+#include <QAudioOutput>
 #include <QRandomGenerator>
 
 class SugarOilPlayer;
@@ -99,6 +100,8 @@ private:
     // 音效播放器
     QMediaPlayer* mHurtSoundPlayer;
     QMediaPlayer* mDeathSoundPlayer;
+    QAudioOutput* mHurtSoundAudioOutput;
+    QAudioOutput* mDeathSoundAudioOutput;
     
     // AI相关
     int mAICounter;

@@ -7,7 +7,7 @@ SugarOilPlayer::SugarOilPlayer(QObject *parent)
     : GameObjectBase(parent)
     , mHP(100)
     , mMaxHP(100)
-    , mSpeed(3.0)
+    , mSpeed(5.0)
     , mAttackPoint(20)
     , mDefence(5)
     , mLevel(1)
@@ -21,7 +21,8 @@ SugarOilPlayer::SugarOilPlayer(QObject *parent)
     , mAnimationTimer(nullptr)
     , mShootSoundPlayer(nullptr)
     , mHurtSoundPlayer(nullptr)
-
+    , mShootSoundAudioOutput(nullptr)
+    , mHurtSoundAudioOutput(nullptr)
     , mBlinkAnimation(nullptr)
 {
     // 设置初始图像
@@ -41,10 +42,14 @@ SugarOilPlayer::SugarOilPlayer(QObject *parent)
     
     // 初始化音效播放器 (Qt5兼容)
     mShootSoundPlayer = new QMediaPlayer(this);
-    mShootSoundPlayer->setMedia(QUrl("qrc:/sounds/shoot.wav"));
-    
+    mShootSoundAudioOutput = new QAudioOutput(this);
+    mShootSoundPlayer->setAudioOutput(mShootSoundAudioOutput);
+    mShootSoundPlayer->setSource(QUrl("qrc:/sounds/shoot.wav"));
+
     mHurtSoundPlayer = new QMediaPlayer(this);
-    mHurtSoundPlayer->setMedia(QUrl("qrc:/sounds/hurt.wav"));
+    mHurtSoundAudioOutput = new QAudioOutput(this);
+    mHurtSoundPlayer->setAudioOutput(mHurtSoundAudioOutput);
+    mHurtSoundPlayer->setSource(QUrl("qrc:/sounds/hurt.wav"));
     
     // 初始化闪烁动画
     mBlinkAnimation = new QPropertyAnimation(this, "opacity", this);
