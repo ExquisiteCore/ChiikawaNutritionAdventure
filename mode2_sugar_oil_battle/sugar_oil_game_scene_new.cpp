@@ -79,7 +79,11 @@ void SugarOilGameSceneNew::initializePlayer()
     connect(mPlayer, &SugarOilPlayer::playerShoot, this, &SugarOilGameSceneNew::onPlayerShoot);
     connect(mPlayer, &SugarOilPlayer::playerDied, this, &SugarOilGameSceneNew::onPlayerDied);
     connect(mPlayer, &SugarOilPlayer::levelUp, this, &SugarOilGameSceneNew::onPlayerLevelUp);
-    // connect(mPlayer, &SugarOilPlayer::statsChanged, this, &SugarOilGameSceneNew::playerStatsChanged);
+    connect(mPlayer, &SugarOilPlayer::healthChanged, this, [this](int health, int maxHealth) {
+        emit playerStatsChanged(health, maxHealth, mPlayer->getLevel(), mPlayer->getExp());
+    });
+    // 初始发送一次状态
+    emit playerStatsChanged(mPlayer->getHP(), mPlayer->getMaxHP(), mPlayer->getLevel(), mPlayer->getExp());
 }
 
 void SugarOilGameSceneNew::initializeTimers()
@@ -161,6 +165,7 @@ void SugarOilGameSceneNew::startGame()
     }
     
     emit gameStarted();
+    emit gameStateChanged(SUGAR_OIL_RUNNING);
     qDebug() << "Game started!";
 }
 
@@ -190,6 +195,7 @@ void SugarOilGameSceneNew::pauseGame()
     }
     
     emit gamePaused();
+    emit gameStateChanged(SUGAR_OIL_PAUSED);
     qDebug() << "Game paused!";
 }
 
@@ -219,6 +225,7 @@ void SugarOilGameSceneNew::resumeGame()
     }
     
     emit gameResumed();
+    emit gameStateChanged(SUGAR_OIL_RUNNING);
     qDebug() << "Game resumed!";
 }
 
@@ -344,6 +351,7 @@ void SugarOilGameSceneNew::onGameTimerTimeout()
     if (mGameTime >= GAME_DURATION) {
         stopGame();
         emit gameWon(getScore(), getPlayerLevel());
+        emit gameStateChanged(SUGAR_OIL_WON);
     }
 }
 
@@ -392,7 +400,7 @@ void SugarOilGameSceneNew::updatePlayerMovement()
         QRectF playerRect = mPlayer->boundingRect();
         
         // 允许角色移动到场景边缘，只要角色中心点在场景内即可
-        const qreal margin = playerRect.width() / 2; // 使用角色宽度的一半作为边距
+        const qreal margin = playerRect.width() / 4; // 使用角色宽度的四分之一作为边距，增加移动自由度
         
         if (newPos.x() < -margin) newPos.setX(-margin);
         if (newPos.y() < -margin) newPos.setY(-margin);
@@ -782,8 +790,10 @@ void SugarOilGameSceneNew::onEnemyDied(EnemyBase* enemy)
 
 void SugarOilGameSceneNew::onPlayerDied()
 {
+    qDebug() << "Player died!";
     stopGame();
     emit gameOver(getScore(), getPlayerLevel());
+    emit gameStateChanged(SUGAR_OIL_LOST);
 }
 
 void SugarOilGameSceneNew::onPlayerLevelUp(int newLevel)

@@ -91,6 +91,8 @@ private:
     int currentTime;
     int currentLives;
     int currentScore;
+    int finalScore;
+    int finalLevel;
     bool gameActive;
 };
 

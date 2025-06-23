@@ -59,6 +59,7 @@ signals:
     void gameResumed();
     void gameOver(int finalScore, int finalLevel);
     void gameWon(int finalScore, int finalLevel);
+    void gameStateChanged(SugarOilGameState newState);
     void scoreChanged(int score);
     void timeChanged(int timeLeft);
     void playerStatsChanged(int hp, int maxHp, int level, int exp);

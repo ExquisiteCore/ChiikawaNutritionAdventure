@@ -218,7 +218,7 @@ void UsagiPlayer::constrainToScene(const QRectF& sceneRect)
     QRectF playerRect = boundingRect();
     
     // 允许角色移动到场景边缘，只要角色中心点在场景内即可
-    const qreal margin = playerRect.width() / 2; // 使用角色宽度的一半作为边距
+    const qreal margin = playerRect.width() / 4; // 使用角色宽度的四分之一作为边距，增加移动自由度
     
     if (currentPos.x() < sceneRect.left() - margin) {
         currentPos.setX(sceneRect.left() - margin);

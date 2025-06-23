@@ -118,15 +118,16 @@ void SugarOilGameWindow::setupGameArea()
     
     // 连接游戏场景信号
     connect(gameScene, &SugarOilGameSceneNew::gameWon, [this](int finalScore, int finalLevel) {
-        Q_UNUSED(finalScore);
-        Q_UNUSED(finalLevel);
+        this->finalScore = finalScore;
+        this->finalLevel = finalLevel;
         onGameWon();
     });
     connect(gameScene, &SugarOilGameSceneNew::gameOver, [this](int finalScore, int finalLevel) {
-        Q_UNUSED(finalScore);
-        Q_UNUSED(finalLevel);
+        this->finalScore = finalScore;
+        this->finalLevel = finalLevel;
         onGameLost();
     });
+    connect(gameScene, &SugarOilGameSceneNew::gameStateChanged, this, &SugarOilGameWindow::onGameStateChanged);
     connect(gameScene, &SugarOilGameSceneNew::timeChanged, this, &SugarOilGameWindow::onTimeChanged);
     connect(gameScene, &SugarOilGameSceneNew::scoreChanged, this, &SugarOilGameWindow::onScoreChanged);
     connect(gameScene, &SugarOilGameSceneNew::playerStatsChanged, [this](int hp, int maxHp, int level, int exp) {
@@ -252,12 +253,12 @@ void SugarOilGameWindow::startNewGame()
         // 连接暂停按钮
         disconnect(pauseButton, &QPushButton::clicked, nullptr, nullptr);
         connect(pauseButton, &QPushButton::clicked, [this]() {
-            if (gameScene->isGameRunning()) {
-                gameScene->pauseGame();
-                pauseButton->setText("继续");
-            } else {
+            if (gameScene->isGamePaused()) {
                 gameScene->resumeGame();
                 pauseButton->setText("暂停");
+            } else {
+                gameScene->pauseGame();
+                pauseButton->setText("继续");
             }
         });
         
@@ -448,11 +449,7 @@ void SugarOilGameWindow::updateTimeDisplay(int seconds)
 
 void SugarOilGameWindow::updateLivesDisplay(int lives)
 {
-    QString heartsText = "生命: ";
-    for (int i = 0; i < lives; i++) {
-        heartsText += "❤️";
-    }
-    livesLabel->setText(heartsText);
+    livesLabel->setText(QString("生命: %1").arg(lives));
 }
 
 void SugarOilGameWindow::updateScoreDisplay(int score)
