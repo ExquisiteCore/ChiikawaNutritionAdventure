@@ -37,6 +37,16 @@ SugarOilGameWindow::SugarOilGameWindow(QWidget *parent)
     move(x, y);
     
     setupUI();
+    
+    // 初始化菜单音乐
+    mMenuMusicPlayer = new QMediaPlayer(this);
+    mMenuMusicAudioOutput = new QAudioOutput(this);
+    mMenuMusicPlayer->setAudioOutput(mMenuMusicAudioOutput);
+    mMenuMusicPlayer->setSource(QUrl("qrc:/Sounds/Main_sound.wav"));
+    mMenuMusicAudioOutput->setVolume(0.3f);
+    mMenuMusicPlayer->setLoops(QMediaPlayer::Infinite);
+    mMenuMusicPlayer->play();
+    
     qDebug() << "SugarOilGameWindow构造函数完成";
     
     // 设置样式
@@ -246,6 +256,11 @@ void SugarOilGameWindow::startNewGame()
 {
     qDebug() << "startNewGame方法开始";
     
+    // 停止菜单音乐
+    if (mMenuMusicPlayer) {
+        mMenuMusicPlayer->stop();
+    }
+    
     if (gameScene) {
         qDebug() << "重置并启动游戏场景";
         gameScene->resetGame();
@@ -317,12 +332,20 @@ void SugarOilGameWindow::onGameWon()
 {
     gameActive = false;
     showGameResult(true);
+    // 重新播放菜单音乐
+    if (mMenuMusicPlayer) {
+        mMenuMusicPlayer->play();
+    }
 }
 
 void SugarOilGameWindow::onGameLost()
 {
     gameActive = false;
     showGameResult(false);
+    // 重新播放菜单音乐
+    if (mMenuMusicPlayer) {
+        mMenuMusicPlayer->play();
+    }
 }
 
 void SugarOilGameWindow::onGameStateChanged(SugarOilGameState newState)

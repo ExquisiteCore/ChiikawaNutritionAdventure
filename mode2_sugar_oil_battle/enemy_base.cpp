@@ -36,12 +36,12 @@ EnemyBase::EnemyBase(QObject *parent)
     mHurtSoundPlayer = new QMediaPlayer(this);
     mHurtSoundAudioOutput = new QAudioOutput(this);
     mHurtSoundPlayer->setAudioOutput(mHurtSoundAudioOutput);
-    mHurtSoundPlayer->setSource(QUrl("qrc:/sounds/enemy_hurt.wav"));
+    mHurtSoundPlayer->setSource(QUrl("qrc:/Sounds/Cough_sound.wav"));
 
     mDeathSoundPlayer = new QMediaPlayer(this);
     mDeathSoundAudioOutput = new QAudioOutput(this);
     mDeathSoundPlayer->setAudioOutput(mDeathSoundAudioOutput);
-    mDeathSoundPlayer->setSource(QUrl("qrc:/sounds/enemy_death.wav"));
+    mDeathSoundPlayer->setSource(QUrl("qrc:/Sounds/Lose_1.wav"));
 }
 
 EnemyBase::EnemyBase(SugarOilPlayer* player, int hp, int attackPoint, qreal speed, int expValue, EnemyType type, QObject *parent)
@@ -76,12 +76,12 @@ EnemyBase::EnemyBase(SugarOilPlayer* player, int hp, int attackPoint, qreal spee
     mHurtSoundPlayer = new QMediaPlayer(this);
     mHurtSoundAudioOutput = new QAudioOutput(this);
     mHurtSoundPlayer->setAudioOutput(mHurtSoundAudioOutput);
-    mHurtSoundPlayer->setSource(QUrl("qrc:/sounds/enemy_hurt.wav"));
+    mHurtSoundPlayer->setSource(QUrl("qrc:/Sounds/Cough_sound.wav"));
 
     mDeathSoundPlayer = new QMediaPlayer(this);
     mDeathSoundAudioOutput = new QAudioOutput(this);
     mDeathSoundPlayer->setAudioOutput(mDeathSoundAudioOutput);
-    mDeathSoundPlayer->setSource(QUrl("qrc:/sounds/enemy_death.wav"));
+    mDeathSoundPlayer->setSource(QUrl("qrc:/Sounds/Lose_1.wav"));
     
     updatePixmap();
     setScale(0.12);

@@ -114,11 +114,33 @@ void SugarOilGameSceneNew::initializeTimers()
 
 void SugarOilGameSceneNew::initializeAudio()
 {
+    // 开始前背景音乐
     mBackgroundMusicPlayer = new QMediaPlayer(this);
     mBackgroundMusicAudioOutput = new QAudioOutput(this);
     mBackgroundMusicPlayer->setAudioOutput(mBackgroundMusicAudioOutput);
-    mBackgroundMusicPlayer->setSource(QUrl("qrc:/sounds/background_music.mp3"));
-    mBackgroundMusicAudioOutput->setVolume(0.3f); // Qt6使用0.0-1.0的音量范围
+    mBackgroundMusicPlayer->setSource(QUrl("qrc:/Sounds/Main_sound.wav"));
+    mBackgroundMusicAudioOutput->setVolume(0.3f);
+    
+    // 游戏中音乐
+    mGameMusicPlayer = new QMediaPlayer(this);
+    mGameMusicAudioOutput = new QAudioOutput(this);
+    mGameMusicPlayer->setAudioOutput(mGameMusicAudioOutput);
+    mGameMusicPlayer->setSource(QUrl("qrc:/Sounds/Game_sound.wav"));
+    mGameMusicAudioOutput->setVolume(0.4f);
+    
+    // 胜利音效
+    mWinSoundPlayer = new QMediaPlayer(this);
+    mWinSoundAudioOutput = new QAudioOutput(this);
+    mWinSoundPlayer->setAudioOutput(mWinSoundAudioOutput);
+    mWinSoundPlayer->setSource(QUrl("qrc:/Sounds/Win.wav"));
+    mWinSoundAudioOutput->setVolume(0.6f);
+    
+    // 失败音效
+    mLoseSoundPlayer = new QMediaPlayer(this);
+    mLoseSoundAudioOutput = new QAudioOutput(this);
+    mLoseSoundPlayer->setAudioOutput(mLoseSoundAudioOutput);
+    mLoseSoundPlayer->setSource(QUrl("qrc:/Sounds/Lose.wav"));
+    mLoseSoundAudioOutput->setVolume(0.6f);
 }
 
 void SugarOilGameSceneNew::initializeManagers()
@@ -159,9 +181,13 @@ void SugarOilGameSceneNew::startGame()
     mItemSpawnTimer->start(8000); // 每8秒生成一个道具
     mCreatureSpawnTimer->start(15000); // 每15秒生成一个生物
     
-    // 播放背景音乐
+    // 停止背景音乐，播放游戏音乐
     if (mBackgroundMusicPlayer) {
-        mBackgroundMusicPlayer->play();
+        mBackgroundMusicPlayer->stop();
+    }
+    if (mGameMusicPlayer) {
+        mGameMusicPlayer->setLoops(QMediaPlayer::Infinite); // 循环播放
+        mGameMusicPlayer->play();
     }
     
     emit gameStarted();
@@ -184,9 +210,9 @@ void SugarOilGameSceneNew::pauseGame()
     mItemSpawnTimer->stop();
     mCreatureSpawnTimer->stop();
     
-    // 暂停背景音乐
-    if (mBackgroundMusicPlayer) {
-        mBackgroundMusicPlayer->pause();
+    // 暂停游戏音乐
+    if (mGameMusicPlayer) {
+        mGameMusicPlayer->pause();
     }
     
     // 暂停所有敌人的AI
@@ -214,9 +240,9 @@ void SugarOilGameSceneNew::resumeGame()
     mItemSpawnTimer->start();
     mCreatureSpawnTimer->start();
     
-    // 恢复背景音乐
-    if (mBackgroundMusicPlayer) {
-        mBackgroundMusicPlayer->play();
+    // 恢复游戏音乐
+    if (mGameMusicPlayer) {
+        mGameMusicPlayer->play();
     }
     
     // 恢复所有敌人的AI
@@ -245,9 +271,9 @@ void SugarOilGameSceneNew::stopGame()
     if (mItemSpawnTimer) mItemSpawnTimer->stop();
     if (mCreatureSpawnTimer) mCreatureSpawnTimer->stop();
     
-    // 停止背景音乐
-    if (mBackgroundMusicPlayer) {
-        mBackgroundMusicPlayer->stop();
+    // 停止游戏音乐
+    if (mGameMusicPlayer) {
+        mGameMusicPlayer->stop();
     }
     
     // 停止所有敌人的AI
@@ -350,6 +376,10 @@ void SugarOilGameSceneNew::onGameTimerTimeout()
     // 检查游戏是否结束
     if (mGameTime >= GAME_DURATION) {
         stopGame();
+        // 播放胜利音效
+        if (mWinSoundPlayer) {
+            mWinSoundPlayer->play();
+        }
         emit gameWon(getScore(), getPlayerLevel());
         emit gameStateChanged(SUGAR_OIL_WON);
     }
@@ -792,6 +822,10 @@ void SugarOilGameSceneNew::onPlayerDied()
 {
     qDebug() << "Player died!";
     stopGame();
+    // 播放失败音效
+    if (mLoseSoundPlayer) {
+        mLoseSoundPlayer->play();
+    }
     emit gameOver(getScore(), getPlayerLevel());
     emit gameStateChanged(SUGAR_OIL_LOST);
 }

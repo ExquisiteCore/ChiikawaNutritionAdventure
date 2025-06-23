@@ -80,6 +80,10 @@ private:
     
     // 按钮
     QPushButton* backButton;
+    
+    // 音频
+    QMediaPlayer* mMenuMusicPlayer;
+    QAudioOutput* mMenuMusicAudioOutput;
     QPushButton* restartButton;
     QPushButton* instructionsButton;
     QPushButton* pauseButton;

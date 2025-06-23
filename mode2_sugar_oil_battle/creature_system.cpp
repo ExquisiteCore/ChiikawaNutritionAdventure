@@ -32,7 +32,7 @@ GameCreature::GameCreature(CreatureType type, QObject *parent)
     mActivateSoundPlayer = new QMediaPlayer(this);
     mActivateSoundAudioOutput = new QAudioOutput(this);
     mActivateSoundPlayer->setAudioOutput(mActivateSoundAudioOutput);
-    mActivateSoundPlayer->setSource(QUrl("qrc:/sounds/Bean_sound_short.wav"));
+    mActivateSoundPlayer->setSource(QUrl("qrc:/Sounds/Bean_sound_short.wav"));
     mActivateSoundAudioOutput->setVolume(0.6f);
     
     setupEffect();

@@ -22,7 +22,7 @@ GameItem::GameItem(ItemType type, QObject *parent)
     mPickupSoundPlayer = new QMediaPlayer(this);
     mPickupSoundAudioOutput = new QAudioOutput(this);
     mPickupSoundPlayer->setAudioOutput(mPickupSoundAudioOutput);
-    mPickupSoundPlayer->setSource(QUrl("qrc:/sounds/TapButton.wav"));
+    mPickupSoundPlayer->setSource(QUrl("qrc:/Sounds/TapButton.wav"));
     mPickupSoundAudioOutput->setVolume(0.5f);
     
     setupEffect();

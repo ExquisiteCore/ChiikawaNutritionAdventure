@@ -81,12 +81,12 @@ SugarOilPlayer::SugarOilPlayer(QObject *parent)
     mShootSoundPlayer = new QMediaPlayer(this);
     mShootSoundAudioOutput = new QAudioOutput(this);
     mShootSoundPlayer->setAudioOutput(mShootSoundAudioOutput);
-    mShootSoundPlayer->setSource(QUrl("qrc:/sounds/shoot.wav"));
+    mShootSoundPlayer->setSource(QUrl("qrc:/Sounds/TapButton.wav"));
 
     mHurtSoundPlayer = new QMediaPlayer(this);
     mHurtSoundAudioOutput = new QAudioOutput(this);
     mHurtSoundPlayer->setAudioOutput(mHurtSoundAudioOutput);
-    mHurtSoundPlayer->setSource(QUrl("qrc:/sounds/hurt.wav"));
+    mHurtSoundPlayer->setSource(QUrl("qrc:/Sounds/Cough_sound.wav"));
     
     // 初始化闪烁动画
     mBlinkAnimation = new QPropertyAnimation(this, "opacity", this);

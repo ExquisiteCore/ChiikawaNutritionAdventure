@@ -154,6 +154,12 @@ private:
     // 音频
     QMediaPlayer* mBackgroundMusicPlayer;
     QAudioOutput* mBackgroundMusicAudioOutput;
+    QMediaPlayer* mGameMusicPlayer;
+    QAudioOutput* mGameMusicAudioOutput;
+    QMediaPlayer* mWinSoundPlayer;
+    QAudioOutput* mWinSoundAudioOutput;
+    QMediaPlayer* mLoseSoundPlayer;
+    QAudioOutput* mLoseSoundAudioOutput;
     
     // 系统管理器
     ItemManager* mItemManager;
