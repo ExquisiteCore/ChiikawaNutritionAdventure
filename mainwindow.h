@@ -11,6 +11,7 @@
 #include <QPixmap>
 #include "loginwindow.h"
 #include "mode1_carbohydrate_battle/carbohydrate_game_window.h"
+#include "mode2_sugar_oil_battle/sugar_oil_game_window.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -34,6 +35,8 @@ private slots:
     void onLogoutClicked();
     void onCarbohydrateBattleClicked();
     void onCarbohydrateGameClosed();
+    void onSugarOilBattleClicked();
+    void onSugarOilGameClosed();
 
 private:
     void setupGameUI();
@@ -53,6 +56,7 @@ private:
     
     // 游戏窗口
     CarbohydrateGameWindow *carbohydrateGameWindow;
+    SugarOilGameWindow *sugarOilGameWindow;
 };
 
 #endif // MAINWINDOW_H

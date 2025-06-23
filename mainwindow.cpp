@@ -10,6 +10,7 @@ MainWindow::MainWindow(QWidget *parent)
     , loginWindow(nullptr)
     , gameWidget(nullptr)
     , carbohydrateGameWindow(nullptr)
+    , sugarOilGameWindow(nullptr)
 {
     ui->setupUi(this);
     
@@ -221,9 +222,9 @@ void MainWindow::onLevelsClicked()
         "}"
     );
     
-    // 模式二按钮（暂未实现）
-    QPushButton *mode2Button = new QPushButton("🍗 模式二：糖油混合物歼灭战（开发中）");
-    mode2Button->setEnabled(false);
+    // 模式二按钮
+    QPushButton *mode2Button = new QPushButton("🍗 模式二：糖油混合物歼灭战");
+    mode2Button->setEnabled(true);
     mode2Button->setStyleSheet(
         "QPushButton {"
         "    background-color: #ddd;"
@@ -264,6 +265,10 @@ void MainWindow::onLevelsClicked()
     connect(mode1Button, &QPushButton::clicked, [this, levelDialog]() {
         levelDialog->accept();
         onCarbohydrateBattleClicked();
+    });
+    connect(mode2Button, &QPushButton::clicked, [this, levelDialog]() {
+        levelDialog->accept();
+        onSugarOilBattleClicked();
     });
     connect(closeButton, &QPushButton::clicked, levelDialog, &QDialog::accept);
     
@@ -318,6 +323,27 @@ void MainWindow::onCarbohydrateGameClosed()
     // 游戏窗口关闭时，重新显示主窗口
     if (carbohydrateGameWindow) {
         carbohydrateGameWindow->hide();
+    }
+    this->show();
+}
+
+void MainWindow::onSugarOilBattleClicked()
+{
+    if (!sugarOilGameWindow) {
+        sugarOilGameWindow = new SugarOilGameWindow(this);
+        connect(sugarOilGameWindow, &SugarOilGameWindow::gameWindowClosed,
+                this, &MainWindow::onSugarOilGameClosed);
+    }
+    
+    this->hide();
+    sugarOilGameWindow->show();
+    sugarOilGameWindow->startNewGame();
+}
+
+void MainWindow::onSugarOilGameClosed()
+{
+    if (sugarOilGameWindow) {
+        sugarOilGameWindow->hide();
     }
     this->show();
 }

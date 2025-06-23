@@ -1,0 +1,125 @@
+#ifndef SUGAR_OIL_CONFIG_H
+#define SUGAR_OIL_CONFIG_H
+
+// 游戏窗口配置
+#define SUGAR_OIL_WINDOW_WIDTH 1200
+#define SUGAR_OIL_WINDOW_HEIGHT 900
+#define SUGAR_OIL_SCENE_WIDTH 1000
+#define SUGAR_OIL_SCENE_HEIGHT 800
+
+// 游戏时间配置
+#define GAME_DURATION_SECONDS 300  // 5分钟 = 300秒
+#define TIMER_UPDATE_INTERVAL 16   // 约60FPS
+
+// 角色配置
+#define USAGI_SIZE 32
+#define USAGI_SPEED 5
+#define USAGI_INITIAL_LIVES 3
+
+// 敌人配置
+#define SUGAR_OIL_ENEMY_SIZE 28
+#define SUGAR_OIL_ENEMY_SPEED 3
+#define SUGAR_OIL_ENEMY_COUNT 5
+#define SUGAR_OIL_ENEMY_SPAWN_INTERVAL 3000  // 3秒生成一个敌人
+
+// 道具配置
+#define ITEM_SIZE 24
+#define ITEM_COUNT 24
+#define ITEM_SPAWN_INTERVAL 2000  // 2秒生成一个道具
+
+// 生物配置
+#define CREATURE_SIZE 30
+#define CREATURE_COUNT 5
+#define CREATURE_SPAWN_INTERVAL 5000  // 5秒生成一个生物
+
+// 属性加成配置
+#define BUFF_DURATION 10000  // 10秒
+#define SPEED_BUFF_MULTIPLIER 1.5
+#define DAMAGE_BUFF_MULTIPLIER 2.0
+#define SHIELD_BUFF_DURATION 5000  // 5秒无敌
+
+// 碰撞检测
+#define COLLISION_DISTANCE 20
+
+// 游戏对象类型
+enum SugarOilGameObjectType {
+    TYPE_USAGI = 2001,
+    TYPE_SUGAR_OIL_ENEMY = 2002,
+    TYPE_GAME_ITEM = 2003,
+    TYPE_CREATURE = 2004,
+    TYPE_BUFF = 2005
+};
+
+// 游戏状态
+enum SugarOilGameState {
+    SUGAR_OIL_MENU = 0,
+    SUGAR_OIL_RUNNING = 1,
+    SUGAR_OIL_PAUSED = 2,
+    SUGAR_OIL_WON = 3,
+    SUGAR_OIL_LOST = 4
+};
+
+// 移动方向
+enum SugarOilDirection {
+    SUGAR_OIL_DIR_NONE = -1,
+    SUGAR_OIL_DIR_LEFT = 0,
+    SUGAR_OIL_DIR_UP = 1,
+    SUGAR_OIL_DIR_RIGHT = 2,
+    SUGAR_OIL_DIR_DOWN = 3
+};
+
+// 方向向量
+const int SUGAR_OIL_DIR_OFFSET[4][2] = {
+    {-1, 0},  // LEFT
+    {0, -1},  // UP
+    {1, 0},   // RIGHT
+    {0, 1}    // DOWN
+};
+
+// 道具类型
+enum ItemType {
+    ITEM_SPEED_BOOST = 0,
+    ITEM_DAMAGE_BOOST = 1,
+    ITEM_SHIELD = 2,
+    ITEM_HEALTH = 3,
+    ITEM_SCORE_BONUS = 4,
+    ITEM_TIME_SLOW = 5,
+    ITEM_INVINCIBLE = 6,
+    ITEM_DOUBLE_SCORE = 7,
+    ITEM_EXTRA_LIFE = 8,
+    ITEM_FREEZE_ENEMIES = 9,
+    ITEM_MAGNET = 10,
+    ITEM_BOMB = 11,
+    ITEM_RAPID_FIRE = 12,
+    ITEM_ENERGY_DRINK = 13,
+    ITEM_PROTEIN_BAR = 14,
+    ITEM_VITAMIN = 15,
+    ITEM_MINERAL = 16,
+    ITEM_FIBER = 17,
+    ITEM_ANTIOXIDANT = 18,
+    ITEM_OMEGA3 = 19,
+    ITEM_CALCIUM = 20,
+    ITEM_IRON = 21,
+    ITEM_ZINC = 22,
+    ITEM_MULTIVITAMIN = 23
+};
+
+// 生物类型
+enum CreatureType {
+    CREATURE_HELPER = 0,
+    CREATURE_GUARDIAN = 1,
+    CREATURE_HEALER = 2,
+    CREATURE_SPEEDSTER = 3,
+    CREATURE_WARRIOR = 4
+};
+
+// 敌人类型
+enum SugarOilEnemyType {
+    ENEMY_FRIED_CHICKEN = 0,
+    ENEMY_BARBECUE = 1,
+    ENEMY_MILK_TEA = 2,
+    ENEMY_SNAIL_NOODLES = 3,
+    ENEMY_CAKE = 4
+};
+
+#endif // SUGAR_OIL_CONFIG_H
