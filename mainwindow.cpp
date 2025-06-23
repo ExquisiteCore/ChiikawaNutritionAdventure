@@ -338,27 +338,38 @@ void MainWindow::onSugarOilBattleClicked()
                 this, &MainWindow::onSugarOilGameClosed);
     }
     
+    // 检查窗口是否已经可见，避免重复操作
+    if (sugarOilGameWindow->isVisible()) {
+        qDebug() << "游戏窗口已可见，激活窗口";
+        sugarOilGameWindow->raise();
+        sugarOilGameWindow->activateWindow();
+        return;
+    }
+    
     qDebug() << "隐藏主窗口";
     this->hide();
     
     qDebug() << "显示游戏窗口";
     sugarOilGameWindow->show();
-    sugarOilGameWindow->raise();
-    sugarOilGameWindow->activateWindow();
     
-    // 强制刷新和重绘
-    sugarOilGameWindow->repaint();
-    sugarOilGameWindow->update();
-    QApplication::processEvents();
-    
-    qDebug() << "游戏窗口显示状态:" << sugarOilGameWindow->isVisible();
-    qDebug() << "游戏窗口大小:" << sugarOilGameWindow->size();
-    qDebug() << "游戏窗口位置:" << sugarOilGameWindow->pos();
-    qDebug() << "游戏窗口是否为活动窗口:" << sugarOilGameWindow->isActiveWindow();
-    qDebug() << "游戏窗口窗口标志:" << sugarOilGameWindow->windowFlags();
-    
-    qDebug() << "启动新游戏";
-    sugarOilGameWindow->startNewGame();
+    // 确保窗口完全显示后再进行后续操作
+    if (sugarOilGameWindow->isVisible()) {
+        sugarOilGameWindow->raise();
+        sugarOilGameWindow->activateWindow();
+        
+        // 只在必要时进行单次刷新
+        QApplication::processEvents();
+        
+        qDebug() << "游戏窗口显示状态:" << sugarOilGameWindow->isVisible();
+        qDebug() << "游戏窗口是否为活动窗口:" << sugarOilGameWindow->isActiveWindow();
+        
+        qDebug() << "启动新游戏";
+        sugarOilGameWindow->startNewGame();
+    } else {
+        qDebug() << "错误：游戏窗口显示失败";
+        this->show(); // 恢复主窗口显示
+        return;
+    }
     
     qDebug() << "模式2启动完成";
 }
@@ -369,6 +380,8 @@ void MainWindow::onSugarOilGameClosed()
         sugarOilGameWindow->hide();
     }
     this->show();
+    this->raise();
+    this->activateWindow();
 }
 
 void MainWindow::applyGameStyles()

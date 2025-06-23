@@ -11,7 +11,8 @@
 #include <QProgressBar>
 #include <QTimer>
 #include <QCloseEvent>
-#include "sugar_oil_game_scene.h"
+#include <QGraphicsView>
+#include "sugar_oil_game_scene_new.h"
 #include "sugar_oil_config.h"
 
 class SugarOilGameWindow : public QWidget
@@ -64,7 +65,7 @@ private:
     
     // 游戏区域
     QGraphicsView* gameView;
-    SugarOilGameScene* gameScene;
+    SugarOilGameSceneNew* gameScene;
     
     // 控制面板
     QWidget* controlPanel;

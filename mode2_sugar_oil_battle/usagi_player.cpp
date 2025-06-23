@@ -70,15 +70,15 @@ UsagiPlayer::~UsagiPlayer()
 
 void UsagiPlayer::loadPlayerImages()
 {
-    // 加载不同状态的玩家图片
-    playerImages["idle"] = QPixmap(":/img/usagi_idle.png");
-    playerImages["move_up"] = QPixmap(":/img/usagi_up.png");
-    playerImages["move_down"] = QPixmap(":/img/usagi_down.png");
-    playerImages["move_left"] = QPixmap(":/img/usagi_left.png");
-    playerImages["move_right"] = QPixmap(":/img/usagi_right.png");
-    playerImages["damaged"] = QPixmap(":/img/usagi_damaged.png");
-    playerImages["shield"] = QPixmap(":/img/usagi_shield.png");
-    playerImages["invincible"] = QPixmap(":/img/usagi_invincible.png");
+    // 加载不同状态的玩家图片 - 修正资源路径
+    playerImages["idle"] = QPixmap(":/img/roles/usagi1.png");
+    playerImages["move_up"] = QPixmap(":/img/roles/usagi2.png");
+    playerImages["move_down"] = QPixmap(":/img/roles/usagi3.png");
+    playerImages["move_left"] = QPixmap(":/img/roles/usagi1-mir.png");
+    playerImages["move_right"] = QPixmap(":/img/roles/usagi1.png");
+    playerImages["damaged"] = QPixmap(":/img/roles/usagi2.png");
+    playerImages["shield"] = QPixmap(":/img/roles/usagi3.png");
+    playerImages["invincible"] = QPixmap(":/img/roles/usagi1-invincible.png");
     
     // 如果图片加载失败，创建默认图片
     for (auto it = playerImages.begin(); it != playerImages.end(); ++it) {

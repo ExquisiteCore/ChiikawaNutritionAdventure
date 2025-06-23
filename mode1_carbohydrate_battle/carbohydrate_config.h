@@ -24,7 +24,7 @@
 #define FIBER_SWORD_DAMAGE 25
 #define BOSS_HEALTH 100
 #define MOVEMENT_SPEED 4
-#define COLLISION_DISTANCE 16
+#define CARBOHYDRATE_COLLISION_DISTANCE 16
 
 // 游戏对象类型
 enum GameObjectType {

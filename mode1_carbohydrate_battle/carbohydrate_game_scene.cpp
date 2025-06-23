@@ -449,7 +449,7 @@ void CarbohydrateGameScene::checkCollisions()
     QPointF bossPos = boss->pos();
     qreal distance = QLineF(playerPos, bossPos).length();
     
-    if (distance < COLLISION_DISTANCE) {
+    if (distance < CARBOHYDRATE_COLLISION_DISTANCE) {
         onPlayerCaught();
     }
 }

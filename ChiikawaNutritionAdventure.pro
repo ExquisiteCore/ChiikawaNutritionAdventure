@@ -21,10 +21,15 @@ SOURCES += \
     mode1_carbohydrate_battle/fiber_sword.cpp \
     mode2_sugar_oil_battle/sugar_oil_game_window.cpp \
     mode2_sugar_oil_battle/sugar_oil_game_scene.cpp \
+    mode2_sugar_oil_battle/sugar_oil_game_scene_new.cpp \
     mode2_sugar_oil_battle/usagi_player.cpp \
     mode2_sugar_oil_battle/sugar_oil_enemy.cpp \
     mode2_sugar_oil_battle/game_item.cpp \
-    mode2_sugar_oil_battle/creature.cpp
+    mode2_sugar_oil_battle/creature.cpp \
+    mode2_sugar_oil_battle/game_object_base.cpp \
+    mode2_sugar_oil_battle/sugar_oil_player.cpp \
+    mode2_sugar_oil_battle/enemy_base.cpp \
+    mode2_sugar_oil_battle/bullet_base.cpp
 
 HEADERS += \
     mainwindow.h \
@@ -39,10 +44,15 @@ HEADERS += \
     mode2_sugar_oil_battle/sugar_oil_config.h \
     mode2_sugar_oil_battle/sugar_oil_game_window.h \
     mode2_sugar_oil_battle/sugar_oil_game_scene.h \
+    mode2_sugar_oil_battle/sugar_oil_game_scene_new.h \
     mode2_sugar_oil_battle/usagi_player.h \
     mode2_sugar_oil_battle/sugar_oil_enemy.h \
     mode2_sugar_oil_battle/game_item.h \
-    mode2_sugar_oil_battle/creature.h
+    mode2_sugar_oil_battle/creature.h \
+    mode2_sugar_oil_battle/game_object_base.h \
+    mode2_sugar_oil_battle/sugar_oil_player.h \
+    mode2_sugar_oil_battle/enemy_base.h \
+    mode2_sugar_oil_battle/bullet_base.h
 
 FORMS += \
     mainwindow.ui

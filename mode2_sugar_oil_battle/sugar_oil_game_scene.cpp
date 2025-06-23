@@ -45,22 +45,59 @@ SugarOilGameScene::SugarOilGameScene(QObject *parent)
 
 SugarOilGameScene::~SugarOilGameScene()
 {
-    // 清理定时器
-    if (gameTimer) gameTimer->stop();
-    if (countdownTimer) countdownTimer->stop();
-    if (enemySpawnTimer) enemySpawnTimer->stop();
-    if (itemSpawnTimer) itemSpawnTimer->stop();
-    if (creatureSpawnTimer) creatureSpawnTimer->stop();
+    // 停止并清理所有定时器
+    if (gameTimer) {
+        gameTimer->stop();
+        gameTimer->deleteLater();
+    }
+    if (countdownTimer) {
+        countdownTimer->stop();
+        countdownTimer->deleteLater();
+    }
+    if (enemySpawnTimer) {
+        enemySpawnTimer->stop();
+        enemySpawnTimer->deleteLater();
+    }
+    if (itemSpawnTimer) {
+        itemSpawnTimer->stop();
+        itemSpawnTimer->deleteLater();
+    }
+    if (creatureSpawnTimer) {
+        creatureSpawnTimer->stop();
+        creatureSpawnTimer->deleteLater();
+    }
     
     // 清理音频
     if (backgroundMusicPlayer) {
         backgroundMusicPlayer->stop();
     }
     
+    // 清理玩家对象
+    if (player) {
+        disconnect(player, nullptr, this, nullptr);
+        removeItem(player);
+        player->deleteLater();
+        player = nullptr;
+    }
+    
     // 清理游戏对象
-    qDeleteAll(enemies);
-    qDeleteAll(items);
-    qDeleteAll(creatures);
+    for (auto enemy : enemies) {
+        removeItem(enemy);
+        enemy->deleteLater();
+    }
+    enemies.clear();
+    
+    for (auto item : items) {
+        removeItem(item);
+        item->deleteLater();
+    }
+    items.clear();
+    
+    for (auto creature : creatures) {
+        removeItem(creature);
+        creature->deleteLater();
+    }
+    creatures.clear();
 }
 
 void SugarOilGameScene::initializeGame()
@@ -128,22 +165,20 @@ void SugarOilGameScene::startGame()
     qDebug() << "重置游戏";
     resetGame();
     
-    // 创建玩家
-    if (!player) {
-        qDebug() << "创建新的UsagiPlayer";
-        player = new UsagiPlayer(this);
-        addItem(player);
-        player->setPosition(QPointF(SUGAR_OIL_SCENE_WIDTH / 2, SUGAR_OIL_SCENE_HEIGHT / 2));
-        
-        // 连接玩家信号
-        connect(player, &UsagiPlayer::livesChanged, this, &SugarOilGameScene::livesChanged);
-        connect(player, &UsagiPlayer::scoreChanged, this, &SugarOilGameScene::scoreChanged);
-        connect(player, &UsagiPlayer::playerDamaged, this, &SugarOilGameScene::onPlayerDamaged);
-        connect(player, &UsagiPlayer::playerHealed, this, &SugarOilGameScene::onPlayerHealed);
-        connect(player, &UsagiPlayer::playerDied, this, [this]() {
-            endGame(false);
-        });
-    }
+    // 创建玩家 - 确保只创建一次
+    qDebug() << "创建新的UsagiPlayer";
+    player = new UsagiPlayer(this);
+    addItem(player);
+    player->setPosition(QPointF(SUGAR_OIL_SCENE_WIDTH / 2, SUGAR_OIL_SCENE_HEIGHT / 2));
+    
+    // 连接玩家信号
+    connect(player, &UsagiPlayer::livesChanged, this, &SugarOilGameScene::livesChanged);
+    connect(player, &UsagiPlayer::scoreChanged, this, &SugarOilGameScene::scoreChanged);
+    connect(player, &UsagiPlayer::playerDamaged, this, &SugarOilGameScene::onPlayerDamaged);
+    connect(player, &UsagiPlayer::playerHealed, this, &SugarOilGameScene::onPlayerHealed);
+    connect(player, &UsagiPlayer::playerDied, this, [this]() {
+        endGame(false);
+    });
     
     // 生成初始对象
     spawnInitialObjects();
@@ -276,28 +311,30 @@ void SugarOilGameScene::resetGame()
     if (itemSpawnTimer) itemSpawnTimer->stop();
     if (creatureSpawnTimer) creatureSpawnTimer->stop();
     
-    // 清理所有游戏对象
+    // 清理所有游戏对象 - 使用deleteLater()避免崩溃
     if (player) {
+        // 断开信号连接
+        disconnect(player, nullptr, this, nullptr);
         removeItem(player);
-        delete player;
+        player->deleteLater();
         player = nullptr;
     }
     
     for (auto enemy : enemies) {
         removeItem(enemy);
-        delete enemy;
+        enemy->deleteLater();
     }
     enemies.clear();
     
     for (auto item : items) {
         removeItem(item);
-        delete item;
+        item->deleteLater();
     }
     items.clear();
     
     for (auto creature : creatures) {
         removeItem(creature);
-        delete creature;
+        creature->deleteLater();
     }
     creatures.clear();
     
@@ -553,14 +590,18 @@ void SugarOilGameScene::checkCollisions()
     if (!player) return;
     
     QPointF playerCenter = player->getCenter();
+    float playerRadius = USAGI_SIZE / 2.0f;
     
-    // 检查与敌人的碰撞
-    for (auto enemy : enemies) {
+    // 检查与敌人的碰撞 - 改进碰撞检测，考虑对象大小
+    for (int i = enemies.size() - 1; i >= 0; i--) {
+        auto enemy = enemies[i];
         if (enemy->isActive()) {
             QPointF enemyCenter = enemy->getCenter();
+            float enemyRadius = SUGAR_OIL_ENEMY_SIZE / 2.0f;
             float distance = QLineF(playerCenter, enemyCenter).length();
+            float collisionDistance = playerRadius + enemyRadius;
             
-            if (distance < COLLISION_DISTANCE) {
+            if (distance < collisionDistance) {
                 if (!player->isInvincible()) {
                     player->takeDamage(enemy->getDamage());
                     playSound("Cough_sound.wav");
@@ -569,25 +610,31 @@ void SugarOilGameScene::checkCollisions()
         }
     }
     
-    // 检查与道具的碰撞
-    for (auto item : items) {
+    // 检查与道具的碰撞 - 改进碰撞检测，考虑对象大小
+    for (int i = items.size() - 1; i >= 0; i--) {
+        auto item = items[i];
         if (item->isActive()) {
             QPointF itemCenter = item->getCenter();
+            float itemRadius = ITEM_SIZE / 2.0f;
             float distance = QLineF(playerCenter, itemCenter).length();
+            float collisionDistance = playerRadius + itemRadius;
             
-            if (distance < COLLISION_DISTANCE) {
+            if (distance < collisionDistance) {
                 item->collect();
             }
         }
     }
     
-    // 检查与生物的碰撞
-    for (auto creature : creatures) {
+    // 检查与生物的碰撞 - 改进碰撞检测，考虑对象大小
+    for (int i = creatures.size() - 1; i >= 0; i--) {
+        auto creature = creatures[i];
         if (creature->isActive()) {
             QPointF creatureCenter = creature->getCenter();
+            float creatureRadius = CREATURE_SIZE / 2.0f;
             float distance = QLineF(playerCenter, creatureCenter).length();
+            float collisionDistance = playerRadius + creatureRadius;
             
-            if (distance < COLLISION_DISTANCE) {
+            if (distance < collisionDistance) {
                 creature->encounter();
             }
         }
@@ -603,29 +650,29 @@ void SugarOilGameScene::removeOffscreenObjects()
 {
     QRectF sceneArea = sceneRect().adjusted(-100, -100, 100, 100);
     
-    // 清理超出屏幕的敌人
+    // 清理超出屏幕的敌人 - 使用deleteLater()避免崩溃
     for (int i = enemies.size() - 1; i >= 0; i--) {
         if (!sceneArea.contains(enemies[i]->getCenter())) {
             removeItem(enemies[i]);
-            delete enemies[i];
+            enemies[i]->deleteLater();
             enemies.removeAt(i);
         }
     }
     
-    // 清理超出屏幕的道具
+    // 清理超出屏幕的道具 - 使用deleteLater()避免崩溃
     for (int i = items.size() - 1; i >= 0; i--) {
         if (!sceneArea.contains(items[i]->getCenter())) {
             removeItem(items[i]);
-            delete items[i];
+            items[i]->deleteLater();
             items.removeAt(i);
         }
     }
     
-    // 清理超出屏幕的生物
+    // 清理超出屏幕的生物 - 使用deleteLater()避免崩溃
     for (int i = creatures.size() - 1; i >= 0; i--) {
         if (!sceneArea.contains(creatures[i]->getCenter())) {
             removeItem(creatures[i]);
-            delete creatures[i];
+            creatures[i]->deleteLater();
             creatures.removeAt(i);
         }
     }

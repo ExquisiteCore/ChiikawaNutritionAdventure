@@ -103,7 +103,7 @@ void SugarOilGameWindow::setupGameArea()
     gameAreaLayout->setSpacing(10);
     
     // 创建游戏场景和视图
-    gameScene = new SugarOilGameScene(this);
+    gameScene = new SugarOilGameSceneNew(this);
     gameView = new QGraphicsView(gameScene);
     gameView->setFixedSize(SUGAR_OIL_SCENE_WIDTH + 20, SUGAR_OIL_SCENE_HEIGHT + 20);
     gameView->setRenderHint(QPainter::Antialiasing);
@@ -112,14 +112,24 @@ void SugarOilGameWindow::setupGameArea()
     gameView->setFrameStyle(QFrame::Box);
     
     // 连接游戏场景信号
-    connect(gameScene, &SugarOilGameScene::gameWon, this, &SugarOilGameWindow::onGameWon);
-    connect(gameScene, &SugarOilGameScene::gameLost, this, &SugarOilGameWindow::onGameLost);
-    connect(gameScene, &SugarOilGameScene::gameStateChanged, this, &SugarOilGameWindow::onGameStateChanged);
-    connect(gameScene, &SugarOilGameScene::timeChanged, this, &SugarOilGameWindow::onTimeChanged);
-    connect(gameScene, &SugarOilGameScene::livesChanged, this, &SugarOilGameWindow::onLivesChanged);
-    connect(gameScene, &SugarOilGameScene::scoreChanged, this, &SugarOilGameWindow::onScoreChanged);
-    connect(gameScene, &SugarOilGameScene::itemCollected, this, &SugarOilGameWindow::onItemCollected);
-    connect(gameScene, &SugarOilGameScene::creatureEncountered, this, &SugarOilGameWindow::onCreatureEncountered);
+    connect(gameScene, &SugarOilGameSceneNew::gameWon, [this](int finalScore, int finalLevel) {
+        Q_UNUSED(finalScore);
+        Q_UNUSED(finalLevel);
+        onGameWon();
+    });
+    connect(gameScene, &SugarOilGameSceneNew::gameOver, [this](int finalScore, int finalLevel) {
+        Q_UNUSED(finalScore);
+        Q_UNUSED(finalLevel);
+        onGameLost();
+    });
+    connect(gameScene, &SugarOilGameSceneNew::timeChanged, this, &SugarOilGameWindow::onTimeChanged);
+    connect(gameScene, &SugarOilGameSceneNew::scoreChanged, this, &SugarOilGameWindow::onScoreChanged);
+    connect(gameScene, &SugarOilGameSceneNew::playerStatsChanged, [this](int hp, int maxHp, int level, int exp) {
+        Q_UNUSED(maxHp);
+        Q_UNUSED(level);
+        Q_UNUSED(exp);
+        onLivesChanged(hp);
+    });
     
     gameAreaLayout->addWidget(gameView);
     mainLayout->addLayout(gameAreaLayout);
@@ -254,7 +264,7 @@ void SugarOilGameWindow::showGameInstructions()
 void SugarOilGameWindow::keyPressEvent(QKeyEvent *event)
 {
     if (gameScene && gameActive) {
-        gameScene->handleKeyPress(event);
+        gameScene->handleKeyPress(event->key());
     }
     QWidget::keyPressEvent(event);
 }
@@ -262,7 +272,7 @@ void SugarOilGameWindow::keyPressEvent(QKeyEvent *event)
 void SugarOilGameWindow::keyReleaseEvent(QKeyEvent *event)
 {
     if (gameScene && gameActive) {
-        gameScene->handleKeyRelease(event);
+        gameScene->handleKeyRelease(event->key());
     }
     QWidget::keyReleaseEvent(event);
 }

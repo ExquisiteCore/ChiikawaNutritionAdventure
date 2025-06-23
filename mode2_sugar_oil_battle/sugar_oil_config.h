@@ -39,7 +39,7 @@
 #define SHIELD_BUFF_DURATION 5000  // 5秒无敌
 
 // 碰撞检测
-#define COLLISION_DISTANCE 20
+#define SUGAR_OIL_COLLISION_DISTANCE 20
 
 // 游戏对象类型
 enum SugarOilGameObjectType {
