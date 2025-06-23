@@ -20,7 +20,6 @@ SOURCES += \
     mode1_carbohydrate_battle/fake_vegetable_boss.cpp \
     mode1_carbohydrate_battle/fiber_sword.cpp \
     mode2_sugar_oil_battle/sugar_oil_game_window.cpp \
-    mode2_sugar_oil_battle/sugar_oil_game_scene.cpp \
     mode2_sugar_oil_battle/sugar_oil_game_scene_new.cpp \
     mode2_sugar_oil_battle/usagi_player.cpp \
     mode2_sugar_oil_battle/sugar_oil_enemy.cpp \
@@ -43,7 +42,6 @@ HEADERS += \
     mode1_carbohydrate_battle/fiber_sword.h \
     mode2_sugar_oil_battle/sugar_oil_config.h \
     mode2_sugar_oil_battle/sugar_oil_game_window.h \
-    mode2_sugar_oil_battle/sugar_oil_game_scene.h \
     mode2_sugar_oil_battle/sugar_oil_game_scene_new.h \
     mode2_sugar_oil_battle/usagi_player.h \
     mode2_sugar_oil_battle/sugar_oil_enemy.h \
