@@ -149,8 +149,8 @@ private:
     static constexpr int ANIMATION_FRAMES = 3;
     static constexpr int DEFAULT_LIFETIME = 20000; // 20秒
     static constexpr float DEFAULT_SPEED = 2.0f;
-    static constexpr int MOVEMENT_UPDATE_INTERVAL = 16; // ~60 FPS
-    static constexpr int ANIMATION_UPDATE_INTERVAL = 300; // ~3.3 FPS
+    static constexpr int MOVEMENT_UPDATE_INTERVAL = 25; // ~40 FPS，与其他组件保持一致
+    static constexpr int ANIMATION_UPDATE_INTERVAL = 350; // ~2.9 FPS，稍微降低动画频率
 };
 
 #endif // CREATURE_H

@@ -75,7 +75,7 @@ private:
     
     QTimer* mMoveTimer;
     
-    static const int MOVE_INTERVAL = 16; // ~60 FPS
+    static const int MOVE_INTERVAL = 25; // ~40 FPS，降低子弹更新频率
 };
 
 #endif // BULLET_BASE_H

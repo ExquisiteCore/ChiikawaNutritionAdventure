@@ -161,7 +161,7 @@ void UsagiPlayer::startMovement()
 {
     if (!isMoving) {
         isMoving = true;
-        movementTimer->start(16); // 约60FPS
+        movementTimer->start(25); // 约40FPS，减少卡顿
         startWalkAnimation();
     }
 }
@@ -216,18 +216,19 @@ void UsagiPlayer::constrainToScene(const QRectF& sceneRect)
 {
     QPointF currentPos = pos();
     QRectF playerRect = boundingRect().translated(currentPos);
+    const int borderWidth = 8; // 与场景边界宽度保持一致
     
-    // 限制玩家在场景边界内
-    if (playerRect.left() < sceneRect.left()) {
-        currentPos.setX(sceneRect.left());
-    } else if (playerRect.right() > sceneRect.right()) {
-        currentPos.setX(sceneRect.right() - boundingRect().width());
+    // 限制玩家在场景边界内（考虑边界宽度）
+    if (playerRect.left() < sceneRect.left() + borderWidth) {
+        currentPos.setX(sceneRect.left() + borderWidth);
+    } else if (playerRect.right() > sceneRect.right() - borderWidth) {
+        currentPos.setX(sceneRect.right() - borderWidth - boundingRect().width());
     }
     
-    if (playerRect.top() < sceneRect.top()) {
-        currentPos.setY(sceneRect.top());
-    } else if (playerRect.bottom() > sceneRect.bottom()) {
-        currentPos.setY(sceneRect.bottom() - boundingRect().height());
+    if (playerRect.top() < sceneRect.top() + borderWidth) {
+        currentPos.setY(sceneRect.top() + borderWidth);
+    } else if (playerRect.bottom() > sceneRect.bottom() - borderWidth) {
+        currentPos.setY(sceneRect.bottom() - borderWidth - boundingRect().height());
     }
     
     setPos(currentPos);

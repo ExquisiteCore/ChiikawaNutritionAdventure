@@ -53,7 +53,20 @@ SugarOilGameSceneNew::~SugarOilGameSceneNew()
 void SugarOilGameSceneNew::initializeScene()
 {
     setSceneRect(0, 0, SCENE_WIDTH, SCENE_HEIGHT);
-    setBackgroundBrush(QBrush(QColor(144, 238, 144))); // 浅绿色背景
+    // 使用与模式1相同的背景图片
+    QPixmap backgroundPixmap(":/img/GameBackground.png");
+    if (backgroundPixmap.isNull()) {
+        // 如果背景图片加载失败，使用默认背景
+        backgroundPixmap = QPixmap(SCENE_WIDTH, SCENE_HEIGHT);
+        backgroundPixmap.fill(QColor(20, 20, 40));
+    } else {
+        // 缩放背景图片以适应场景大小
+        backgroundPixmap = backgroundPixmap.scaled(SCENE_WIDTH, SCENE_HEIGHT, Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
+    }
+    setBackgroundBrush(QBrush(backgroundPixmap));
+    
+    // 添加地图边界
+    drawMapBoundaries();
 }
 
 void SugarOilGameSceneNew::initializePlayer()
@@ -374,17 +387,18 @@ void SugarOilGameSceneNew::updatePlayerMovement()
     if (movement.x() != 0 || movement.y() != 0) {
         mPlayer->setPos(mPlayer->pos() + movement);
         
-        // 确保玩家不会移出场景边界
+        // 确保玩家不会移出场景边界（考虑边界宽度）
         QPointF newPos = mPlayer->pos();
         QRectF playerRect = mPlayer->boundingRect();
+        const int borderWidth = 8; // 与drawMapBoundaries中的边界宽度保持一致
         
-        if (newPos.x() < 0) newPos.setX(0);
-        if (newPos.y() < 0) newPos.setY(0);
-        if (newPos.x() + playerRect.width() > SCENE_WIDTH) {
-            newPos.setX(SCENE_WIDTH - playerRect.width());
+        if (newPos.x() < borderWidth) newPos.setX(borderWidth);
+        if (newPos.y() < borderWidth) newPos.setY(borderWidth);
+        if (newPos.x() + playerRect.width() > SCENE_WIDTH - borderWidth) {
+            newPos.setX(SCENE_WIDTH - borderWidth - playerRect.width());
         }
-        if (newPos.y() + playerRect.height() > SCENE_HEIGHT) {
-            newPos.setY(SCENE_HEIGHT - playerRect.height());
+        if (newPos.y() + playerRect.height() > SCENE_HEIGHT - borderWidth) {
+            newPos.setY(SCENE_HEIGHT - borderWidth - playerRect.height());
         }
         
         mPlayer->setPos(newPos);
@@ -784,6 +798,31 @@ void SugarOilGameSceneNew::onBulletOutOfBounds(BulletBase* bullet)
     // 从场景中移除并删除
     removeItem(bullet);
     bullet->deleteLater();
+}
+
+void SugarOilGameSceneNew::drawMapBoundaries()
+{
+    // 创建边界线条，参考模式1的墙体样式
+    QPen boundaryPen(QColor(100, 50, 0), 4); // 棕色边界线，4像素宽度
+    QBrush boundaryBrush(QColor(100, 50, 0, 100)); // 半透明棕色填充
+    
+    const int borderWidth = 8; // 边界宽度
+    
+    // 上边界
+    QGraphicsRectItem* topBorder = addRect(0, 0, SCENE_WIDTH, borderWidth, boundaryPen, boundaryBrush);
+    topBorder->setZValue(10);
+    
+    // 下边界
+    QGraphicsRectItem* bottomBorder = addRect(0, SCENE_HEIGHT - borderWidth, SCENE_WIDTH, borderWidth, boundaryPen, boundaryBrush);
+    bottomBorder->setZValue(10);
+    
+    // 左边界
+    QGraphicsRectItem* leftBorder = addRect(0, 0, borderWidth, SCENE_HEIGHT, boundaryPen, boundaryBrush);
+    leftBorder->setZValue(10);
+    
+    // 右边界
+    QGraphicsRectItem* rightBorder = addRect(SCENE_WIDTH - borderWidth, 0, borderWidth, SCENE_HEIGHT, boundaryPen, boundaryBrush);
+    rightBorder->setZValue(10);
 }
 
 void SugarOilGameSceneNew::keyPressEvent(QKeyEvent *event)

@@ -12,13 +12,13 @@
 #define TIMER_UPDATE_INTERVAL 16   // 约60FPS
 
 // 角色配置
-#define USAGI_SIZE 24
-#define USAGI_SPEED 5
+#define USAGI_SIZE 18  // 从24减小到18，参考模式1的28但适当缩小
+#define USAGI_SPEED 4  // 从5减小到4，与模式1保持一致
 #define USAGI_INITIAL_LIVES 3
 
 // 敌人配置
-#define SUGAR_OIL_ENEMY_SIZE 20
-#define SUGAR_OIL_ENEMY_SPEED 3
+#define SUGAR_OIL_ENEMY_SIZE 16  // 从20减小到16
+#define SUGAR_OIL_ENEMY_SPEED 2  // 从3减小到2，降低敌人速度
 #define SUGAR_OIL_ENEMY_COUNT 5
 #define SUGAR_OIL_ENEMY_SPAWN_INTERVAL 3000  // 3秒生成一个敌人
 

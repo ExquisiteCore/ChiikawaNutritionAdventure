@@ -70,7 +70,7 @@ private:
     QAudioOutput* mActivateSoundAudioOutput;
     
     static const int ANIMATION_INTERVAL = 400; // 动画帧间隔
-    static const int MOVE_INTERVAL = 50;       // 移动更新间隔
+    static const int MOVE_INTERVAL = 30;       // 移动更新间隔，优化性能
 };
 
 // 生物管理器

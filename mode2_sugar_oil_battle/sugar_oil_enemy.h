@@ -159,8 +159,8 @@ private:
     
     static const EnemyConfig ENEMY_CONFIGS[5];
     static const int ANIMATION_FRAMES = 4;
-    static const int MOVEMENT_UPDATE_INTERVAL = 16; // ~60 FPS
-    static const int ANIMATION_UPDATE_INTERVAL = 200; // 5 FPS
+    static const int MOVEMENT_UPDATE_INTERVAL = 25; // ~40 FPS，与其他组件保持一致
+    static const int ANIMATION_UPDATE_INTERVAL = 250; // 4 FPS，稍微降低动画频率
 };
 
 #endif // SUGAR_OIL_ENEMY_H
