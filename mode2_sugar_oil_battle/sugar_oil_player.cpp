@@ -39,7 +39,7 @@ SugarOilPlayer::SugarOilPlayer(QObject *parent)
 {
     // 设置初始图像
     setPixmap(QPixmap(":/img/roles/usagi1.png"));
-    setScale(0.25);
+    setScale(0.15);
     setZValue(10); // 确保玩家在最上层
     
     // 初始化定时器

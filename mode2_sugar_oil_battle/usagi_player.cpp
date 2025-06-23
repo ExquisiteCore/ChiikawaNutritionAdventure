@@ -44,6 +44,7 @@ UsagiPlayer::UsagiPlayer(QObject *parent)
     
     // 设置初始图片
     setPixmap(playerImages["idle"]);
+    setScale(0.15);  // 缩小角色尺寸
     
     // 设置变换原点为中心
     setTransformOriginPoint(boundingRect().center());
