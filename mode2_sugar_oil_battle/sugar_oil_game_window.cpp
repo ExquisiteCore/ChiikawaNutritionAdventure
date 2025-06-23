@@ -116,6 +116,10 @@ void SugarOilGameWindow::setupGameArea()
     gameView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     gameView->setFrameStyle(QFrame::Box);
     
+    // 安装事件过滤器以处理鼠标事件
+    gameView->installEventFilter(this);
+    gameView->setMouseTracking(true);
+    
     // 连接游戏场景信号
     connect(gameScene, &SugarOilGameSceneNew::gameWon, [this](int finalScore, int finalLevel) {
         this->finalScore = finalScore;
@@ -483,4 +487,35 @@ void SugarOilGameWindow::updateControlPanel()
     updateTimeDisplay(currentTime);
     updateLivesDisplay(currentLives);
     updateScoreDisplay(currentScore);
+}
+
+bool SugarOilGameWindow::eventFilter(QObject *obj, QEvent *event)
+{
+    if (obj == gameView && gameScene) {
+        if (event->type() == QEvent::MouseButtonPress) {
+            QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
+            if (mouseEvent->button() == Qt::LeftButton) {
+                // 将视图坐标转换为场景坐标
+                QPointF scenePos = gameView->mapToScene(mouseEvent->pos());
+                gameScene->handleMousePress(scenePos);
+                return true;
+            }
+        }
+        else if (event->type() == QEvent::MouseButtonRelease) {
+            QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
+            if (mouseEvent->button() == Qt::LeftButton) {
+                QPointF scenePos = gameView->mapToScene(mouseEvent->pos());
+                gameScene->handleMouseRelease(scenePos);
+                return true;
+            }
+        }
+        else if (event->type() == QEvent::MouseMove) {
+            QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
+            QPointF scenePos = gameView->mapToScene(mouseEvent->pos());
+            gameScene->handleMouseMove(scenePos);
+            return true;
+        }
+    }
+    
+    return QWidget::eventFilter(obj, event);
 }

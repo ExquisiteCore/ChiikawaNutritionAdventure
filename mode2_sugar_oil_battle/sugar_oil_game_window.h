@@ -8,6 +8,7 @@
 #include <QPushButton>
 #include <QMessageBox>
 #include <QKeyEvent>
+#include <QMouseEvent>
 #include <QProgressBar>
 #include <QTimer>
 #include <QCloseEvent>
@@ -31,6 +32,7 @@ protected:
     void keyPressEvent(QKeyEvent *event) override;
     void keyReleaseEvent(QKeyEvent *event) override;
     void closeEvent(QCloseEvent *event) override;
+    bool eventFilter(QObject *obj, QEvent *event) override;
     
 signals:
     void gameWindowClosed();
