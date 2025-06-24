@@ -75,13 +75,24 @@ void AudioManager::setupMusicPlayer()
     musicAudioOutput = new QAudioOutput(this);
     musicPlayer->setAudioOutput(musicAudioOutput);
     
-    // 设置音乐循环播放
+    // 设置音乐循环播放和状态监听
     connect(musicPlayer, &QMediaPlayer::mediaStatusChanged, this, 
             [this](QMediaPlayer::MediaStatus status) {
+                qDebug() << "音乐状态变化:" << status;
                 if (status == QMediaPlayer::EndOfMedia && musicPlaying) {
                     musicPlayer->setPosition(0);
                     musicPlayer->play();
                 }
+            });
+    
+    connect(musicPlayer, &QMediaPlayer::playbackStateChanged, this,
+            [this](QMediaPlayer::PlaybackState state) {
+                qDebug() << "播放状态变化:" << state;
+            });
+    
+    connect(musicPlayer, &QMediaPlayer::errorOccurred, this,
+            [this](QMediaPlayer::Error error, const QString &errorString) {
+                qDebug() << "音乐播放错误:" << error << errorString;
             });
     
     // 设置初始音量
@@ -128,11 +139,15 @@ void AudioManager::playGameMusic(MusicType type)
     
     currentMusicType = type;
     if (musicPaths.contains(type)) {
-        musicPlayer->setSource(QUrl(musicPaths[type]));
+        QString musicPath = musicPaths[type];
+        qDebug() << "准备播放音乐，类型:" << static_cast<int>(type) << "路径:" << musicPath;
+        
+        musicPlayer->setSource(QUrl(musicPath));
         
         // 游戏音乐和背景音乐循环播放，胜利/失败音乐播放一次
         if (type == MusicType::Mode1Game || type == MusicType::Mode2Game) {
             musicPlayer->setLoops(QMediaPlayer::Infinite);
+            qDebug() << "设置游戏音乐循环播放";
         } else {
             musicPlayer->setLoops(1);
         }
@@ -141,7 +156,9 @@ void AudioManager::playGameMusic(MusicType type)
         musicPlaying = true;
         musicPaused = false;
         
-        qDebug() << "开始播放游戏音乐，类型:" << static_cast<int>(type);
+        qDebug() << "开始播放游戏音乐，类型:" << static_cast<int>(type) << "音量:" << musicAudioOutput->volume();
+    } else {
+        qDebug() << "错误：找不到音乐类型" << static_cast<int>(type) << "的路径配置";
     }
 }
 

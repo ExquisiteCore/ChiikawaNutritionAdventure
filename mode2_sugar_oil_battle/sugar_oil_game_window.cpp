@@ -38,8 +38,8 @@ SugarOilGameWindow::SugarOilGameWindow(QWidget *parent)
     
     setupUI();
     
-    // 播放菜单音乐
-    AudioManager::getInstance()->playBackgroundMusic();
+    // 音乐由主窗口统一管理，此处不播放背景音乐
+    // 保持主窗口设置的Mode2Game音乐继续播放
     
     qDebug() << "SugarOilGameWindow构造函数完成";
     
@@ -250,8 +250,8 @@ void SugarOilGameWindow::startNewGame()
 {
     qDebug() << "startNewGame方法开始";
     
-    // 停止菜单音乐
-    AudioManager::getInstance()->stopCurrentMusic();
+    // 音乐由主窗口统一管理，此处不停止音乐
+    // 保持主窗口设置的Mode2Game音乐继续播放
     
     if (gameScene) {
         qDebug() << "重置并启动游戏场景";
@@ -324,16 +324,16 @@ void SugarOilGameWindow::onGameWon()
 {
     gameActive = false;
     showGameResult(true);
-    // 重新播放菜单音乐
-    AudioManager::getInstance()->playBackgroundMusic();
+    // 播放胜利音乐
+    AudioManager::getInstance()->playGameMusic(AudioManager::MusicType::Victory);
 }
 
 void SugarOilGameWindow::onGameLost()
 {
     gameActive = false;
     showGameResult(false);
-    // 重新播放菜单音乐
-    AudioManager::getInstance()->playBackgroundMusic();
+    // 播放失败音乐
+    AudioManager::getInstance()->playGameMusic(AudioManager::MusicType::Defeat);
 }
 
 void SugarOilGameWindow::onGameStateChanged(SugarOilGameState newState)
