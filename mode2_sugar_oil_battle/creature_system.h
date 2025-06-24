@@ -48,6 +48,10 @@ public:
     // 检查是否靠近玩家
     bool isNearPlayer(const QPointF& playerPos, qreal distance = 50.0) const;
     
+    // 移动控制
+    void pauseMovement();
+    void resumeMovement();
+    
 protected:
     void updatePixmap();
     void setupEffect();

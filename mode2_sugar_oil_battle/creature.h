@@ -54,6 +54,10 @@ public:
     void playAppearAnimation();
     void playDisappearAnimation();
     
+    // 移动控制
+    void pauseMovement();
+    void resumeMovement();
+    
     // 特殊能力
     void activateAbility();
     bool isAbilityActive() const { return abilityActive; }

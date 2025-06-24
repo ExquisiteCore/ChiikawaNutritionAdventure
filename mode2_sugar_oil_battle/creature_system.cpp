@@ -218,6 +218,20 @@ QString CreatureManager::getCreatureDescription(CreatureType type)
     }
 }
 
+void GameCreature::pauseMovement()
+{
+    if (mMoveTimer && mMoveTimer->isActive()) {
+        mMoveTimer->stop();
+    }
+}
+
+void GameCreature::resumeMovement()
+{
+    if (mMoveTimer && !mMoveTimer->isActive()) {
+        mMoveTimer->start(MOVE_INTERVAL);
+    }
+}
+
 QString CreatureManager::getCreatureName(CreatureType type)
 {
     switch (type) {

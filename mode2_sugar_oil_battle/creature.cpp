@@ -462,3 +462,17 @@ QRectF Creature::boundingRect() const
 // getMovementSpeed, isActive, isEncountered, isFriendly
 
 // getTargetPosition function removed - not declared in header
+
+void Creature::pauseMovement()
+{
+    if (movementTimer && movementTimer->isActive()) {
+        movementTimer->stop();
+    }
+}
+
+void Creature::resumeMovement()
+{
+    if (movementTimer && !movementTimer->isActive() && active) {
+        movementTimer->start(16); // 约60FPS
+    }
+}

@@ -1,4 +1,5 @@
 #include "sugar_oil_game_scene_new.h"
+#include "creature.h"
 #include "../audio_manager.h"
 #include <QGraphicsView>
 #include <QApplication>
@@ -188,6 +189,19 @@ void SugarOilGameSceneNew::pauseGame()
         enemy->stopAI();
     }
     
+    // 暂停所有生物的移动
+    for (GameCreature* creature : mCreatures) {
+        creature->pauseMovement();
+    }
+    
+    // 暂停所有子弹的移动
+    for (BulletBase* bullet : mPlayerBullets) {
+        bullet->stopMoving();
+    }
+    for (BulletBase* bullet : mEnemyBullets) {
+        bullet->stopMoving();
+    }
+    
     emit gamePaused();
     emit gameStateChanged(SUGAR_OIL_PAUSED);
     qDebug() << "Game paused!";
@@ -214,6 +228,19 @@ void SugarOilGameSceneNew::resumeGame()
     // 恢复所有敌人的AI
     for (EnemyBase* enemy : mEnemies) {
         enemy->startAI();
+    }
+    
+    // 恢复所有生物的移动
+    for (GameCreature* creature : mCreatures) {
+        creature->resumeMovement();
+    }
+    
+    // 恢复所有子弹的移动
+    for (BulletBase* bullet : mPlayerBullets) {
+        bullet->startMoving();
+    }
+    for (BulletBase* bullet : mEnemyBullets) {
+        bullet->startMoving();
     }
     
     emit gameResumed();
