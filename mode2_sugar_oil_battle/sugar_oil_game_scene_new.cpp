@@ -564,6 +564,14 @@ void SugarOilGameSceneNew::checkPlayerBulletEnemyCollisions()
                 // 敌人受伤
                 enemy->takeDamage(bullet->getDamage());
                 
+                // 如果敌人死亡，立即从场景中移除
+                if (enemy->getHP() <= 0) {
+                    enemy->stopAI();
+                    removeItem(enemy);
+                    mEnemies.removeAt(j);
+                    enemy->deleteLater();
+                }
+                
                 // 移除子弹
                 removeItem(bullet);
                 mPlayerBullets.removeAt(i);
@@ -821,9 +829,9 @@ void SugarOilGameSceneNew::onPlayerShoot(QPointF position, QPointF direction, in
     createPlayerBullet(position, direction, damage);
 }
 
-void SugarOilGameSceneNew::onEnemyAttack(QPointF position, QPointF direction, int damage)
+void SugarOilGameSceneNew::onEnemyAttack(EnemyBase* enemy, QPointF position, QPointF direction, int damage)
 {
-    createEnemyBullet(position, direction, damage);
+    createEnemyBullet(enemy, position, direction, damage);
 }
 
 void SugarOilGameSceneNew::createPlayerBullet(const QPointF &position, const QPointF &direction, int damage)
@@ -841,10 +849,15 @@ void SugarOilGameSceneNew::createPlayerBullet(const QPointF &position, const QPo
     bullet->startMoving();
 }
 
-void SugarOilGameSceneNew::createEnemyBullet(const QPointF &position, const QPointF &direction, int damage)
+void SugarOilGameSceneNew::createEnemyBullet(EnemyBase* enemy, const QPointF &position, const QPointF &direction, int damage)
 {
     // 使用对象池获取子弹，减少内存分配开销
-    BulletBase* bullet = BulletBase::getBulletFromPool(nullptr, BulletBase::BulletType::EnemyBullet);
+    BulletBase* bullet = BulletBase::getBulletFromPool(enemy, BulletBase::BulletType::EnemyBullet);
+    if (!bullet) {
+        qWarning("Failed to create enemy bullet!");
+        return;
+    }
+    
     bullet->setPos(position);
     bullet->setMoveDirection(direction);
     bullet->setSpeed(6.0);

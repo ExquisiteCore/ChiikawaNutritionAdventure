@@ -66,7 +66,7 @@ signals:
 public slots:
     void onGameTimerTimeout();
     void onPlayerShoot(QPointF position, QPointF direction, int damage);
-    void onEnemyAttack(QPointF position, QPointF direction, int damage);
+    void onEnemyAttack(EnemyBase* enemy, QPointF position, QPointF direction, int damage);
     void onEnemyDied(EnemyBase* enemy);
     void onPlayerDied();
     void onPlayerLevelUp(int newLevel);
@@ -98,7 +98,7 @@ private:
     // 游戏逻辑
     void spawnEnemy(EnemyBase::EnemyType type, const QPointF &position);
     void createPlayerBullet(const QPointF &position, const QPointF &direction, int damage);
-    void createEnemyBullet(const QPointF &position, const QPointF &direction, int damage);
+    void createEnemyBullet(EnemyBase* enemy, const QPointF &position, const QPointF &direction, int damage);
     
     // 碰撞检测
     void checkPlayerEnemyCollisions();

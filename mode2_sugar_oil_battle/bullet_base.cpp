@@ -178,6 +178,12 @@ void BulletBase::updateBulletPixmap()
 // 对象池实现 - 性能优化
 BulletBase* BulletBase::getBulletFromPool(GameObjectBase* owner, BulletType type)
 {
+    // 添加空指针检查
+    if (!owner) {
+        qWarning("BulletBase::getBulletFromPool: owner is null!");
+        return nullptr;
+    }
+    
     QList<BulletBase*>& pool = (type == PlayerBullet) ? sPlayerBulletPool : sEnemyBulletPool;
     
     BulletBase* bullet = nullptr;
@@ -214,6 +220,12 @@ void BulletBase::returnBulletToPool(BulletBase* bullet)
 
 void BulletBase::resetBullet(GameObjectBase* owner, BulletType type)
 {
+    // 添加空指针检查，提高安全性
+    if (!owner) {
+        qWarning("BulletBase::resetBullet: owner is null!");
+        return;
+    }
+    
     mOwner = owner;
     mBulletType = type;
     mSpeed = 8.0;

@@ -108,7 +108,7 @@ void EnemyBase::attack()
     QPointF direction = getDirectionToPlayer();
     
     // 发射攻击信号
-    emit enemyAttack(getCenterPos(), direction, mAttackPoint);
+    emit enemyAttack(this, getCenterPos(), direction, mAttackPoint);
 }
 
 void EnemyBase::moveEnemy()

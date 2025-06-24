@@ -61,7 +61,7 @@ public:
     
 signals:
     void enemyDied(EnemyBase* enemy);
-    void enemyAttack(QPointF position, QPointF direction, int damage);
+    void enemyAttack(EnemyBase* enemy, QPointF position, QPointF direction, int damage);
     void enemyHurt(EnemyBase* enemy);
 
 public slots:
