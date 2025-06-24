@@ -39,8 +39,8 @@ SugarOilGameWindow::SugarOilGameWindow(QWidget *parent)
     
     setupUI();
     
-    // 创建答题界面
-    quizWindow = new NutritionQuizWindow(this);
+    // 创建答题界面（独立窗口）
+    quizWindow = new NutritionQuizWindow(nullptr);
     connect(quizWindow, &NutritionQuizWindow::quizCompleted, this, [this]() {
         qDebug() << "答题完成";
     });
@@ -500,14 +500,33 @@ void SugarOilGameWindow::showGameResult(bool won)
                  "消灭了所有糖油混合物！\n"
                  "现在他可以成为贵州版彭于晏了！\n\n" +
                  QString("最终分数: %1").arg(currentScore);
+        
+        QMessageBox::information(this, title, message);
     } else {
         message = "😢 很遗憾！😢\n\n"
                  "乌萨奇没能抵抗住糖油混合物的诱惑...\n"
                  "不过不要气馁，再试一次吧！\n\n" +
                  QString("最终分数: %1").arg(currentScore);
+        
+        // 创建自定义弹窗，失败时显示宝典按钮
+        QMessageBox msgBox(this);
+        msgBox.setWindowTitle(title);
+        msgBox.setText(message);
+        
+        // 添加宝典按钮和确认按钮
+        QPushButton *handbookButton = msgBox.addButton("营养宝典", QMessageBox::ActionRole);
+        QPushButton *okButton = msgBox.addButton("确认", QMessageBox::AcceptRole);
+        
+        msgBox.exec();
+        
+        // 检查用户点击了哪个按钮
+        if (msgBox.clickedButton() == handbookButton) {
+            // 打开营养知识答题界面
+            if (quizWindow) {
+                quizWindow->startQuiz();
+            }
+        }
     }
-    
-    QMessageBox::information(this, title, message);
 }
 
 void SugarOilGameWindow::updateControlPanel()

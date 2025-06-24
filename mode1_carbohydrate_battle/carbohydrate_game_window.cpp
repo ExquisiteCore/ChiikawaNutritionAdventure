@@ -18,8 +18,8 @@ CarbohydrateGameWindow::CarbohydrateGameWindow(QWidget *parent)
     
     setupUI();
     
-    // 创建营养知识答题窗口
-    quizWindow = new NutritionQuizWindow(this);
+    // 创建营养知识答题窗口（独立窗口）
+    quizWindow = new NutritionQuizWindow(nullptr);
     connect(quizWindow, &NutritionQuizWindow::quizCompleted, this, &CarbohydrateGameWindow::onQuizCompleted);
     connect(quizWindow, &NutritionQuizWindow::backToMenu, this, &CarbohydrateGameWindow::onBackToMenu);
     
@@ -241,6 +241,12 @@ void CarbohydrateGameWindow::showGameResult(bool won)
                  "保护了营养世界的和平。</p>"
                  "<p>真正的蔬菜富含膳食纤维，"
                  "是健康饮食的重要组成部分！</p>";
+        
+        QMessageBox msgBox(this);
+        msgBox.setWindowTitle(title);
+        msgBox.setText(message);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.exec();
     } else {
         message = "<h3>很遗憾...</h3>"
                  "<p>你被伪蔬菜BOSS抓住了！</p>"
@@ -248,13 +254,26 @@ void CarbohydrateGameWindow::showGameResult(bool won)
                  "下次一定能够成功击败BOSS。</p>"
                  "<p>记住：真正的蔬菜富含膳食纤维，"
                  "有助于消化和健康！</p>";
+        
+        // 创建自定义弹窗，失败时显示宝典按钮
+        QMessageBox msgBox(this);
+        msgBox.setWindowTitle(title);
+        msgBox.setText(message);
+        
+        // 添加宝典按钮和确认按钮
+        QPushButton *handbookButton = msgBox.addButton("营养宝典", QMessageBox::ActionRole);
+        QPushButton *okButton = msgBox.addButton("确认", QMessageBox::AcceptRole);
+        
+        msgBox.exec();
+        
+        // 检查用户点击了哪个按钮
+        if (msgBox.clickedButton() == handbookButton) {
+            // 打开营养知识答题界面
+            if (quizWindow) {
+                quizWindow->startQuiz();
+            }
+        }
     }
-    
-    QMessageBox msgBox(this);
-    msgBox.setWindowTitle(title);
-    msgBox.setText(message);
-    msgBox.setStandardButtons(QMessageBox::Ok);
-    msgBox.exec();
 }
 
 void CarbohydrateGameWindow::keyPressEvent(QKeyEvent *event)

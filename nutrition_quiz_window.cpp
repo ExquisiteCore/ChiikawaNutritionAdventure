@@ -20,6 +20,12 @@ NutritionQuizWindow::NutritionQuizWindow(QWidget *parent)
     setWindowTitle("ちいかわ营养大冒险 - 营养知识宝典");
     setFixedSize(800, 600);
     
+    // 设置为独立窗口
+    if (!parent) {
+        setWindowFlags(Qt::Window | Qt::WindowCloseButtonHint | Qt::WindowMinimizeButtonHint);
+        setAttribute(Qt::WA_DeleteOnClose, false); // 防止窗口关闭时被删除
+    }
+    
     // 居中显示
     QScreen *screen = QApplication::primaryScreen();
     QRect screenGeometry = screen->geometry();
