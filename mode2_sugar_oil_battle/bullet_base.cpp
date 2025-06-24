@@ -190,7 +190,22 @@ BulletBase* BulletBase::getBulletFromPool(GameObjectBase* owner, BulletType type
     if (!pool.isEmpty()) {
         // 从池中获取现有对象
         bullet = pool.takeLast();
-        bullet->resetBullet(owner, type);
+        
+        // 验证从池中获取的对象是否有效
+        if (!bullet) {
+            qWarning("BulletBase::getBulletFromPool: Retrieved null bullet from pool!");
+            // 创建新对象作为备用
+            bullet = new BulletBase(owner, type);
+        } else {
+            // 尝试安全地重置子弹
+            try {
+                bullet->resetBullet(owner, type);
+            } catch (...) {
+                qWarning("BulletBase::getBulletFromPool: Exception during resetBullet, creating new bullet");
+                delete bullet; // 删除损坏的对象
+                bullet = new BulletBase(owner, type);
+            }
+        }
     } else {
         // 池为空时创建新对象
         bullet = new BulletBase(owner, type);
@@ -203,17 +218,32 @@ void BulletBase::returnBulletToPool(BulletBase* bullet)
 {
     if (!bullet) return;
     
-    // 停止移动和重置状态
-    bullet->stopMoving();
-    bullet->setVisible(false);
-    
-    QList<BulletBase*>& pool = (bullet->mBulletType == PlayerBullet) ? sPlayerBulletPool : sEnemyBulletPool;
-    
-    // 如果池未满，将对象返回池中
-    if (pool.size() < MAX_POOL_SIZE) {
-        pool.append(bullet);
-    } else {
-        // 池已满，直接删除对象
+    // 验证子弹对象的有效性
+    try {
+        // 尝试访问子弹的基本属性来验证对象完整性
+        BulletType type = bullet->mBulletType;
+        
+        // 停止移动和重置状态
+        bullet->stopMoving();
+        bullet->setVisible(false);
+        
+        QList<BulletBase*>& pool = (type == PlayerBullet) ? sPlayerBulletPool : sEnemyBulletPool;
+        
+        // 检查是否已经在池中（避免重复添加）
+        if (pool.contains(bullet)) {
+            qWarning("BulletBase::returnBulletToPool: Bullet already in pool!");
+            return;
+        }
+        
+        // 如果池未满，将对象返回池中
+        if (pool.size() < MAX_POOL_SIZE) {
+            pool.append(bullet);
+        } else {
+            // 池已满，直接删除对象
+            delete bullet;
+        }
+    } catch (...) {
+        qWarning("BulletBase::returnBulletToPool: Exception accessing bullet, deleting it");
         delete bullet;
     }
 }
