@@ -56,6 +56,11 @@ public:
     void startMoving();
     void stopMoving();
     
+    // 对象池功能 - 性能优化
+    static BulletBase* getBulletFromPool(GameObjectBase* owner, BulletType type);
+    static void returnBulletToPool(BulletBase* bullet);
+    void resetBullet(GameObjectBase* owner, BulletType type);
+    
 signals:
     void bulletOutOfBounds(BulletBase* bullet);
     void bulletHit(BulletBase* bullet, GameObjectBase* target);
@@ -74,6 +79,11 @@ private:
     int mDamage;
     
     QTimer* mMoveTimer;
+    
+    // 对象池相关
+    static QList<BulletBase*> sPlayerBulletPool;
+    static QList<BulletBase*> sEnemyBulletPool;
+    static const int MAX_POOL_SIZE = 50; // 最大池大小
     
     static const int MOVE_INTERVAL = 25; // ~40 FPS，降低子弹更新频率
 };

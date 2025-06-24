@@ -2,6 +2,10 @@
 #include <QPixmap>
 #include <QtMath>
 
+// 静态成员变量定义
+QList<BulletBase*> BulletBase::sPlayerBulletPool;
+QList<BulletBase*> BulletBase::sEnemyBulletPool;
+
 BulletBase::BulletBase(QObject *parent)
     : GameObjectBase(parent)
     , mOwner(nullptr)
@@ -140,25 +144,88 @@ void BulletBase::onMoveTimeout()
 
 void BulletBase::updateBulletPixmap()
 {
-    QString imagePath;
+    // 使用静态变量缓存预加载的图像，避免重复加载导致卡顿
+    static QPixmap playerBulletPixmap;
+    static QPixmap enemyBulletPixmap;
+    static bool pixmapsLoaded = false;
     
-    if (mBulletType == PlayerBullet) {
-        imagePath = ":/img/bulletsample.png";
-    } else {
-        imagePath = ":/img/enemybulletsample.png";
+    // 首次加载时初始化图像缓存
+    if (!pixmapsLoaded) {
+        playerBulletPixmap = QPixmap(":/img/bulletsample.png");
+        enemyBulletPixmap = QPixmap(":/img/enemybulletsample.png");
+        
+        // 如果加载失败，创建默认图像
+        if (playerBulletPixmap.isNull()) {
+            playerBulletPixmap = QPixmap(10, 10);
+            playerBulletPixmap.fill(Qt::blue);
+        }
+        if (enemyBulletPixmap.isNull()) {
+            enemyBulletPixmap = QPixmap(10, 10);
+            enemyBulletPixmap.fill(Qt::red);
+        }
+        
+        pixmapsLoaded = true;
     }
     
-    QPixmap pixmap(imagePath);
-    if (!pixmap.isNull()) {
-        setPixmap(pixmap);
+    // 直接使用缓存的图像
+    if (mBulletType == PlayerBullet) {
+        setPixmap(playerBulletPixmap);
     } else {
-        // 如果找不到图像，创建一个简单的彩色矩形
-        QPixmap defaultPixmap(10, 10);
-        if (mBulletType == PlayerBullet) {
-            defaultPixmap.fill(Qt::blue);
-        } else {
-            defaultPixmap.fill(Qt::red);
-        }
-        setPixmap(defaultPixmap);
+        setPixmap(enemyBulletPixmap);
+    }
+}
+
+// 对象池实现 - 性能优化
+BulletBase* BulletBase::getBulletFromPool(GameObjectBase* owner, BulletType type)
+{
+    QList<BulletBase*>& pool = (type == PlayerBullet) ? sPlayerBulletPool : sEnemyBulletPool;
+    
+    BulletBase* bullet = nullptr;
+    if (!pool.isEmpty()) {
+        // 从池中获取现有对象
+        bullet = pool.takeLast();
+        bullet->resetBullet(owner, type);
+    } else {
+        // 池为空时创建新对象
+        bullet = new BulletBase(owner, type);
+    }
+    
+    return bullet;
+}
+
+void BulletBase::returnBulletToPool(BulletBase* bullet)
+{
+    if (!bullet) return;
+    
+    // 停止移动和重置状态
+    bullet->stopMoving();
+    bullet->setVisible(false);
+    
+    QList<BulletBase*>& pool = (bullet->mBulletType == PlayerBullet) ? sPlayerBulletPool : sEnemyBulletPool;
+    
+    // 如果池未满，将对象返回池中
+    if (pool.size() < MAX_POOL_SIZE) {
+        pool.append(bullet);
+    } else {
+        // 池已满，直接删除对象
+        delete bullet;
+    }
+}
+
+void BulletBase::resetBullet(GameObjectBase* owner, BulletType type)
+{
+    mOwner = owner;
+    mBulletType = type;
+    mSpeed = 8.0;
+    mMoveDirection = QPointF(1.0, 0.0);
+    mDamage = 10;
+    
+    // 重新设置图像
+    updateBulletPixmap();
+    setVisible(true);
+    
+    // 重置定时器
+    if (mMoveTimer) {
+        mMoveTimer->stop();
     }
 }
