@@ -48,7 +48,7 @@ private:
     QHBoxLayout *gameLayout;
     QVBoxLayout *buttonLayout;
     
-    QLabel *welcomeLabel;
+
     QPushButton *gameIntroButton;
     QPushButton *levelsButton;
     QPushButton *settingsButton;

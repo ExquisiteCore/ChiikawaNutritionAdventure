@@ -121,13 +121,7 @@ void MainWindow::setupGameUI()
     QVBoxLayout* rightLayout = new QVBoxLayout();
     rightLayout->setSpacing(30);
     
-    // 欢迎标题
-    welcomeLabel = new QLabel("🎮 ちいかわ营养大冒险 🎮", this);
-    welcomeLabel->setAlignment(Qt::AlignCenter);
-    welcomeLabel->setObjectName("welcomeLabel");
-    
     rightLayout->addStretch();
-    rightLayout->addWidget(welcomeLabel);
     rightLayout->addStretch();
     
     // 添加到主布局
@@ -398,15 +392,7 @@ void MainWindow::applyGameStyles()
         "    font-family: 'PingFang SC', 'Hiragino Sans GB', 'Arial Unicode MS', 'Helvetica Neue';"
         "}"
         
-        "#welcomeLabel {"
-        "    font-size: 32px;"
-        "    font-weight: bold;"
-        "    color: #2d3436;"
-        "    margin: 20px 0;"
-        "    background: transparent;"
-        "    padding: 20px;"
-        "}"
-        
+
         "#imageButton {"
         "    background: transparent;"
         "    border: none;"
