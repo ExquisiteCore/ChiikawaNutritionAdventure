@@ -747,8 +747,8 @@ void NutritionQuizWindow::showFinalResult()
     }
     
     finalResultLabel->setText(resultText);
-    finalScoreLabel->setText(QString("最终得分: %1/%2 (%.1f%%)")
-                            .arg(correctAnswers).arg(totalQuestions).arg(percentage));
+    finalScoreLabel->setText(QString("最终得分: %1/%2 (%3%)")
+                            .arg(correctAnswers).arg(totalQuestions).arg(percentage, 0, 'f', 1));
     
     stackedWidget->setCurrentWidget(resultWidget);
 }
