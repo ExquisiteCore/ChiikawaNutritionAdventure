@@ -222,12 +222,16 @@ void MainWindow::onLevelsClicked()
     mode2Button->setEnabled(true);
     mode2Button->setStyleSheet(
         "QPushButton {"
-        "    background-color: #ddd;"
-        "    color: #999;"
+        "    background-color: #fd79a8;"
+        "    color: white;"
         "    border: none;"
         "    border-radius: 10px;"
         "    padding: 15px;"
         "    font-size: 14px;"
+        "    font-weight: bold;"
+        "}"
+        "QPushButton:hover {"
+        "    background-color: #e84393;"
         "}"
     );
     
