@@ -46,7 +46,7 @@ private:
     LoginWindow *loginWindow;
     QWidget *gameWidget;
     QHBoxLayout *gameLayout;
-    QVBoxLayout *buttonLayout;
+    QHBoxLayout *buttonLayout;
     
 
     QPushButton *gameIntroButton;

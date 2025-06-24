@@ -70,8 +70,8 @@ void MainWindow::setupGameUI()
     leftLayout->setSpacing(20);
     leftLayout->setContentsMargins(0, 0, 20, 0);
     
-    // 按钮布局（垂直排列）
-    buttonLayout = new QVBoxLayout();
+    // 按钮布局（横向排列）
+    buttonLayout = new QHBoxLayout();
     buttonLayout->setSpacing(20);
     
     // 创建四个主要按钮（只显示图标，不显示文字）
