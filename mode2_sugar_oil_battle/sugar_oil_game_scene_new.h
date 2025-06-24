@@ -165,7 +165,7 @@ private:
     // 游戏配置
     static const int GAME_DURATION = 300; // 5分钟
     static const int UPDATE_INTERVAL = 25; // ~40 FPS，降低更新频率减少卡顿
-    static const int SPAWN_INTERVAL = 1500; // 1.5秒，降低生成频率
+    static const int SPAWN_INTERVAL = 3000; // 3秒，降低生成频率
     static const int SCENE_WIDTH = SUGAR_OIL_SCENE_WIDTH;
     static const int SCENE_HEIGHT = SUGAR_OIL_SCENE_HEIGHT;
 };

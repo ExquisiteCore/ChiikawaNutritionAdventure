@@ -20,7 +20,7 @@
 #define SUGAR_OIL_ENEMY_SIZE 4  // 再次缩小敌人尺寸
 #define SUGAR_OIL_ENEMY_SPEED 2  // 从3减小到2，降低敌人速度
 #define SUGAR_OIL_ENEMY_COUNT 5
-#define SUGAR_OIL_ENEMY_SPAWN_INTERVAL 3000  // 3秒生成一个敌人
+#define SUGAR_OIL_ENEMY_SPAWN_INTERVAL 4000  // 4秒生成一个敌人
 
 // 道具配置
 #define ITEM_SIZE 16

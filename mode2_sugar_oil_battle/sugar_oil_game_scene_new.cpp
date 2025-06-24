@@ -126,13 +126,15 @@ void SugarOilGameSceneNew::initializeManagers()
 
 void SugarOilGameSceneNew::loadBackground()
 {
-    QPixmap backgroundPixmap(":/images/game_background.png");
+    // 使用与模式1相同的背景图片
+    QPixmap backgroundPixmap(":/img/GameBackground.png");
     if (backgroundPixmap.isNull()) {
-        // 如果没有背景图片，创建一个简单的渐变背景
+        // 如果背景图片加载失败，使用默认背景
         backgroundPixmap = QPixmap(SCENE_WIDTH, SCENE_HEIGHT);
-        backgroundPixmap.fill(QColor(144, 238, 144));
+        backgroundPixmap.fill(QColor(20, 20, 40));
     } else {
-        backgroundPixmap = backgroundPixmap.scaled(SCENE_WIDTH, SCENE_HEIGHT, Qt::KeepAspectRatioByExpanding);
+        // 缩放背景图片以适应场景大小
+        backgroundPixmap = backgroundPixmap.scaled(SCENE_WIDTH, SCENE_HEIGHT, Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
     }
     
     mBackground = addPixmap(backgroundPixmap);
@@ -418,19 +420,19 @@ void SugarOilGameSceneNew::updateEnemySpawning()
 {
     mSpawnCounter++;
     
-    // 根据游戏时间调整生成频率
-    int spawnInterval = 2000; // 基础间隔2秒
+    // 根据游戏时间调整生成频率（降低刷新速度）
+    int spawnInterval = 3000; // 基础间隔3秒
     if (mGameTime > 60) {
-        spawnInterval = 1500; // 1分钟后加快到1.5秒
+        spawnInterval = 2500; // 1分钟后加快到2.5秒
     }
     if (mGameTime > 120) {
-        spawnInterval = 1000; // 2分钟后加快到1秒
+        spawnInterval = 2000; // 2分钟后加快到2秒
     }
     if (mGameTime > 180) {
-        spawnInterval = 800; // 3分钟后加快到0.8秒
+        spawnInterval = 1500; // 3分钟后加快到1.5秒
     }
     if (mGameTime > 240) {
-        spawnInterval = 600; // 4分钟后加快到0.6秒
+        spawnInterval = 1200; // 4分钟后加快到1.2秒
     }
     
     mSpawnTimer->setInterval(spawnInterval);
