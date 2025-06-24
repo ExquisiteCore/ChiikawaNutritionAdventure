@@ -268,9 +268,17 @@ void CarbohydrateGameWindow::showGameResult(bool won)
         
         // 检查用户点击了哪个按钮
         if (msgBox.clickedButton() == handbookButton) {
-            // 打开营养知识答题界面
+            // 直接打开营养知识宝典
             if (quizWindow) {
-                quizWindow->startQuiz();
+                // 先加载数据
+                if (!quizWindow->loadKnowledgeFromDatabase() || !quizWindow->loadQuestionsFromDatabase()) {
+                    QMessageBox::warning(this, "错误", "无法加载营养知识数据，请检查数据库连接。");
+                    return;
+                }
+                // 重置状态
+                quizWindow->resetState();
+                // 直接显示宝典内容
+                quizWindow->showKnowledge();
             }
         }
     }

@@ -18,7 +18,7 @@ NutritionQuizWindow::NutritionQuizWindow(QWidget *parent)
     
     // 设置窗口属性
     setWindowTitle("ちいかわ营养大冒险 - 营养知识宝典");
-    setFixedSize(800, 600);
+    setFixedSize(1000, 700);
     
     // 设置为独立窗口
     if (!parent) {
@@ -148,10 +148,11 @@ void NutritionQuizWindow::setupKnowledgeUI()
     
     knowledgeLayout->addWidget(knowledgeTitleLabel);
     knowledgeLayout->addWidget(knowledgeProgressBar);
-    knowledgeLayout->addSpacing(20);
-    knowledgeLayout->addWidget(knowledgeScrollArea);
-    knowledgeLayout->addSpacing(20);
+    knowledgeLayout->addSpacing(10);
+    knowledgeLayout->addWidget(knowledgeScrollArea, 1); // 给滚动区域更多空间
+    knowledgeLayout->addSpacing(10);
     knowledgeLayout->addLayout(knowledgeNavLayout);
+    knowledgeLayout->addSpacing(10); // 底部留一点空间
     
     stackedWidget->addWidget(knowledgeWidget);
 }
@@ -221,18 +222,19 @@ void NutritionQuizWindow::setupQuizUI()
     quizLayout->addWidget(quizTitleLabel);
     quizLayout->addWidget(quizProgressBar);
     quizLayout->addWidget(scoreLabel);
-    quizLayout->addSpacing(20);
+    quizLayout->addSpacing(10);
     quizLayout->addWidget(questionLabel);
-    quizLayout->addSpacing(15);
+    quizLayout->addSpacing(10);
     quizLayout->addWidget(optionAButton);
     quizLayout->addWidget(optionBButton);
     quizLayout->addWidget(optionCButton);
     quizLayout->addWidget(optionDButton);
-    quizLayout->addSpacing(20);
+    quizLayout->addSpacing(15);
     quizLayout->addWidget(submitAnswerButton, 0, Qt::AlignCenter);
     quizLayout->addWidget(resultLabel);
     quizLayout->addWidget(explanationEdit);
     quizLayout->addWidget(nextQuestionButton, 0, Qt::AlignCenter);
+    quizLayout->addSpacing(10); // 底部留一点空间
     quizLayout->addStretch();
     
     stackedWidget->addWidget(quizWidget);
@@ -467,6 +469,15 @@ void NutritionQuizWindow::showKnowledge()
 {
     displayKnowledge();
     stackedWidget->setCurrentWidget(knowledgeWidget);
+    show();
+}
+
+void NutritionQuizWindow::resetState()
+{
+    // 重置状态
+    currentKnowledgeIndex = 0;
+    currentQuestionIndex = 0;
+    correctAnswers = 0;
 }
 
 bool NutritionQuizWindow::loadKnowledgeFromDatabase()

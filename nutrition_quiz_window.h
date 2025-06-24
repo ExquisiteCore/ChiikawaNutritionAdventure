@@ -52,6 +52,11 @@ public:
     
     void startQuiz();
     void showKnowledge();
+    
+    // 公共方法供游戏窗口调用
+    bool loadKnowledgeFromDatabase();
+    bool loadQuestionsFromDatabase();
+    void resetState();
 
 private slots:
     void onKnowledgeButtonClicked();
@@ -69,9 +74,7 @@ private:
     void setupQuizUI();
     void applyStyles();
     
-    // 数据库相关
-    bool loadKnowledgeFromDatabase();
-    bool loadQuestionsFromDatabase();
+    // 数据库相关（已移至公共方法）
     
     // 知识宝典相关
     void displayKnowledge();
