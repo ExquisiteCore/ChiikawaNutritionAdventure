@@ -399,16 +399,31 @@ void LoginWindow::onLoginClicked()
     QString password = passwordEdit->text();
     
     if (username.isEmpty() || password.isEmpty()) {
-        QMessageBox::warning(this, "输入错误", "请输入用户名和密码！");
+        QMessageBox msgBox(this);
+        msgBox.setWindowTitle("输入错误");
+        msgBox.setText("请输入用户名和密码！");
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setStyleSheet("QMessageBox { color: black; } QMessageBox QLabel { color: black; }");
+        msgBox.exec();
         return;
     }
     
     if (validateLogin(username, password)) {
-        QMessageBox::information(this, "登录成功", "欢迎回来，" + username + "！");
+        QMessageBox msgBox(this);
+        msgBox.setWindowTitle("登录成功");
+        msgBox.setText("欢迎回来，" + username + "！");
+        msgBox.setIcon(QMessageBox::Information);
+        msgBox.setStyleSheet("QMessageBox { color: black; } QMessageBox QLabel { color: black; }");
+        msgBox.exec();
         emit loginSuccessful();
         this->hide();
     } else {
-        QMessageBox::warning(this, "登录失败", "用户名或密码错误！");
+        QMessageBox msgBox(this);
+        msgBox.setWindowTitle("登录失败");
+        msgBox.setText("用户名或密码错误！");
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setStyleSheet("QMessageBox { color: black; } QMessageBox QLabel { color: black; }");
+        msgBox.exec();
         passwordEdit->clear();
         passwordEdit->setFocus();
     }
@@ -420,25 +435,50 @@ void LoginWindow::onRegisterClicked()
     QString password = passwordEdit->text();
     
     if (username.isEmpty() || password.isEmpty()) {
-        QMessageBox::warning(this, "输入错误", "请输入用户名和密码！");
+        QMessageBox msgBox(this);
+        msgBox.setWindowTitle("输入错误");
+        msgBox.setText("请输入用户名和密码！");
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setStyleSheet("QMessageBox { color: black; } QMessageBox QLabel { color: black; }");
+        msgBox.exec();
         return;
     }
     
     if (username.length() < 3) {
-        QMessageBox::warning(this, "注册失败", "用户名长度至少3个字符！");
+        QMessageBox msgBox(this);
+        msgBox.setWindowTitle("注册失败");
+        msgBox.setText("用户名长度至少3个字符！");
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setStyleSheet("QMessageBox { color: black; } QMessageBox QLabel { color: black; }");
+        msgBox.exec();
         return;
     }
     
     if (password.length() < 6) {
-        QMessageBox::warning(this, "注册失败", "密码长度至少6个字符！");
+        QMessageBox msgBox(this);
+        msgBox.setWindowTitle("注册失败");
+        msgBox.setText("密码长度至少6个字符！");
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setStyleSheet("QMessageBox { color: black; } QMessageBox QLabel { color: black; }");
+        msgBox.exec();
         return;
     }
     
     if (registerUser(username, password)) {
-        QMessageBox::information(this, "注册成功", "注册成功！请使用新账号登录。");
+        QMessageBox msgBox(this);
+        msgBox.setWindowTitle("注册成功");
+        msgBox.setText("注册成功！请使用新账号登录。");
+        msgBox.setIcon(QMessageBox::Information);
+        msgBox.setStyleSheet("QMessageBox { color: black; } QMessageBox QLabel { color: black; }");
+        msgBox.exec();
         passwordEdit->clear();
     } else {
-        QMessageBox::warning(this, "注册失败", "用户名已存在或注册失败！");
+        QMessageBox msgBox(this);
+        msgBox.setWindowTitle("注册失败");
+        msgBox.setText("用户名已存在或注册失败！");
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setStyleSheet("QMessageBox { color: black; } QMessageBox QLabel { color: black; }");
+        msgBox.exec();
     }
 }
 
@@ -498,7 +538,7 @@ void LoginWindow::applyStyles()
         "#inputLabel {"
         "    font-size: 14px;"
         "    font-weight: bold;"
-        "    color: #333;"
+        "    color: black;"
         "    margin-bottom: 5px;"
         "}"
         
@@ -507,6 +547,7 @@ void LoginWindow::applyStyles()
         "    border: 2px solid #ddd;"
         "    border-radius: 8px;"
         "    font-size: 14px;"
+        "    color: black;"
         "    background: white;"
         "    selection-background-color: #4a90e2;"
         "}"
