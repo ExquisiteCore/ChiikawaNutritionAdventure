@@ -65,14 +65,16 @@ void MainWindow::setupGameUI()
     gameLayout->setSpacing(30);
     gameLayout->setContentsMargins(50, 50, 50, 50);
     
-    // 左侧按钮布局
-    QVBoxLayout* leftLayout = new QVBoxLayout();
-    leftLayout->setSpacing(20);
-    leftLayout->setContentsMargins(0, 0, 20, 0);
+    // 主要内容布局（垂直排列）
+    QVBoxLayout* mainContentLayout = new QVBoxLayout();
+    mainContentLayout->setSpacing(20);
     
     // 按钮布局（横向排列）
     buttonLayout = new QHBoxLayout();
     buttonLayout->setSpacing(20);
+    
+    // 在按钮左右两边添加弹性间距以实现居中
+    buttonLayout->addStretch();
     
     // 创建四个主要按钮（只显示图标，不显示文字）
     gameIntroButton = new QPushButton("", this);
@@ -107,26 +109,22 @@ void MainWindow::setupGameUI()
     logoutButton->setFlat(true);
     logoutButton->setToolTip("退出登录");
     
-    // 添加按钮到布局
+    // 添加按钮到布局（左右居中）
     buttonLayout->addWidget(gameIntroButton);
     buttonLayout->addWidget(levelsButton);
     buttonLayout->addWidget(settingsButton);
     buttonLayout->addWidget(logoutButton);
     buttonLayout->addStretch();
     
-    // 将按钮布局添加到左侧布局
-    leftLayout->addLayout(buttonLayout);
+    // 将按钮布局添加到主要内容布局（添加上方间距使按钮位置上移）
+    mainContentLayout->addStretch(1);
+    mainContentLayout->addLayout(buttonLayout);
+    mainContentLayout->addStretch(3);
     
-    // 右侧内容布局
-    QVBoxLayout* rightLayout = new QVBoxLayout();
-    rightLayout->setSpacing(30);
-    
-    rightLayout->addStretch();
-    rightLayout->addStretch();
-    
-    // 添加到主布局
-    gameLayout->addLayout(leftLayout);
-    gameLayout->addLayout(rightLayout);
+    // 添加到主布局（左右居中）
+    gameLayout->addStretch();
+    gameLayout->addLayout(mainContentLayout);
+    gameLayout->addStretch();
     
     // 连接信号槽
     connect(gameIntroButton, &QPushButton::clicked, this, &MainWindow::onGameIntroClicked);
