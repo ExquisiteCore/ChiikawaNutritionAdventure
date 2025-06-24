@@ -143,9 +143,9 @@ void BulletBase::updateBulletPixmap()
     QString imagePath;
     
     if (mBulletType == PlayerBullet) {
-        imagePath = ":/img/bullets/player_bullet.png";
+        imagePath = ":/img/bulletsample.png";
     } else {
-        imagePath = ":/img/bullets/enemy_bullet.png";
+        imagePath = ":/img/enemybulletsample.png";
     }
     
     QPixmap pixmap(imagePath);
