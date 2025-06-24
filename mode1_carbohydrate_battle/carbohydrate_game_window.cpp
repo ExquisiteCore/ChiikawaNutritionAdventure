@@ -11,11 +11,18 @@ CarbohydrateGameWindow::CarbohydrateGameWindow(QWidget *parent)
     , gameScene(nullptr)
     , gameView(nullptr)
     , gameInProgress(false)
+    , quizWindow(nullptr)
 {
     setWindowTitle("碳水化合物之战 - 膳食纤维剑击败伪蔬菜BOSS");
     setFixedSize(GAME_WINDOW_WIDTH + 200, GAME_WINDOW_HEIGHT);
     
     setupUI();
+    
+    // 创建营养知识答题窗口
+    quizWindow = new NutritionQuizWindow(this);
+    connect(quizWindow, &NutritionQuizWindow::quizCompleted, this, &CarbohydrateGameWindow::onQuizCompleted);
+    connect(quizWindow, &NutritionQuizWindow::backToMenu, this, &CarbohydrateGameWindow::onBackToMenu);
+    
     startNewGame();
 }
 
@@ -289,7 +296,16 @@ void CarbohydrateGameWindow::onGameWon()
 
 void CarbohydrateGameWindow::onGameLost()
 {
-    showGameResult(false);
+    gameInProgress = false;
+    
+    // 显示营养知识答题界面
+    if (quizWindow) {
+        quizWindow->startQuiz();
+    } else {
+        // 备用方案：如果答题窗口创建失败，显示原来的结果
+        showGameResult(false);
+    }
+    
     updateControlPanel();
 }
 
@@ -321,4 +337,16 @@ void CarbohydrateGameWindow::onRestartButtonClicked()
 void CarbohydrateGameWindow::onInstructionsButtonClicked()
 {
     showGameInstructions();
+}
+
+void CarbohydrateGameWindow::onQuizCompleted()
+{
+    // 答题完成后显示游戏结果
+    showGameResult(false);
+}
+
+void CarbohydrateGameWindow::onBackToMenu()
+{
+    // 返回主菜单
+    emit backToMenu();
 }

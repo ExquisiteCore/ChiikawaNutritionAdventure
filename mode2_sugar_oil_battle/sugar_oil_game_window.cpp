@@ -17,6 +17,7 @@ SugarOilGameWindow::SugarOilGameWindow(QWidget *parent)
     , currentLives(USAGI_INITIAL_LIVES)
     , currentScore(0)
     , gameActive(false)
+    , quizWindow(nullptr)
 {
     qDebug() << "SugarOilGameWindow构造函数开始";
     
@@ -37,6 +38,15 @@ SugarOilGameWindow::SugarOilGameWindow(QWidget *parent)
     move(x, y);
     
     setupUI();
+    
+    // 创建答题界面
+    quizWindow = new NutritionQuizWindow(this);
+    connect(quizWindow, &NutritionQuizWindow::quizCompleted, this, [this]() {
+        qDebug() << "答题完成";
+    });
+    connect(quizWindow, &NutritionQuizWindow::backToMenu, this, [this]() {
+        emit gameWindowClosed();
+    });
     
     // 音乐由主窗口统一管理，此处不播放背景音乐
     // 保持主窗口设置的Mode2Game音乐继续播放
@@ -331,9 +341,16 @@ void SugarOilGameWindow::onGameWon()
 void SugarOilGameWindow::onGameLost()
 {
     gameActive = false;
-    showGameResult(false);
     // 播放失败音乐
     AudioManager::getInstance()->playGameMusic(AudioManager::MusicType::Defeat);
+    
+    // 显示答题界面而不是游戏结果
+    if (quizWindow) {
+        quizWindow->startQuiz();
+    } else {
+        // 备用方案：如果答题界面创建失败，显示原来的结果
+        showGameResult(false);
+    }
 }
 
 void SugarOilGameWindow::onGameStateChanged(SugarOilGameState newState)

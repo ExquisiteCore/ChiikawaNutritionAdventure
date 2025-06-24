@@ -13,6 +13,7 @@ SOURCES += \
     mainwindow.cpp \
     loginwindow.cpp \
     audio_manager.cpp \
+    nutrition_quiz_window.cpp \
     mode1_carbohydrate_battle/carbohydrate_game_window.cpp \
     mode1_carbohydrate_battle/carbohydrate_game_scene.cpp \
     mode1_carbohydrate_battle/game_map.cpp \
@@ -35,6 +36,7 @@ HEADERS += \
     mainwindow.h \
     loginwindow.h \
     audio_manager.h \
+    nutrition_quiz_window.h \
     mode1_carbohydrate_battle/carbohydrate_config.h \
     mode1_carbohydrate_battle/carbohydrate_game_window.h \
     mode1_carbohydrate_battle/carbohydrate_game_scene.h \

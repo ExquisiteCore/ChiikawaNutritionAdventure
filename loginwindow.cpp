@@ -132,6 +132,34 @@ void LoginWindow::setupDatabase()
         if (!query.exec(createTableSQL)) {
             qDebug() << "创建用户表失败:" << query.lastError().text();
         } else {
+            // 执行数据库初始化脚本
+            QString scriptPath = QApplication::applicationDirPath() + "/database_setup.sql";
+            QFile scriptFile(scriptPath);
+            
+            if (scriptFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                QTextStream in(&scriptFile);
+                QString sqlScript = in.readAll();
+                scriptFile.close();
+                
+                // 分割SQL语句并执行
+                QStringList sqlStatements = sqlScript.split(";", Qt::SkipEmptyParts);
+                
+                for (const QString& statement : sqlStatements) {
+                    QString trimmedStatement = statement.trimmed();
+                    if (!trimmedStatement.isEmpty() && !trimmedStatement.startsWith("--")) {
+                        QSqlQuery scriptQuery(database);
+                        if (!scriptQuery.exec(trimmedStatement)) {
+                            qDebug() << "执行SQL语句失败:" << trimmedStatement;
+                            qDebug() << "错误信息:" << scriptQuery.lastError().text();
+                        }
+                    }
+                }
+                
+                qDebug() << "数据库初始化脚本执行完成";
+            } else {
+                qDebug() << "无法读取数据库初始化脚本:" << scriptPath;
+            }
+            
             // 插入默认测试用户
             QSqlQuery insertQuery(database);
             insertQuery.prepare("INSERT OR IGNORE INTO users (username, password) VALUES (?, ?)");

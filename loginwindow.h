@@ -14,6 +14,8 @@
 #include <QPixmap>
 #include <QFont>
 #include <QGraphicsDropShadowEffect>
+#include <QFile>
+#include <QTextStream>
 
 QT_BEGIN_NAMESPACE
 class QVBoxLayout;

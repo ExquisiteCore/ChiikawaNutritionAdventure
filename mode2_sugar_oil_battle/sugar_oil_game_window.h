@@ -15,6 +15,7 @@
 #include <QGraphicsView>
 #include "sugar_oil_game_scene_new.h"
 #include "sugar_oil_config.h"
+#include "../nutrition_quiz_window.h"
 
 class SugarOilGameWindow : public QWidget
 {
@@ -98,6 +99,9 @@ private:
     int finalScore;
     int finalLevel;
     bool gameActive;
+    
+    // 答题界面
+    NutritionQuizWindow* quizWindow;
 };
 
 #endif // SUGAR_OIL_GAME_WINDOW_H

@@ -10,6 +10,7 @@
 #include <QKeyEvent>
 #include "carbohydrate_game_scene.h"
 #include "carbohydrate_config.h"
+#include "../nutrition_quiz_window.h"
 
 class CarbohydrateGameWindow : public QWidget
 {
@@ -30,6 +31,7 @@ protected:
     
 signals:
     void gameWindowClosed();
+    void backToMenu();
     
 private slots:
     void onGameWon();
@@ -38,6 +40,8 @@ private slots:
     void onBackButtonClicked();
     void onRestartButtonClicked();
     void onInstructionsButtonClicked();
+    void onQuizCompleted();
+    void onBackToMenu();
     
 private:
     void setupUI();
@@ -64,6 +68,9 @@ private:
     
     // 游戏状态
     bool gameInProgress;
+    
+    // 答题界面
+    NutritionQuizWindow* quizWindow;
 };
 
 #endif // CARBOHYDRATE_GAME_WINDOW_H
