@@ -3,8 +3,7 @@
 
 #include "game_object_base.h"
 #include <QTimer>
-#include <QMediaPlayer>
-#include <QAudioOutput>
+#include "../audio_manager.h"
 #include <QPropertyAnimation>
 
 class SugarOilPlayer : public GameObjectBase
@@ -118,11 +117,7 @@ private:
     bool mFastShootingEnabled;
     bool mMagnetismEnabled;
     
-    // 音效
-    QMediaPlayer* mShootSoundPlayer;
-    QMediaPlayer* mHurtSoundPlayer;
-    QAudioOutput* mShootSoundAudioOutput;
-    QAudioOutput* mHurtSoundAudioOutput;
+    // 音效现在由AudioManager统一管理
     
     // 动画相关
     QPropertyAnimation* mBlinkAnimation;

@@ -53,6 +53,9 @@ void MainWindow::onLoginSuccessful()
     setupGameUI();
     applyGameStyles();
     this->show();
+    
+    // 开始播放背景音乐
+    AudioManager::getInstance()->playBackgroundMusic();
 }
 
 void MainWindow::setupGameUI()
@@ -297,6 +300,9 @@ void MainWindow::onLogoutClicked()
 
 void MainWindow::onCarbohydrateBattleClicked()
 {
+    // 停止背景音乐，播放模式1游戏音乐
+    AudioManager::getInstance()->playGameMusic(AudioManager::MusicType::Mode1Game);
+    
     // 创建并显示碳水化合物之战游戏窗口
     if (!carbohydrateGameWindow) {
         carbohydrateGameWindow = new CarbohydrateGameWindow();
@@ -312,6 +318,9 @@ void MainWindow::onCarbohydrateBattleClicked()
 
 void MainWindow::onCarbohydrateGameClosed()
 {
+    // 停止游戏音乐，恢复背景音乐
+    AudioManager::getInstance()->playBackgroundMusic();
+    
     // 游戏窗口关闭时，重新显示主窗口
     if (carbohydrateGameWindow) {
         carbohydrateGameWindow->hide();
@@ -322,6 +331,9 @@ void MainWindow::onCarbohydrateGameClosed()
 void MainWindow::onSugarOilBattleClicked()
 {
     qDebug() << "模式2按钮被点击";
+    
+    // 停止背景音乐，播放模式2游戏音乐
+    AudioManager::getInstance()->playGameMusic(AudioManager::MusicType::Mode2Game);
     
     if (!sugarOilGameWindow) {
         qDebug() << "创建新的SugarOilGameWindow";
@@ -368,6 +380,9 @@ void MainWindow::onSugarOilBattleClicked()
 
 void MainWindow::onSugarOilGameClosed()
 {
+    // 停止游戏音乐，恢复背景音乐
+    AudioManager::getInstance()->playBackgroundMusic();
+    
     if (sugarOilGameWindow) {
         sugarOilGameWindow->hide();
     }

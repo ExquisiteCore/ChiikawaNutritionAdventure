@@ -4,8 +4,8 @@
 #include "sugar_oil_config.h"
 #include "game_object_base.h"
 #include <QTimer>
-#include <QMediaPlayer>
-#include <QAudioOutput>
+// 音频现在由AudioManager统一管理
+#include "../audio_manager.h"
 #include <QRandomGenerator>
 
 class SugarOilPlayer;
@@ -65,9 +65,7 @@ private:
     qreal mSpeed;
     bool mIsFollowingPlayer;
     
-    // 音效
-    QMediaPlayer* mActivateSoundPlayer;
-    QAudioOutput* mActivateSoundAudioOutput;
+    // 音效现在由AudioManager统一管理
     
     static const int ANIMATION_INTERVAL = 400; // 动画帧间隔
     static const int MOVE_INTERVAL = 30;       // 移动更新间隔，优化性能

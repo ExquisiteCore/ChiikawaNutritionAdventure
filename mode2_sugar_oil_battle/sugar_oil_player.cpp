@@ -31,10 +31,8 @@ SugarOilPlayer::SugarOilPlayer(QObject *parent)
     , mExperienceMultiplier(1.0)
     , mFastShootingEnabled(false)
     , mMagnetismEnabled(false)
-    , mShootSoundPlayer(nullptr)
-    , mHurtSoundPlayer(nullptr)
-    , mShootSoundAudioOutput(nullptr)
-    , mHurtSoundAudioOutput(nullptr)
+
+
     , mBlinkAnimation(nullptr)
 {
     // 设置初始图像
@@ -77,16 +75,7 @@ SugarOilPlayer::SugarOilPlayer(QObject *parent)
     mExperienceEffectTimer->setSingleShot(true);
     connect(mExperienceEffectTimer, &QTimer::timeout, [this]() { mExperienceMultiplier = 1.0; });
     
-    // 初始化音效播放器 (Qt5兼容)
-    mShootSoundPlayer = new QMediaPlayer(this);
-    mShootSoundAudioOutput = new QAudioOutput(this);
-    mShootSoundPlayer->setAudioOutput(mShootSoundAudioOutput);
-    mShootSoundPlayer->setSource(QUrl("qrc:/Sounds/TapButton.wav"));
-
-    mHurtSoundPlayer = new QMediaPlayer(this);
-    mHurtSoundAudioOutput = new QAudioOutput(this);
-    mHurtSoundPlayer->setAudioOutput(mHurtSoundAudioOutput);
-    mHurtSoundPlayer->setSource(QUrl("qrc:/Sounds/Cough_sound.wav"));
+    // 音效播放现在由AudioManager统一管理
     
     // 初始化闪烁动画
     mBlinkAnimation = new QPropertyAnimation(this, "opacity", this);
@@ -120,10 +109,7 @@ void SugarOilPlayer::takeDamage(int damage)
     mHP = qMax(0, mHP - actualDamage);
     
     // 播放受伤音效
-    if (mHurtSoundPlayer) {
-        mHurtSoundPlayer->setPosition(0);
-        mHurtSoundPlayer->play();
-    }
+    AudioManager::getInstance()->playSound(AudioManager::SoundType::PlayerHurt);
     
     // 设置无敌状态
     setInvincible(true);
@@ -157,10 +143,7 @@ void SugarOilPlayer::gainExp(int exp)
 void SugarOilPlayer::shoot(const QPointF &direction)
 {
     // 播放射击音效
-    if (mShootSoundPlayer) {
-        mShootSoundPlayer->setPosition(0);
-        mShootSoundPlayer->play();
-    }
+    AudioManager::getInstance()->playSound(AudioManager::SoundType::PlayerAttack);
     
     // 计算有效攻击力
     int effectiveAttack = static_cast<int>(mAttackPoint * mAttackMultiplier);

@@ -1,4 +1,5 @@
 #include "enemy_base.h"
+#include "../audio_manager.h"
 #include "sugar_oil_player.h"
 #include <QPixmap>
 #include <QtMath>
@@ -17,9 +18,6 @@ EnemyBase::EnemyBase(QObject *parent)
     , mPlayer(nullptr)
     , mAITimer(nullptr)
     , mSkillTimer(nullptr)
-    , mHurtSoundPlayer(nullptr)
-    , mDeathSoundPlayer(nullptr)
-
     , mAICounter(0)
 {
     // 初始化AI定时器
@@ -32,16 +30,7 @@ EnemyBase::EnemyBase(QObject *parent)
     mSkillTimer->setSingleShot(true);
     connect(mSkillTimer, &QTimer::timeout, this, &EnemyBase::onSkillTimeout);
     
-    // 初始化音效 (Qt5兼容)
-    mHurtSoundPlayer = new QMediaPlayer(this);
-    mHurtSoundAudioOutput = new QAudioOutput(this);
-    mHurtSoundPlayer->setAudioOutput(mHurtSoundAudioOutput);
-    mHurtSoundPlayer->setSource(QUrl("qrc:/Sounds/Cough_sound.wav"));
-
-    mDeathSoundPlayer = new QMediaPlayer(this);
-    mDeathSoundAudioOutput = new QAudioOutput(this);
-    mDeathSoundPlayer->setAudioOutput(mDeathSoundAudioOutput);
-    mDeathSoundPlayer->setSource(QUrl("qrc:/Sounds/Lose_1.wav"));
+    // 音效播放现在由AudioManager统一管理
 }
 
 EnemyBase::EnemyBase(SugarOilPlayer* player, int hp, int attackPoint, qreal speed, int expValue, EnemyType type, QObject *parent)
@@ -57,9 +46,6 @@ EnemyBase::EnemyBase(SugarOilPlayer* player, int hp, int attackPoint, qreal spee
     , mPlayer(player)
     , mAITimer(nullptr)
     , mSkillTimer(nullptr)
-    , mHurtSoundPlayer(nullptr)
-    , mDeathSoundPlayer(nullptr)
-
     , mAICounter(0)
 {
     // 初始化AI定时器
@@ -73,15 +59,7 @@ EnemyBase::EnemyBase(SugarOilPlayer* player, int hp, int attackPoint, qreal spee
     connect(mSkillTimer, &QTimer::timeout, this, &EnemyBase::onSkillTimeout);
     
     // 初始化音效 (Qt5兼容)
-    mHurtSoundPlayer = new QMediaPlayer(this);
-    mHurtSoundAudioOutput = new QAudioOutput(this);
-    mHurtSoundPlayer->setAudioOutput(mHurtSoundAudioOutput);
-    mHurtSoundPlayer->setSource(QUrl("qrc:/Sounds/Cough_sound.wav"));
-
-    mDeathSoundPlayer = new QMediaPlayer(this);
-    mDeathSoundAudioOutput = new QAudioOutput(this);
-    mDeathSoundPlayer->setAudioOutput(mDeathSoundAudioOutput);
-    mDeathSoundPlayer->setSource(QUrl("qrc:/Sounds/Lose_1.wav"));
+    // 音效播放现在由AudioManager统一管理
     
     updatePixmap();
     setScale(0.12);
@@ -299,18 +277,13 @@ void EnemyBase::updatePixmap()
 
 void EnemyBase::playHurtSound()
 {
-    if (mHurtSoundPlayer) {
-        mHurtSoundPlayer->setPosition(0);
-        mHurtSoundPlayer->play();
-    }
+    // 播放受伤音效
+    AudioManager::getInstance()->playSound(AudioManager::SoundType::EnemyHurt);
 }
 
 void EnemyBase::playDeathSound()
 {
-    if (mDeathSoundPlayer) {
-        mDeathSoundPlayer->setPosition(0);
-        mDeathSoundPlayer->play();
-    }
+    AudioManager::getInstance()->playSound(AudioManager::SoundType::EnemyDeath);
 }
 
 QPointF EnemyBase::getDirectionToPlayer() const

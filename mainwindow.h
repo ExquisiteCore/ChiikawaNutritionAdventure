@@ -12,6 +12,7 @@
 #include "loginwindow.h"
 #include "mode1_carbohydrate_battle/carbohydrate_game_window.h"
 #include "mode2_sugar_oil_battle/sugar_oil_game_window.h"
+#include "audio_manager.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {

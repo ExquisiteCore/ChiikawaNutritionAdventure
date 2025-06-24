@@ -13,8 +13,7 @@ GameCreature::GameCreature(CreatureType type, QObject *parent)
     , mAnimationFrame(0)
     , mSpeed(1.5)
     , mIsFollowingPlayer(true)
-    , mActivateSoundPlayer(nullptr)
-    , mActivateSoundAudioOutput(nullptr)
+    // 音频现在由AudioManager统一管理
 {
     // 初始化动画定时器
     mAnimationTimer = new QTimer(this);
@@ -28,12 +27,7 @@ GameCreature::GameCreature(CreatureType type, QObject *parent)
     connect(mMoveTimer, &QTimer::timeout, this, &GameCreature::onMoveTimeout);
     mMoveTimer->start();
     
-    // 初始化音效
-    mActivateSoundPlayer = new QMediaPlayer(this);
-    mActivateSoundAudioOutput = new QAudioOutput(this);
-    mActivateSoundPlayer->setAudioOutput(mActivateSoundAudioOutput);
-    mActivateSoundPlayer->setSource(QUrl("qrc:/Sounds/Bean_sound_short.wav"));
-    mActivateSoundAudioOutput->setVolume(0.6f);
+    // 音频现在由AudioManager统一管理
     
     setupEffect();
     updatePixmap();
@@ -128,9 +122,8 @@ void GameCreature::activateEffect(SugarOilPlayer* player)
     if (!player) return;
     
     // 播放激活音效
-    if (mActivateSoundPlayer) {
-        mActivateSoundPlayer->play();
-    }
+    // 播放激活音效
+    AudioManager::getInstance()->playSound(AudioManager::SoundType::ItemPickup);
     
     mEffect.isActive = true;
     

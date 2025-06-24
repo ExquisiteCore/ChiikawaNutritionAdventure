@@ -1,4 +1,5 @@
 #include "carbohydrate_game_window.h"
+#include "../audio_manager.h"
 #include <QApplication>
 #include <QCloseEvent>
 #include <QFont>
@@ -21,9 +22,7 @@ CarbohydrateGameWindow::CarbohydrateGameWindow(QWidget *parent)
 CarbohydrateGameWindow::~CarbohydrateGameWindow()
 {
     // 确保析构时停止背景音乐
-    if (gameScene) {
-        gameScene->stopBackgroundMusic();
-    }
+    AudioManager::getInstance()->stopCurrentMusic();
 }
 
 void CarbohydrateGameWindow::setupUI()
@@ -276,9 +275,7 @@ void CarbohydrateGameWindow::keyReleaseEvent(QKeyEvent *event)
 void CarbohydrateGameWindow::closeEvent(QCloseEvent *event)
 {
     // 停止背景音乐
-    if (gameScene) {
-        gameScene->stopBackgroundMusic();
-    }
+    AudioManager::getInstance()->stopCurrentMusic();
     
     emit gameWindowClosed();
     event->accept();

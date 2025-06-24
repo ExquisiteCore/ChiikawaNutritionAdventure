@@ -11,9 +11,7 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 #include <QGraphicsProxyWidget>
-#include <QMediaPlayer>
-#include <QAudioOutput>
-#include <QSoundEffect>
+#include "../audio_manager.h"
 #include "carbohydrate_config.h"
 #include "game_map.h"
 #include "player.h"
@@ -43,14 +41,11 @@ public:
     GameState getCurrentState() const { return currentState; }
     bool isGameRunning() const { return currentState == GAME_RUNNING; }
     
-    // 音频控制
-    void playBackgroundMusic();
-    void playStartBackgroundMusic();
-    void stopBackgroundMusic();
-    void playEndMusic(const QString& musicName);
-    void playSound(const QString& soundName);
-    void setMusicVolume(float volume);
-    void setSoundVolume(float volume);
+    // 音效播放
+    void playAttackSound();
+    void playHurtSound();
+    void playCollectSound();
+    void playSpecialSound(const QString& soundType);
     
 protected:
     void drawBackground(QPainter *painter, const QRectF &rect) override;
@@ -114,11 +109,8 @@ private:
     // 背景
     QPixmap backgroundPixmap;
     
-    // 音频系统
-    QMediaPlayer* backgroundMusicPlayer;
-    QAudioOutput* musicAudioOutput;
-    QSoundEffect* soundEffect;
-    QMap<QString, QString> soundPaths;
+    // 音频管理器引用（使用单例）
+    // AudioManager* audioManager; // 通过AudioManager::getInstance()获取
 };
 
 class CarbohydrateGameView : public QGraphicsView

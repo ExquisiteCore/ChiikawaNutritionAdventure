@@ -20,9 +20,7 @@ CarbohydrateGameScene::CarbohydrateGameScene(QObject *parent)
     , pauseButton(nullptr)
     , resumeButton(nullptr)
     , uiWidget(nullptr)
-    , backgroundMusicPlayer(nullptr)
-    , musicAudioOutput(nullptr)
-    , soundEffect(nullptr)
+
 {
     // 设置场景大小
     setSceneRect(0, 0, GAME_SCENE_WIDTH, GAME_SCENE_HEIGHT);
@@ -43,40 +41,12 @@ CarbohydrateGameScene::CarbohydrateGameScene(QObject *parent)
     countdownTimer = new QTimer(this);
     connect(countdownTimer, &QTimer::timeout, this, &CarbohydrateGameScene::updateCountdown);
     
-    // 初始化音频系统
-    backgroundMusicPlayer = new QMediaPlayer(this);
-    
-    // Qt6音频输出设置
-    musicAudioOutput = new QAudioOutput(this);
-    backgroundMusicPlayer->setAudioOutput(musicAudioOutput);
-    
-    soundEffect = new QSoundEffect(this);
-    
-    // 初始化音频路径映射
-    soundPaths["start_bgm"] = "qrc:/Sounds/Main_sound.wav"; // 游戏开始前的背景音乐
-    soundPaths["background"] = "qrc:/Sounds/Game_sound.wav"; // 游戏进行中的背景音乐
-    soundPaths["collect"] = "qrc:/Sounds/Bean_sound_short.wav";
-    soundPaths["attack"] = "qrc:/Sounds/TapButton.wav";
-    soundPaths["win"] = "qrc:/Sounds/Win.wav";
-    soundPaths["lose"] = "qrc:/Sounds/Lose.wav";
-    soundPaths["boss_hit"] = "qrc:/Sounds/Cough_sound.wav";
-    soundPaths["double_kill"] = "qrc:/Sounds/Double_Kill.wav";
-    soundPaths["triple_kill"] = "qrc:/Sounds/Triple_Kill.wav";
-    soundPaths["dominating"] = "qrc:/Sounds/Dominating.wav";
-    soundPaths["win_bgm"] = "qrc:/Sounds/Win.wav"; // 胜利背景音乐
-    soundPaths["lose_bgm"] = "qrc:/Sounds/Lose_1.wav"; // 失败背景音乐
-    
-    // 设置默认音量
-    if (musicAudioOutput) {
-        musicAudioOutput->setVolume(0.3f);
-    }
-    soundEffect->setVolume(0.5f);
+    // 音频管理由AudioManager统一处理
     
     // 初始化游戏
     initializeGame();
     
-    // 播放游戏开始前的背景音乐
-    playStartBackgroundMusic();
+    // 音乐播放由主窗口控制
 }
 
 CarbohydrateGameScene::~CarbohydrateGameScene()
@@ -287,9 +257,7 @@ void CarbohydrateGameScene::startGame()
             boss->startMovement();
         }
         
-        // 停止开始前音乐，播放游戏背景音乐
-        stopBackgroundMusic();
-        playBackgroundMusic();
+        // 音乐已由主窗口控制，无需在此处切换
         
         updateUI();
         emit gameStateChanged(currentState);
@@ -346,21 +314,15 @@ void CarbohydrateGameScene::endGame(bool won)
         boss->stopMovement();
     }
     
-    // 停止背景音乐
-    stopBackgroundMusic();
+    // 音乐由主窗口控制
     
-    // 播放结束音乐（较长的背景音乐而非短音效）
+    // 播放胜利/失败音乐和音效
     if (won) {
-        playEndMusic("win_bgm");
+        AudioManager::getInstance()->playGameMusic(AudioManager::MusicType::Victory);
+        AudioManager::getInstance()->playSound(AudioManager::SoundType::SpecialEffect, "qrc:/Sounds/Win.wav");
     } else {
-        playEndMusic("lose_bgm");
-    }
-    
-    // 同时播放短音效
-    if (won) {
-        playSound("win");
-    } else {
-        playSound("lose");
+        AudioManager::getInstance()->playGameMusic(AudioManager::MusicType::Defeat);
+        AudioManager::getInstance()->playSound(AudioManager::SoundType::SpecialEffect, "qrc:/Sounds/Lose.wav");
     }
     
     cleanupFiberSwords();
@@ -418,11 +380,11 @@ void CarbohydrateGameScene::onTimeUp()
     currentState = GAME_WIN;
     
     // 播放特殊胜利音效（坚持到最后）
-    playSound("dominating");
+    AudioManager::getInstance()->playSound(AudioManager::SoundType::SpecialEffect, "qrc:/Sounds/Dominating.wav");
     
     // 延迟播放胜利背景音乐
     QTimer::singleShot(2000, this, [this]() {
-        playEndMusic("win_bgm");
+        AudioManager::getInstance()->playGameMusic(AudioManager::MusicType::Victory);
     });
     
     endGame(true);
@@ -453,7 +415,7 @@ void CarbohydrateGameScene::onFiberSwordUsed(QPointF position, Direction directi
     }
     
     // 播放攻击音效
-    playSound("attack");
+    AudioManager::getInstance()->playSound(AudioManager::SoundType::PlayerAttack);
     
     FiberSword* sword = new FiberSword(position, direction, gameMap, this);
     connect(sword, &FiberSword::hitTarget, this, &CarbohydrateGameScene::onFiberSwordHit);
@@ -471,7 +433,7 @@ void CarbohydrateGameScene::onFiberSwordHit(QGraphicsItem* target)
         hitBoss->takeDamage(FIBER_SWORD_DAMAGE);
         
         // 播放Boss受击音效
-        playSound("boss_hit");
+        AudioManager::getInstance()->playSound(AudioManager::SoundType::EnemyHurt);
         
         // 检查连击数并播放相应音效
         static int hitCount = 0;
@@ -494,15 +456,15 @@ void CarbohydrateGameScene::onFiberSwordHit(QGraphicsItem* target)
         // 根据连击数播放特殊音效
         if (hitCount == 2) {
             QTimer::singleShot(500, this, [this]() {
-                playSound("double_kill");
+                AudioManager::getInstance()->playSound(AudioManager::SoundType::SpecialEffect, "qrc:/Sounds/Double_Kill.wav");
             });
         } else if (hitCount == 3) {
             QTimer::singleShot(500, this, [this]() {
-                playSound("triple_kill");
+                AudioManager::getInstance()->playSound(AudioManager::SoundType::SpecialEffect, "qrc:/Sounds/Triple_Kill.wav");
             });
         } else if (hitCount >= 5) {
             QTimer::singleShot(500, this, [this]() {
-                playSound("dominating");
+                AudioManager::getInstance()->playSound(AudioManager::SoundType::SpecialEffect, "qrc:/Sounds/Dominating.wav");
             });
         }
     }
@@ -523,11 +485,11 @@ void CarbohydrateGameScene::onBossDefeated()
     currentState = GAME_WIN;
     
     // 播放特殊胜利音效（主宰）
-    playSound("dominating");
+    AudioManager::getInstance()->playSound(AudioManager::SoundType::SpecialEffect, "qrc:/Sounds/Dominating.wav");
     
     // 延迟播放胜利背景音乐
     QTimer::singleShot(2000, this, [this]() {
-        playEndMusic("win_bgm");
+        AudioManager::getInstance()->playGameMusic(AudioManager::MusicType::Victory);
     });
     
     endGame(true);
@@ -553,7 +515,7 @@ void CarbohydrateGameScene::onFiberValueChanged(int newValue)
 void CarbohydrateGameScene::onFakeVegetableCollected()
 {
     // 播放收集音效
-    playSound("collect");
+    AudioManager::getInstance()->playSound(AudioManager::SoundType::ItemPickup);
     
     // 更新假蔬菜显示
     drawFakeVegetables();
@@ -706,95 +668,4 @@ void CarbohydrateGameView::resizeEvent(QResizeEvent *event)
     }
 }
 
-// 音频控制方法实现
-void CarbohydrateGameScene::playBackgroundMusic()
-{
-    if (backgroundMusicPlayer && soundPaths.contains("background")) {
-        // 先停止当前音乐并清理连接
-        stopBackgroundMusic();
-        
-        // Qt6媒体设置
-        backgroundMusicPlayer->setSource(QUrl(soundPaths["background"]));
-        
-        // 连接信号实现循环播放
-        connect(backgroundMusicPlayer, &QMediaPlayer::mediaStatusChanged, this, [this](QMediaPlayer::MediaStatus status) {
-            if (status == QMediaPlayer::EndOfMedia) {
-                backgroundMusicPlayer->setPosition(0);
-                backgroundMusicPlayer->play();
-            }
-        });
-        backgroundMusicPlayer->play();
-    }
-}
-
-void CarbohydrateGameScene::playStartBackgroundMusic()
-{
-    if (backgroundMusicPlayer && soundPaths.contains("start_bgm")) {
-        // 先停止当前音乐并清理连接
-        stopBackgroundMusic();
-        
-        backgroundMusicPlayer->setSource(QUrl(soundPaths["start_bgm"]));
-        
-        // 设置循环播放
-        connect(backgroundMusicPlayer, &QMediaPlayer::mediaStatusChanged, this, [this](QMediaPlayer::MediaStatus status) {
-            if (status == QMediaPlayer::EndOfMedia) {
-                backgroundMusicPlayer->setPosition(0);
-                backgroundMusicPlayer->play();
-            }
-        });
-        
-        backgroundMusicPlayer->play();
-    }
-}
-
-void CarbohydrateGameScene::stopBackgroundMusic()
-{
-    if (backgroundMusicPlayer) {
-        backgroundMusicPlayer->stop();
-        // 断开之前的循环播放连接
-        disconnect(backgroundMusicPlayer, &QMediaPlayer::mediaStatusChanged, nullptr, nullptr);
-    }
-}
-
-void CarbohydrateGameScene::playEndMusic(const QString& musicName)
-{
-    if (backgroundMusicPlayer && soundPaths.contains(musicName)) {
-        // 先停止当前音乐
-        stopBackgroundMusic();
-        
-        // Qt6媒体设置
-        backgroundMusicPlayer->setSource(QUrl(soundPaths[musicName]));
-        
-        // 设置循环播放（结束音乐也循环播放）
-        connect(backgroundMusicPlayer, &QMediaPlayer::mediaStatusChanged, this, [this](QMediaPlayer::MediaStatus status) {
-            if (status == QMediaPlayer::EndOfMedia) {
-                backgroundMusicPlayer->setPosition(0);
-                backgroundMusicPlayer->play();
-            }
-        });
-        
-        backgroundMusicPlayer->play();
-    }
-}
-
-void CarbohydrateGameScene::playSound(const QString& soundName)
-{
-    if (soundEffect && soundPaths.contains(soundName)) {
-        soundEffect->setSource(QUrl(soundPaths[soundName]));
-        soundEffect->play();
-    }
-}
-
-void CarbohydrateGameScene::setMusicVolume(float volume)
-{
-    if (musicAudioOutput) {
-        musicAudioOutput->setVolume(qBound(0.0f, volume, 1.0f));
-    }
-}
-
-void CarbohydrateGameScene::setSoundVolume(float volume)
-{
-    if (soundEffect) {
-        soundEffect->setVolume(qBound(0.0f, volume, 1.0f));
-    }
-}
+// 音频控制现在由AudioManager统一管理

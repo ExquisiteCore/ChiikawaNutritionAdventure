@@ -9,8 +9,8 @@ GameItem::GameItem(ItemType type, QObject *parent)
     : GameObjectBase(parent)
     , mItemType(type)
     , mAnimationFrame(0)
-    , mPickupSoundPlayer(nullptr)
-    , mPickupSoundAudioOutput(nullptr)
+
+
 {
     // 初始化动画定时器
     mAnimationTimer = new QTimer(this);
@@ -18,12 +18,7 @@ GameItem::GameItem(ItemType type, QObject *parent)
     connect(mAnimationTimer, &QTimer::timeout, this, &GameItem::onAnimationTimeout);
     mAnimationTimer->start();
     
-    // 初始化音效
-    mPickupSoundPlayer = new QMediaPlayer(this);
-    mPickupSoundAudioOutput = new QAudioOutput(this);
-    mPickupSoundPlayer->setAudioOutput(mPickupSoundAudioOutput);
-    mPickupSoundPlayer->setSource(QUrl("qrc:/Sounds/TapButton.wav"));
-    mPickupSoundAudioOutput->setVolume(0.5f);
+    // 音效播放现在由AudioManager统一管理
     
     setupEffect();
     updatePixmap();
@@ -166,9 +161,8 @@ void GameItem::applyEffect(SugarOilPlayer* player)
     if (!player) return;
     
     // 播放拾取音效
-    if (mPickupSoundPlayer) {
-        mPickupSoundPlayer->play();
-    }
+    // 播放拾取音效
+    AudioManager::getInstance()->playSound(AudioManager::SoundType::ItemPickup);
     
     // 应用瞬间效果
     if (mEffect.healthRestore > 0) {

@@ -5,12 +5,11 @@
 #include <QTimer>
 #include <QList>
 #include <QKeyEvent>
-#include <QMediaPlayer>
-#include <QAudioOutput>
 #include <QRandomGenerator>
 #include <QGraphicsPixmapItem>
 
 #include "sugar_oil_config.h"
+#include "../audio_manager.h"
 #include "sugar_oil_player.h"
 #include "enemy_base.h"
 #include "bullet_base.h"
@@ -151,15 +150,7 @@ private:
     QPointF mLastMousePos;
     bool mMousePressed;
     
-    // 音频
-    QMediaPlayer* mBackgroundMusicPlayer;
-    QAudioOutput* mBackgroundMusicAudioOutput;
-    QMediaPlayer* mGameMusicPlayer;
-    QAudioOutput* mGameMusicAudioOutput;
-    QMediaPlayer* mWinSoundPlayer;
-    QAudioOutput* mWinSoundAudioOutput;
-    QMediaPlayer* mLoseSoundPlayer;
-    QAudioOutput* mLoseSoundAudioOutput;
+    // 音频现在由AudioManager统一管理
     
     // 系统管理器
     ItemManager* mItemManager;

@@ -1,4 +1,5 @@
 #include "sugar_oil_game_scene_new.h"
+#include "../audio_manager.h"
 #include <QGraphicsView>
 #include <QApplication>
 #include <QDebug>
@@ -18,7 +19,6 @@ SugarOilGameSceneNew::SugarOilGameSceneNew(QObject *parent)
     , mGameTime(0)
     , mSpawnCounter(0)
     , mMousePressed(false)
-    , mBackgroundMusicPlayer(nullptr)
     , mItemManager(nullptr)
     , mCreatureManager(nullptr)
     , mItemSpawnTimer(nullptr)
@@ -114,33 +114,8 @@ void SugarOilGameSceneNew::initializeTimers()
 
 void SugarOilGameSceneNew::initializeAudio()
 {
-    // 开始前背景音乐
-    mBackgroundMusicPlayer = new QMediaPlayer(this);
-    mBackgroundMusicAudioOutput = new QAudioOutput(this);
-    mBackgroundMusicPlayer->setAudioOutput(mBackgroundMusicAudioOutput);
-    mBackgroundMusicPlayer->setSource(QUrl("qrc:/Sounds/Main_sound.wav"));
-    mBackgroundMusicAudioOutput->setVolume(0.3f);
-    
-    // 游戏中音乐
-    mGameMusicPlayer = new QMediaPlayer(this);
-    mGameMusicAudioOutput = new QAudioOutput(this);
-    mGameMusicPlayer->setAudioOutput(mGameMusicAudioOutput);
-    mGameMusicPlayer->setSource(QUrl("qrc:/Sounds/Game_sound.wav"));
-    mGameMusicAudioOutput->setVolume(0.4f);
-    
-    // 胜利音效
-    mWinSoundPlayer = new QMediaPlayer(this);
-    mWinSoundAudioOutput = new QAudioOutput(this);
-    mWinSoundPlayer->setAudioOutput(mWinSoundAudioOutput);
-    mWinSoundPlayer->setSource(QUrl("qrc:/Sounds/Win.wav"));
-    mWinSoundAudioOutput->setVolume(0.6f);
-    
-    // 失败音效
-    mLoseSoundPlayer = new QMediaPlayer(this);
-    mLoseSoundAudioOutput = new QAudioOutput(this);
-    mLoseSoundPlayer->setAudioOutput(mLoseSoundAudioOutput);
-    mLoseSoundPlayer->setSource(QUrl("qrc:/Sounds/Lose.wav"));
-    mLoseSoundAudioOutput->setVolume(0.6f);
+    // 音频现在由AudioManager统一管理
+    // 无需在此处初始化音频设备
 }
 
 void SugarOilGameSceneNew::initializeManagers()
@@ -181,14 +156,7 @@ void SugarOilGameSceneNew::startGame()
     mItemSpawnTimer->start(8000); // 每8秒生成一个道具
     mCreatureSpawnTimer->start(15000); // 每15秒生成一个生物
     
-    // 停止背景音乐，播放游戏音乐
-    if (mBackgroundMusicPlayer) {
-        mBackgroundMusicPlayer->stop();
-    }
-    if (mGameMusicPlayer) {
-        mGameMusicPlayer->setLoops(QMediaPlayer::Infinite); // 循环播放
-        mGameMusicPlayer->play();
-    }
+    // 音频切换由主窗口统一管理
     
     emit gameStarted();
     emit gameStateChanged(SUGAR_OIL_RUNNING);
@@ -210,10 +178,8 @@ void SugarOilGameSceneNew::pauseGame()
     mItemSpawnTimer->stop();
     mCreatureSpawnTimer->stop();
     
-    // 暂停游戏音乐
-    if (mGameMusicPlayer) {
-        mGameMusicPlayer->pause();
-    }
+    // 音频暂停由AudioManager统一管理
+    AudioManager::getInstance()->pauseCurrentMusic();
     
     // 暂停所有敌人的AI
     for (EnemyBase* enemy : mEnemies) {
@@ -240,10 +206,8 @@ void SugarOilGameSceneNew::resumeGame()
     mItemSpawnTimer->start();
     mCreatureSpawnTimer->start();
     
-    // 恢复游戏音乐
-    if (mGameMusicPlayer) {
-        mGameMusicPlayer->play();
-    }
+    // 音频恢复由AudioManager统一管理
+    AudioManager::getInstance()->resumeCurrentMusic();
     
     // 恢复所有敌人的AI
     for (EnemyBase* enemy : mEnemies) {
@@ -272,9 +236,7 @@ void SugarOilGameSceneNew::stopGame()
     if (mCreatureSpawnTimer) mCreatureSpawnTimer->stop();
     
     // 停止游戏音乐
-    if (mGameMusicPlayer) {
-        mGameMusicPlayer->stop();
-    }
+    AudioManager::getInstance()->stopCurrentMusic();
     
     // 停止所有敌人的AI
     for (EnemyBase* enemy : mEnemies) {
@@ -377,9 +339,7 @@ void SugarOilGameSceneNew::onGameTimerTimeout()
     if (mGameTime >= GAME_DURATION) {
         stopGame();
         // 播放胜利音效
-        if (mWinSoundPlayer) {
-            mWinSoundPlayer->play();
-        }
+        AudioManager::getInstance()->playGameMusic(AudioManager::MusicType::Victory);
         emit gameWon(getScore(), getPlayerLevel());
         emit gameStateChanged(SUGAR_OIL_WON);
     }
@@ -823,9 +783,7 @@ void SugarOilGameSceneNew::onPlayerDied()
     qDebug() << "Player died!";
     stopGame();
     // 播放失败音效
-    if (mLoseSoundPlayer) {
-        mLoseSoundPlayer->play();
-    }
+    AudioManager::getInstance()->playGameMusic(AudioManager::MusicType::Defeat);
     emit gameOver(getScore(), getPlayerLevel());
     emit gameStateChanged(SUGAR_OIL_LOST);
 }

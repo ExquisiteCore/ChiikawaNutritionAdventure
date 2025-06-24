@@ -81,9 +81,7 @@ private:
     // 按钮
     QPushButton* backButton;
     
-    // 音频
-    QMediaPlayer* mMenuMusicPlayer;
-    QAudioOutput* mMenuMusicAudioOutput;
+    // 音频现在由AudioManager统一管理
     QPushButton* restartButton;
     QPushButton* instructionsButton;
     QPushButton* pauseButton;

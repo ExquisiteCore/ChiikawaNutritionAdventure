@@ -3,8 +3,7 @@
 
 #include "game_object_base.h"
 #include <QTimer>
-#include <QMediaPlayer>
-#include <QAudioOutput>
+#include "../audio_manager.h"
 #include <QRandomGenerator>
 
 class SugarOilPlayer;
@@ -98,11 +97,7 @@ private:
     QTimer* mAITimer;
     QTimer* mSkillTimer;
     
-    // 音效播放器
-    QMediaPlayer* mHurtSoundPlayer;
-    QMediaPlayer* mDeathSoundPlayer;
-    QAudioOutput* mHurtSoundAudioOutput;
-    QAudioOutput* mDeathSoundAudioOutput;
+    // 音效现在由AudioManager统一管理
     
     // AI相关
     int mAICounter;

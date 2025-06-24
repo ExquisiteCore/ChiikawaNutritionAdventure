@@ -4,8 +4,7 @@
 #include "sugar_oil_config.h"
 #include "game_object_base.h"
 #include <QTimer>
-#include <QMediaPlayer>
-#include <QAudioOutput>
+#include "../audio_manager.h"
 #include <QRandomGenerator>
 
 class SugarOilPlayer;
@@ -58,9 +57,7 @@ private:
     QTimer* mAnimationTimer;
     int mAnimationFrame;
     
-    // 音效
-    QMediaPlayer* mPickupSoundPlayer;
-    QAudioOutput* mPickupSoundAudioOutput;
+    // 音效现在由AudioManager统一管理
     
     static const int ANIMATION_INTERVAL = 300; // 动画帧间隔
 };
