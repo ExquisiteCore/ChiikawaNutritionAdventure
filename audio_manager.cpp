@@ -75,13 +75,23 @@ void AudioManager::setupMusicPlayer()
     musicAudioOutput = new QAudioOutput(this);
     musicPlayer->setAudioOutput(musicAudioOutput);
     
-    // 设置音乐循环播放和状态监听
+    // 设置音乐状态监听
     connect(musicPlayer, &QMediaPlayer::mediaStatusChanged, this, 
             [this](QMediaPlayer::MediaStatus status) {
                 qDebug() << "音乐状态变化:" << status;
                 if (status == QMediaPlayer::EndOfMedia && musicPlaying) {
-                    musicPlayer->setPosition(0);
-                    musicPlayer->play();
+                    // 只有背景音乐和游戏音乐才循环播放，胜利/失败音乐播放一次后停止
+                    if (currentMusicType == MusicType::Background || 
+                        currentMusicType == MusicType::Mode1Game || 
+                        currentMusicType == MusicType::Mode2Game) {
+                        musicPlayer->setPosition(0);
+                        musicPlayer->play();
+                    } else {
+                        // 胜利/失败音乐播放完毕后停止
+                        musicPlaying = false;
+                        musicPaused = false;
+                        qDebug() << "胜利/失败音乐播放完毕，停止播放";
+                    }
                 }
             });
     
