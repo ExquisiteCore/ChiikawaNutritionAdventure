@@ -1,4 +1,5 @@
 #include "usagi_player.h"
+#include "../audio_manager.h"
 #include <QKeyEvent>
 #include <QGraphicsScene>
 #include <QPropertyAnimation>
@@ -254,6 +255,9 @@ void UsagiPlayer::takeDamage(int damage)
     
     health -= damage;
     if (health < 0) health = 0;
+    
+    // 播放受伤音效
+    AudioManager::getInstance()->playSound(AudioManager::SoundType::PlayerHurt);
     
     // 播放受伤动画
     playDamageAnimation();
