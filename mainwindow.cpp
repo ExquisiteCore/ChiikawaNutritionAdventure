@@ -370,9 +370,13 @@ void MainWindow::onSettingsClicked()
     QHBoxLayout *musicLayout = new QHBoxLayout();
     QSlider *musicVolumeSlider = new QSlider(Qt::Horizontal);
     musicVolumeSlider->setRange(0, 100);
-    musicVolumeSlider->setValue(30); // 默认30%
     
-    QLabel *musicVolumeValueLabel = new QLabel("30%");
+    // 从AudioManager获取当前音乐音量
+    AudioManager* audioManager = AudioManager::getInstance();
+    int currentMusicVolume = static_cast<int>(audioManager->getMusicVolume() * 100);
+    musicVolumeSlider->setValue(currentMusicVolume);
+    
+    QLabel *musicVolumeValueLabel = new QLabel(QString("%1%").arg(currentMusicVolume));
     musicVolumeValueLabel->setAlignment(Qt::AlignCenter);
     musicVolumeValueLabel->setMinimumWidth(50);
     musicVolumeValueLabel->setStyleSheet("font-weight: bold; color: #74b9ff;");
@@ -388,9 +392,12 @@ void MainWindow::onSettingsClicked()
     QHBoxLayout *soundLayout = new QHBoxLayout();
     QSlider *soundVolumeSlider = new QSlider(Qt::Horizontal);
     soundVolumeSlider->setRange(0, 100);
-    soundVolumeSlider->setValue(50); // 默认50%
     
-    QLabel *soundVolumeValueLabel = new QLabel("50%");
+    // 从AudioManager获取当前音效音量
+    int currentSoundVolume = static_cast<int>(audioManager->getSoundVolume() * 100);
+    soundVolumeSlider->setValue(currentSoundVolume);
+    
+    QLabel *soundVolumeValueLabel = new QLabel(QString("%1%").arg(currentSoundVolume));
     soundVolumeValueLabel->setAlignment(Qt::AlignCenter);
     soundVolumeValueLabel->setMinimumWidth(50);
     soundVolumeValueLabel->setStyleSheet("font-weight: bold; color: #74b9ff;");
@@ -401,7 +408,8 @@ void MainWindow::onSettingsClicked()
     
     // 音效开关
     QCheckBox *soundEffectCheckBox = new QCheckBox("启用音效");
-    soundEffectCheckBox->setChecked(true);
+    // 从AudioManager获取当前音效开关状态
+    soundEffectCheckBox->setChecked(audioManager->isSoundEnabled());
     layout->addWidget(soundEffectCheckBox);
     
     layout->addStretch();
@@ -448,7 +456,8 @@ void MainWindow::onSettingsClicked()
         // 应用音频设置
         AudioManager* audioManager = AudioManager::getInstance();
         audioManager->setMusicVolume(musicVolume);
-        audioManager->setSoundVolume(soundEnabled ? soundVolume : 0.0f);
+        audioManager->setSoundVolume(soundVolume);
+        audioManager->setSoundEnabled(soundEnabled);
         
         QMessageBox::information(settingsDialog, "设置", "设置已保存！");
         settingsDialog->accept();

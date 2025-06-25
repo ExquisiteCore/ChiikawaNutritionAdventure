@@ -30,6 +30,7 @@ AudioManager::AudioManager(QObject *parent)
     , musicVolume(0.3f)
     , soundVolume(0.5f)
     , masterVolume(1.0f)
+    , soundEnabled(true)
 {
     initializeAudioResources();
     setupMusicPlayer();
@@ -202,7 +203,7 @@ void AudioManager::resumeCurrentMusic()
 
 void AudioManager::playSound(SoundType type, const QString& soundFile)
 {
-    if (!soundEffect) return;
+    if (!soundEffect || !soundEnabled) return;
     
     QString filePath;
     if (!soundFile.isEmpty()) {
@@ -266,4 +267,25 @@ bool AudioManager::isMusicPaused() const
 AudioManager::MusicType AudioManager::getCurrentMusicType() const
 {
     return currentMusicType;
+}
+
+float AudioManager::getMusicVolume() const
+{
+    return musicVolume;
+}
+
+float AudioManager::getSoundVolume() const
+{
+    return soundVolume;
+}
+
+bool AudioManager::isSoundEnabled() const
+{
+    return soundEnabled;
+}
+
+void AudioManager::setSoundEnabled(bool enabled)
+{
+    soundEnabled = enabled;
+    qDebug() << "设置音效开关:" << enabled;
 }

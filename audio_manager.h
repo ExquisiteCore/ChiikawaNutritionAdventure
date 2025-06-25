@@ -54,6 +54,14 @@ public:
     bool isMusicPlaying() const;
     bool isMusicPaused() const;
     MusicType getCurrentMusicType() const;
+    
+    // 音量获取
+    float getMusicVolume() const;
+    float getSoundVolume() const;
+    bool isSoundEnabled() const;
+    
+    // 音效开关
+    void setSoundEnabled(bool enabled);
 
 private:
     explicit AudioManager(QObject *parent = nullptr);
@@ -85,6 +93,9 @@ private:
     float musicVolume;
     float soundVolume;
     float masterVolume;
+    
+    // 音效开关
+    bool soundEnabled;
 };
 
 #endif // AUDIO_MANAGER_H
