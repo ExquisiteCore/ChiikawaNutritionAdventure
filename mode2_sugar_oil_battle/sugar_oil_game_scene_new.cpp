@@ -672,6 +672,11 @@ void SugarOilGameSceneNew::checkPlayerBulletEnemyCollisions()
             continue;
         }
         
+        // 跳过已销毁的子弹
+        if (bullet->isDestroyed()) {
+            continue;
+        }
+        
         bool bulletHit = false;
         
         for (int j = 0; j < mEnemies.size(); ++j) {
@@ -688,6 +693,9 @@ void SugarOilGameSceneNew::checkPlayerBulletEnemyCollisions()
             if (distance < SUGAR_OIL_COLLISION_DISTANCE) {
                 // 添加调试信息
                 qDebug() << "Bullet collision detected! Distance:" << distance << "Bullet damage:" << bullet->getDamage();
+                
+                // 立即标记子弹为已销毁，避免重复处理
+                bullet->markForDestruction();
                 
                 // 敌人受伤
                 enemy->takeDamage(bullet->getDamage());
@@ -1050,6 +1058,17 @@ void SugarOilGameSceneNew::onPlayerLevelUp(int newLevel)
 
 void SugarOilGameSceneNew::onBulletOutOfBounds(BulletBase* bullet)
 {
+    // 检查子弹是否已经被销毁，避免重复处理
+    if (!bullet || bullet->isDestroyed()) {
+        qDebug() << "onBulletOutOfBounds: Bullet already destroyed, skipping";
+        return;
+    }
+    
+    qDebug() << "onBulletOutOfBounds: Processing bullet removal";
+    
+    // 标记为已销毁
+    bullet->markForDestruction();
+    
     // 从列表中移除子弹
     mPlayerBullets.removeAll(bullet);
     mEnemyBullets.removeAll(bullet);

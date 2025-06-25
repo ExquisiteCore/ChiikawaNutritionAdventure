@@ -13,6 +13,7 @@ BulletBase::BulletBase(QObject *parent)
     , mSpeed(8.0)
     , mMoveDirection(1.0, 0.0)
     , mDamage(10)
+    , mIsDestroyed(false)
     , mMoveTimer(nullptr)
 {
     // 初始化移动定时器
@@ -33,6 +34,7 @@ BulletBase::BulletBase(GameObjectBase* owner, BulletType type, QObject *parent)
     , mSpeed(8.0)
     , mMoveDirection(1.0, 0.0)
     , mDamage(10)
+    , mIsDestroyed(false)
     , mMoveTimer(nullptr)
 {
     // 初始化移动定时器
@@ -226,6 +228,7 @@ void BulletBase::returnBulletToPool(BulletBase* bullet)
         // 停止移动和重置状态
         bullet->stopMoving();
         bullet->setVisible(false);
+        bullet->markForDestruction(); // 标记为已销毁
         
         QList<BulletBase*>& pool = (type == PlayerBullet) ? sPlayerBulletPool : sEnemyBulletPool;
         
@@ -261,6 +264,7 @@ void BulletBase::resetBullet(GameObjectBase* owner, BulletType type)
     mSpeed = 8.0;
     mMoveDirection = QPointF(1.0, 0.0);
     mDamage = 10;
+    mIsDestroyed = false; // 重置销毁状态
     
     // 重新设置图像
     updateBulletPixmap();

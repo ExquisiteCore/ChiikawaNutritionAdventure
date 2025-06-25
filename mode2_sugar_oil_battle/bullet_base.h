@@ -46,6 +46,10 @@ public:
     
     GameObjectBase* getOwner() const { return mOwner; }
     
+    // 状态检查
+    bool isDestroyed() const { return mIsDestroyed; }
+    void markForDestruction() { mIsDestroyed = true; }
+    
     // 移动
     virtual void moveBullet();
     
@@ -77,6 +81,7 @@ private:
     qreal mSpeed;
     QPointF mMoveDirection;
     int mDamage;
+    bool mIsDestroyed; // 添加销毁状态标记
     
     QTimer* mMoveTimer;
     
