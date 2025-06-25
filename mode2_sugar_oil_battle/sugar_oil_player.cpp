@@ -313,3 +313,58 @@ void SugarOilPlayer::checkLevelUp()
         emit expChanged(mExp, EXP_PER_LEVEL);
     }
 }
+
+void SugarOilPlayer::pauseAllTimers()
+{
+    // 暂停无敌定时器
+    if (mInvincibilityTimer && mInvincibilityTimer->isActive()) {
+        mInvincibilityTimer->stop();
+    }
+    
+    // 暂停动画定时器
+    if (mAnimationTimer && mAnimationTimer->isActive()) {
+        mAnimationTimer->stop();
+    }
+    
+    // 暂停所有效果定时器
+    if (mSpeedEffectTimer && mSpeedEffectTimer->isActive()) {
+        mSpeedEffectTimer->stop();
+    }
+    if (mAttackEffectTimer && mAttackEffectTimer->isActive()) {
+        mAttackEffectTimer->stop();
+    }
+    if (mDefenseEffectTimer && mDefenseEffectTimer->isActive()) {
+        mDefenseEffectTimer->stop();
+    }
+    if (mFastShootingTimer && mFastShootingTimer->isActive()) {
+        mFastShootingTimer->stop();
+    }
+    if (mMagnetismTimer && mMagnetismTimer->isActive()) {
+        mMagnetismTimer->stop();
+    }
+    if (mExperienceEffectTimer && mExperienceEffectTimer->isActive()) {
+        mExperienceEffectTimer->stop();
+    }
+    
+    // 暂停闪烁动画
+    if (mBlinkAnimation && mBlinkAnimation->state() == QAbstractAnimation::Running) {
+        mBlinkAnimation->pause();
+    }
+}
+
+void SugarOilPlayer::resumeAllTimers()
+{
+    // 恢复动画定时器（这个应该始终运行）
+    if (mAnimationTimer && !mAnimationTimer->isActive()) {
+        mAnimationTimer->start();
+    }
+    
+    // 其他定时器根据状态恢复
+    // 无敌定时器和效果定时器通常是单次触发，不需要自动恢复
+    // 它们会在相应的事件触发时重新启动
+    
+    // 恢复闪烁动画
+    if (mBlinkAnimation && mBlinkAnimation->state() == QAbstractAnimation::Paused) {
+        mBlinkAnimation->resume();
+    }
+}

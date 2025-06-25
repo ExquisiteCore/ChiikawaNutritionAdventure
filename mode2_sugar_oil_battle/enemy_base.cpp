@@ -215,6 +215,29 @@ void EnemyBase::stopAI()
     }
 }
 
+void EnemyBase::stopAllTimers()
+{
+    // 停止AI定时器
+    if (mAITimer) {
+        mAITimer->stop();
+    }
+    // 停止技能定时器
+    if (mSkillTimer) {
+        mSkillTimer->stop();
+    }
+}
+
+void EnemyBase::resumeAllTimers()
+{
+    // 只有在游戏运行且敌人存活时才恢复定时器
+    if (mHP > 0) {
+        if (mAITimer && !mAITimer->isActive()) {
+            mAITimer->start();
+        }
+        // 技能定时器根据需要恢复（通常是单次触发，不需要自动恢复）
+    }
+}
+
 void EnemyBase::onAITimeout()
 {
     updateAI();

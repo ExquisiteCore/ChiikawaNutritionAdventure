@@ -59,6 +59,10 @@ public:
     void startAI();
     void stopAI();
     
+    // 暂停/恢复所有定时器（用于游戏暂停）
+    void stopAllTimers();
+    void resumeAllTimers();
+    
 signals:
     void enemyDied(EnemyBase* enemy);
     void enemyAttack(EnemyBase* enemy, QPointF position, QPointF direction, int damage);

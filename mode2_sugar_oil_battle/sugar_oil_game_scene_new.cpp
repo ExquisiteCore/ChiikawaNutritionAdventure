@@ -227,22 +227,37 @@ void SugarOilGameSceneNew::pauseGame()
     // 音频暂停由AudioManager统一管理
     AudioManager::getInstance()->pauseCurrentMusic();
     
-    // 暂停所有敌人的AI
+    // 暂停所有敌人的AI和技能定时器
     for (EnemyBase* enemy : mEnemies) {
-        enemy->stopAI();
+        if (enemy) {
+            enemy->stopAI();
+            // 确保敌人的所有定时器都被停止，包括技能定时器
+            enemy->stopAllTimers();
+        }
     }
     
     // 暂停所有生物的移动
     for (GameCreature* creature : mCreatures) {
-        creature->pauseMovement();
+        if (creature) {
+            creature->pauseMovement();
+        }
     }
     
     // 暂停所有子弹的移动
     for (BulletBase* bullet : mPlayerBullets) {
-        bullet->stopMoving();
+        if (bullet) {
+            bullet->stopMoving();
+        }
     }
     for (BulletBase* bullet : mEnemyBullets) {
-        bullet->stopMoving();
+        if (bullet) {
+            bullet->stopMoving();
+        }
+    }
+    
+    // 暂停玩家的所有定时器
+    if (mPlayer) {
+        mPlayer->pauseAllTimers();
     }
     
     emit gamePaused();
@@ -268,22 +283,37 @@ void SugarOilGameSceneNew::resumeGame()
     // 音频恢复由AudioManager统一管理
     AudioManager::getInstance()->resumeCurrentMusic();
     
-    // 恢复所有敌人的AI
+    // 恢复所有敌人的AI和技能定时器
     for (EnemyBase* enemy : mEnemies) {
-        enemy->startAI();
+        if (enemy) {
+            enemy->startAI();
+            // 恢复敌人的所有定时器
+            enemy->resumeAllTimers();
+        }
     }
     
     // 恢复所有生物的移动
     for (GameCreature* creature : mCreatures) {
-        creature->resumeMovement();
+        if (creature) {
+            creature->resumeMovement();
+        }
     }
     
     // 恢复所有子弹的移动
     for (BulletBase* bullet : mPlayerBullets) {
-        bullet->startMoving();
+        if (bullet) {
+            bullet->startMoving();
+        }
     }
     for (BulletBase* bullet : mEnemyBullets) {
-        bullet->startMoving();
+        if (bullet) {
+            bullet->startMoving();
+        }
+    }
+    
+    // 恢复玩家的所有定时器
+    if (mPlayer) {
+        mPlayer->resumeAllTimers();
     }
     
     emit gameResumed();
@@ -631,6 +661,10 @@ void SugarOilGameSceneNew::checkPlayerEnemyCollisions()
 
 void SugarOilGameSceneNew::checkPlayerBulletEnemyCollisions()
 {
+    // 使用临时列表存储需要移除的对象，避免在循环中修改列表导致索引问题
+    QList<BulletBase*> bulletsToRemove;
+    QList<EnemyBase*> enemiesToRemove;
+    
     for (int i = mPlayerBullets.size() - 1; i >= 0; --i) {
         BulletBase* bullet = mPlayerBullets[i];
         if (!bullet) {
@@ -638,14 +672,12 @@ void SugarOilGameSceneNew::checkPlayerBulletEnemyCollisions()
             continue;
         }
         
-        QRectF bulletRect = bullet->sceneBoundingRect();
         bool bulletHit = false;
         
-        for (int j = mEnemies.size() - 1; j >= 0; --j) {
+        for (int j = 0; j < mEnemies.size(); ++j) {
             EnemyBase* enemy = mEnemies[j];
-            if (!enemy) {
-                mEnemies.removeAt(j);
-                continue;
+            if (!enemy || enemy->getHP() <= 0) {
+                continue; // 跳过无效或已死亡的敌人
             }
             
             // 使用距离检测提高碰撞精度
@@ -657,18 +689,14 @@ void SugarOilGameSceneNew::checkPlayerBulletEnemyCollisions()
                 // 敌人受伤
                 enemy->takeDamage(bullet->getDamage());
                 
-                // 如果敌人死亡，立即从场景中移除
+                // 如果敌人死亡，标记为需要移除
                 if (enemy->getHP() <= 0) {
                     enemy->stopAI();
-                    removeItem(enemy);
-                    mEnemies.removeAt(j);
-                    enemy->deleteLater();
+                    enemiesToRemove.append(enemy);
                 }
                 
-                // 移除子弹
-                removeItem(bullet);
-                mPlayerBullets.removeAt(i);
-                BulletBase::returnBulletToPool(bullet);
+                // 标记子弹为需要移除
+                bulletsToRemove.append(bullet);
                 bulletHit = true;
                 break;
             }
@@ -677,6 +705,20 @@ void SugarOilGameSceneNew::checkPlayerBulletEnemyCollisions()
         if (bulletHit) {
             break;
         }
+    }
+    
+    // 移除被击中的子弹
+    for (BulletBase* bullet : bulletsToRemove) {
+        mPlayerBullets.removeOne(bullet);
+        removeItem(bullet);
+        BulletBase::returnBulletToPool(bullet);
+    }
+    
+    // 移除死亡的敌人
+    for (EnemyBase* enemy : enemiesToRemove) {
+        mEnemies.removeOne(enemy);
+        removeItem(enemy);
+        enemy->deleteLater();
     }
 }
 

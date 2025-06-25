@@ -63,6 +63,10 @@ public:
     void startMoving() { mIsMoving = true; }
     void stopMoving() { mIsMoving = false; }
     bool isMoving() const { return mIsMoving; }
+    
+    // 暂停/恢复所有定时器（用于游戏暂停）
+    void pauseAllTimers();
+    void resumeAllTimers();
 
 signals:
     void healthChanged(int health, int maxHealth);
