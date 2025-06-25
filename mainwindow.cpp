@@ -3,6 +3,13 @@
 #include <QApplication>
 #include <QScreen>
 #include <QMessageBox>
+#include <QDialog>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QSlider>
+#include <QCheckBox>
+#include <QLabel>
+#include <QPushButton>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -278,13 +285,180 @@ void MainWindow::onLevelsClicked()
 
 void MainWindow::onSettingsClicked()
 {
-    QMessageBox::information(this, "游戏设置", 
-                           "⚙️ 游戏设置 ⚙️\n\n"
-                           "设置选项：\n\n"
-                           "🖱️ 鼠标灵敏度调节\n"
-                           "🔊 声音大小调节\n"
-                           "🎵 音效开关\n\n"
-                           "（具体设置功能将在后续开发中实现）");
+    // 创建设置对话框
+    QDialog *settingsDialog = new QDialog(this);
+    settingsDialog->setWindowTitle("游戏设置");
+    settingsDialog->setFixedSize(450, 400);
+    settingsDialog->setStyleSheet(
+        "QDialog {"
+        "    background-color: #2d3436;"
+        "    border-radius: 10px;"
+        "}"
+        "QLabel {"
+        "    color: #ddd;"
+        "    font-size: 14px;"
+        "    margin: 5px 0;"
+        "}"
+        "QSlider::groove:horizontal {"
+        "    border: 1px solid #999;"
+        "    height: 8px;"
+        "    background: #555;"
+        "    border-radius: 4px;"
+        "}"
+        "QSlider::handle:horizontal {"
+        "    background: #74b9ff;"
+        "    border: 1px solid #5c5c5c;"
+        "    width: 18px;"
+        "    margin: -2px 0;"
+        "    border-radius: 9px;"
+        "}"
+        "QSlider::sub-page:horizontal {"
+        "    background: #74b9ff;"
+        "    border-radius: 4px;"
+        "}"
+        "QCheckBox {"
+        "    color: #ddd;"
+        "    font-size: 14px;"
+        "    margin: 10px 0;"
+        "}"
+        "QCheckBox::indicator {"
+        "    width: 18px;"
+        "    height: 18px;"
+        "}"
+        "QCheckBox::indicator:unchecked {"
+        "    background-color: #555;"
+        "    border: 2px solid #999;"
+        "    border-radius: 9px;"
+        "}"
+        "QCheckBox::indicator:checked {"
+        "    background-color: #74b9ff;"
+        "    border: 2px solid #74b9ff;"
+        "    border-radius: 9px;"
+        "}"
+        "QPushButton {"
+        "    background-color: #636e72;"
+        "    color: white;"
+        "    border: none;"
+        "    border-radius: 8px;"
+        "    padding: 12px 24px;"
+        "    font-size: 14px;"
+        "    min-width: 80px;"
+        "}"
+        "QPushButton:hover {"
+        "    background-color: #2d3436;"
+        "}"
+    );
+    
+    QVBoxLayout *layout = new QVBoxLayout(settingsDialog);
+    layout->setSpacing(15);
+    layout->setContentsMargins(25, 25, 25, 25);
+    
+    // 标题
+    QLabel *titleLabel = new QLabel("⚙️ 游戏设置");
+    titleLabel->setAlignment(Qt::AlignCenter);
+    QFont titleFont = titleLabel->font();
+    titleFont.setPointSize(16);
+    titleFont.setBold(true);
+    titleLabel->setFont(titleFont);
+    titleLabel->setStyleSheet("color: #ffcc00; margin-bottom: 10px;");
+    layout->addWidget(titleLabel);
+    
+    // 音乐音量设置
+    QLabel *musicVolumeLabel = new QLabel("🎵 背景音乐音量:");
+    layout->addWidget(musicVolumeLabel);
+    
+    QHBoxLayout *musicLayout = new QHBoxLayout();
+    QSlider *musicVolumeSlider = new QSlider(Qt::Horizontal);
+    musicVolumeSlider->setRange(0, 100);
+    musicVolumeSlider->setValue(30); // 默认30%
+    
+    QLabel *musicVolumeValueLabel = new QLabel("30%");
+    musicVolumeValueLabel->setAlignment(Qt::AlignCenter);
+    musicVolumeValueLabel->setMinimumWidth(50);
+    musicVolumeValueLabel->setStyleSheet("font-weight: bold; color: #74b9ff;");
+    
+    musicLayout->addWidget(musicVolumeSlider);
+    musicLayout->addWidget(musicVolumeValueLabel);
+    layout->addLayout(musicLayout);
+    
+    // 音效音量设置
+    QLabel *soundVolumeLabel = new QLabel("🔊 音效音量:");
+    layout->addWidget(soundVolumeLabel);
+    
+    QHBoxLayout *soundLayout = new QHBoxLayout();
+    QSlider *soundVolumeSlider = new QSlider(Qt::Horizontal);
+    soundVolumeSlider->setRange(0, 100);
+    soundVolumeSlider->setValue(50); // 默认50%
+    
+    QLabel *soundVolumeValueLabel = new QLabel("50%");
+    soundVolumeValueLabel->setAlignment(Qt::AlignCenter);
+    soundVolumeValueLabel->setMinimumWidth(50);
+    soundVolumeValueLabel->setStyleSheet("font-weight: bold; color: #74b9ff;");
+    
+    soundLayout->addWidget(soundVolumeSlider);
+    soundLayout->addWidget(soundVolumeValueLabel);
+    layout->addLayout(soundLayout);
+    
+    // 音效开关
+    QCheckBox *soundEffectCheckBox = new QCheckBox("启用音效");
+    soundEffectCheckBox->setChecked(true);
+    layout->addWidget(soundEffectCheckBox);
+    
+    layout->addStretch();
+    
+    // 按钮布局
+    QHBoxLayout *buttonLayout = new QHBoxLayout();
+    
+    QPushButton *applyButton = new QPushButton("应用");
+    applyButton->setStyleSheet(
+        "QPushButton {"
+        "    background-color: #74b9ff;"
+        "}"
+        "QPushButton:hover {"
+        "    background-color: #0984e3;"
+        "}"
+    );
+    
+    QPushButton *cancelButton = new QPushButton("取消");
+    
+    buttonLayout->addStretch(); // 添加弹性空间
+    buttonLayout->addWidget(applyButton);
+    buttonLayout->addSpacing(10); // 按钮间距
+    buttonLayout->addWidget(cancelButton);
+    buttonLayout->addStretch(); // 添加弹性空间
+    
+    layout->addSpacing(20); // 与上面内容的间距
+    layout->addLayout(buttonLayout);
+    
+    // 连接信号
+    connect(musicVolumeSlider, &QSlider::valueChanged, [musicVolumeValueLabel](int value) {
+        musicVolumeValueLabel->setText(QString("%1%").arg(value));
+    });
+    
+    connect(soundVolumeSlider, &QSlider::valueChanged, [soundVolumeValueLabel](int value) {
+        soundVolumeValueLabel->setText(QString("%1%").arg(value));
+    });
+    
+    connect(applyButton, &QPushButton::clicked, [=]() {
+        // 应用设置
+        float musicVolume = musicVolumeSlider->value() / 100.0f;
+        float soundVolume = soundVolumeSlider->value() / 100.0f;
+        bool soundEnabled = soundEffectCheckBox->isChecked();
+        
+        // 应用音频设置
+        AudioManager* audioManager = AudioManager::getInstance();
+        audioManager->setMusicVolume(musicVolume);
+        audioManager->setSoundVolume(soundEnabled ? soundVolume : 0.0f);
+        
+        QMessageBox::information(settingsDialog, "设置", "设置已保存！");
+        settingsDialog->accept();
+    });
+    
+    connect(cancelButton, &QPushButton::clicked, settingsDialog, &QDialog::reject);
+    
+    // 显示对话框
+    settingsDialog->exec();
+    settingsDialog->deleteLater();
 }
 
 void MainWindow::onLogoutClicked()
