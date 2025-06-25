@@ -33,21 +33,64 @@ SugarOilGameSceneNew::SugarOilGameSceneNew(QObject *parent)
     initializeAudio();
     initializeManagers();
     loadBackground();
+    
+    // 初始化性能监控
+    mPerformanceTimer.start();
 }
 
 SugarOilGameSceneNew::~SugarOilGameSceneNew()
 {
     stopGame();
     
-    // 清理所有游戏对象
-    qDeleteAll(mEnemies);
-    qDeleteAll(mPlayerBullets);
-    qDeleteAll(mEnemyBullets);
-    qDeleteAll(mItems);
-    qDeleteAll(mCreatures);
+    // 安全清理所有游戏对象，防止重复删除
+    for (EnemyBase* enemy : mEnemies) {
+        if (enemy) {
+            enemy->stopAI();
+            removeItem(enemy);
+            enemy->deleteLater();
+        }
+    }
+    mEnemies.clear();
     
+    // 子弹使用对象池，需要正确归还
+    for (BulletBase* bullet : mPlayerBullets) {
+        if (bullet) {
+            removeItem(bullet);
+            BulletBase::returnBulletToPool(bullet);
+        }
+    }
+    mPlayerBullets.clear();
+    
+    for (BulletBase* bullet : mEnemyBullets) {
+        if (bullet) {
+            removeItem(bullet);
+            BulletBase::returnBulletToPool(bullet);
+        }
+    }
+    mEnemyBullets.clear();
+    
+    // 清理道具和生物
+    for (GameItem* item : mItems) {
+        if (item) {
+            removeItem(item);
+            item->deleteLater();
+        }
+    }
+    mItems.clear();
+    
+    for (GameCreature* creature : mCreatures) {
+        if (creature) {
+            removeItem(creature);
+            creature->deleteLater();
+        }
+    }
+    mCreatures.clear();
+    
+    // 清理玩家
     if (mPlayer) {
-        delete mPlayer;
+        removeItem(mPlayer);
+        mPlayer->deleteLater();
+        mPlayer = nullptr;
     }
 }
 
@@ -407,11 +450,29 @@ void SugarOilGameSceneNew::updateGame()
         return;
     }
     
+    // 性能监控
+    mFrameCount++;
+    if (mFrameCount % 100 == 0) {
+        qint64 elapsed = mPerformanceTimer.elapsed();
+        qreal fps = (mFrameCount * 1000.0) / elapsed;
+        qDebug() << "Performance Stats - FPS:" << fps 
+                 << "Enemies:" << mEnemies.size()
+                 << "Player Bullets:" << mPlayerBullets.size()
+                 << "Enemy Bullets:" << mEnemyBullets.size()
+                 << "Items:" << mItems.size()
+                 << "Creatures:" << mCreatures.size();
+    }
+    
     updatePlayerMovement();
     updateItems();
     updateCreatures();
     updateCollisions();
-    cleanupObjects();
+    
+    // 优化清理频率，每5帧清理一次以提升性能
+    static int cleanupCounter = 0;
+    if (++cleanupCounter % 5 == 0) {
+        cleanupObjects();
+    }
 }
 
 void SugarOilGameSceneNew::updatePlayerMovement()
@@ -587,7 +648,12 @@ void SugarOilGameSceneNew::checkPlayerBulletEnemyCollisions()
                 continue;
             }
             
-            if (enemy->sceneBoundingRect().intersects(bulletRect)) {
+            // 使用距离检测提高碰撞精度
+            QPointF bulletPos = bullet->pos();
+            QPointF enemyPos = enemy->pos();
+            qreal distance = QLineF(bulletPos, enemyPos).length();
+            
+            if (distance < SUGAR_OIL_COLLISION_DISTANCE) {
                 // 敌人受伤
                 enemy->takeDamage(bullet->getDamage());
                 
@@ -818,7 +884,12 @@ void SugarOilGameSceneNew::removeActivatedCreatures()
 
 void SugarOilGameSceneNew::removeOutOfBoundsBullets()
 {
-    QRectF sceneRect = this->sceneRect();
+    // 使用简单坐标比较优化性能
+    const qreal margin = 50.0; // 边界缓冲区
+    const qreal minX = -margin;
+    const qreal maxX = SUGAR_OIL_SCENE_WIDTH + margin;
+    const qreal minY = -margin;
+    const qreal maxY = SUGAR_OIL_SCENE_HEIGHT + margin;
     
     // 检查玩家子弹
     for (int i = mPlayerBullets.size() - 1; i >= 0; --i) {
@@ -828,7 +899,8 @@ void SugarOilGameSceneNew::removeOutOfBoundsBullets()
             continue;
         }
         
-        if (!sceneRect.intersects(bullet->sceneBoundingRect())) {
+        QPointF pos = bullet->pos();
+        if (pos.x() < minX || pos.x() > maxX || pos.y() < minY || pos.y() > maxY) {
             removeItem(bullet);
             mPlayerBullets.removeAt(i);
             BulletBase::returnBulletToPool(bullet);
@@ -843,7 +915,8 @@ void SugarOilGameSceneNew::removeOutOfBoundsBullets()
             continue;
         }
         
-        if (!sceneRect.intersects(bullet->sceneBoundingRect())) {
+        QPointF pos = bullet->pos();
+        if (pos.x() < minX || pos.x() > maxX || pos.y() < minY || pos.y() > maxY) {
             removeItem(bullet);
             mEnemyBullets.removeAt(i);
             BulletBase::returnBulletToPool(bullet);
@@ -867,7 +940,7 @@ void SugarOilGameSceneNew::createPlayerBullet(const QPointF &position, const QPo
     BulletBase* bullet = BulletBase::getBulletFromPool(mPlayer, BulletBase::BulletType::PlayerBullet);
     bullet->setPos(position);
     bullet->setMoveDirection(direction);
-    bullet->setSpeed(8.0);
+    bullet->setSpeed(5.0); // 降低速度减少穿透问题
     bullet->setDamage(damage);
     addItem(bullet);
     mPlayerBullets.append(bullet);

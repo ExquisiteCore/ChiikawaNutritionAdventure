@@ -7,6 +7,7 @@
 #include <QKeyEvent>
 #include <QRandomGenerator>
 #include <QGraphicsPixmapItem>
+#include <QElapsedTimer>
 
 #include "sugar_oil_config.h"
 #include "../audio_manager.h"
@@ -125,11 +126,17 @@ private:
     
     // 游戏对象
     SugarOilPlayer* mPlayer;
+     
+     // 游戏对象列表
     QList<EnemyBase*> mEnemies;
     QList<BulletBase*> mPlayerBullets;
     QList<BulletBase*> mEnemyBullets;
     QList<GameItem*> mItems;
     QList<GameCreature*> mCreatures;
+    
+    // 性能监控
+    int mFrameCount = 0;
+    QElapsedTimer mPerformanceTimer;
     
     // 背景
     QGraphicsPixmapItem* mBackground;
@@ -164,7 +171,7 @@ private:
     
     // 游戏配置
     static const int GAME_DURATION = 300; // 5分钟
-    static const int UPDATE_INTERVAL = 25; // ~40 FPS，降低更新频率减少卡顿
+    static const int UPDATE_INTERVAL = 16; // 60 FPS，与配置文件保持一致
     static const int SPAWN_INTERVAL = 3000; // 3秒，降低生成频率
     static const int SCENE_WIDTH = SUGAR_OIL_SCENE_WIDTH;
     static const int SCENE_HEIGHT = SUGAR_OIL_SCENE_HEIGHT;
