@@ -14,7 +14,18 @@ AudioManager* AudioManager::getInstance()
 void AudioManager::destroyInstance()
 {
     if (instance) {
-        delete instance;
+        // 安全停止所有音频播放
+        try {
+            instance->stopCurrentMusic();
+            if (instance->soundEffect && instance->soundEffect->isPlaying()) {
+                instance->soundEffect->stop();
+            }
+        } catch (...) {
+            qDebug() << "销毁音频管理器时停止播放发生异常";
+        }
+        
+        // 延迟删除以确保所有音频操作完成
+        instance->deleteLater();
         instance = nullptr;
     }
 }
@@ -39,16 +50,31 @@ AudioManager::AudioManager(QObject *parent)
 
 AudioManager::~AudioManager()
 {
+    // 安全停止和清理音频资源
     if (musicPlayer) {
-        musicPlayer->stop();
-        delete musicPlayer;
+        // 断开所有信号连接，防止析构时触发回调
+        disconnect(musicPlayer, nullptr, this, nullptr);
+        if (musicPlayer->playbackState() != QMediaPlayer::StoppedState) {
+            musicPlayer->stop();
+        }
+        musicPlayer->deleteLater();
+        musicPlayer = nullptr;
     }
     if (musicAudioOutput) {
-        delete musicAudioOutput;
+        musicAudioOutput->deleteLater();
+        musicAudioOutput = nullptr;
     }
     if (soundEffect) {
-        delete soundEffect;
+        if (soundEffect->isPlaying()) {
+            soundEffect->stop();
+        }
+        soundEffect->deleteLater();
+        soundEffect = nullptr;
     }
+    
+    // 重置状态标志
+    musicPlaying = false;
+    musicPaused = false;
 }
 
 void AudioManager::initializeAudioResources()
@@ -118,7 +144,10 @@ void AudioManager::setupSoundEffects()
 
 void AudioManager::playBackgroundMusic()
 {
-    if (!musicPlayer) return;
+    if (!musicPlayer || !musicAudioOutput) {
+        qDebug() << "音乐播放器未初始化";
+        return;
+    }
     
     // 如果当前已经在播放背景音乐，则不重复播放
     if (musicPlaying && currentMusicType == MusicType::Background) {
@@ -127,19 +156,35 @@ void AudioManager::playBackgroundMusic()
     
     stopCurrentMusic();
     
-    currentMusicType = MusicType::Background;
-    musicPlayer->setSource(QUrl(musicPaths[MusicType::Background]));
-    musicPlayer->setLoops(QMediaPlayer::Infinite);
-    musicPlayer->play();
-    musicPlaying = true;
-    musicPaused = false;
-    
-    qDebug() << "开始播放背景音乐";
+    try {
+        currentMusicType = MusicType::Background;
+        QString musicPath = musicPaths[MusicType::Background];
+        
+        if (musicPath.isEmpty()) {
+            qDebug() << "背景音乐路径为空";
+            return;
+        }
+        
+        musicPlayer->setSource(QUrl(musicPath));
+        musicPlayer->setLoops(QMediaPlayer::Infinite);
+        musicPlayer->play();
+        musicPlaying = true;
+        musicPaused = false;
+        
+        qDebug() << "开始播放背景音乐:" << musicPath;
+    } catch (...) {
+        qDebug() << "播放背景音乐时发生异常";
+        musicPlaying = false;
+        musicPaused = false;
+    }
 }
 
 void AudioManager::playGameMusic(MusicType type)
 {
-    if (!musicPlayer) return;
+    if (!musicPlayer || !musicAudioOutput) {
+        qDebug() << "音乐播放器未初始化";
+        return;
+    }
     
     // 如果当前已经在播放相同的游戏音乐，则不重复播放
     if (musicPlaying && currentMusicType == type) {
@@ -148,62 +193,98 @@ void AudioManager::playGameMusic(MusicType type)
     
     stopCurrentMusic();
     
-    currentMusicType = type;
-    if (musicPaths.contains(type)) {
-        QString musicPath = musicPaths[type];
-        qDebug() << "准备播放音乐，类型:" << static_cast<int>(type) << "路径:" << musicPath;
-        
-        musicPlayer->setSource(QUrl(musicPath));
-        
-        // 游戏音乐和背景音乐循环播放，胜利/失败音乐播放一次
-        if (type == MusicType::Mode1Game || type == MusicType::Mode2Game) {
-            musicPlayer->setLoops(QMediaPlayer::Infinite);
-            qDebug() << "设置游戏音乐循环播放";
+    try {
+        currentMusicType = type;
+        if (musicPaths.contains(type)) {
+            QString musicPath = musicPaths[type];
+            
+            if (musicPath.isEmpty()) {
+                qDebug() << "音乐路径为空，类型:" << static_cast<int>(type);
+                return;
+            }
+            
+            qDebug() << "准备播放音乐，类型:" << static_cast<int>(type) << "路径:" << musicPath;
+            
+            musicPlayer->setSource(QUrl(musicPath));
+            
+            // 游戏音乐和背景音乐循环播放，胜利/失败音乐播放一次
+            if (type == MusicType::Mode1Game || type == MusicType::Mode2Game) {
+                musicPlayer->setLoops(QMediaPlayer::Infinite);
+                qDebug() << "设置游戏音乐循环播放";
+            } else {
+                musicPlayer->setLoops(1);
+            }
+            
+            musicPlayer->play();
+            musicPlaying = true;
+            musicPaused = false;
+            
+            qDebug() << "开始播放游戏音乐，类型:" << static_cast<int>(type) << "音量:" << musicAudioOutput->volume();
         } else {
-            musicPlayer->setLoops(1);
+            qDebug() << "错误：找不到音乐类型" << static_cast<int>(type) << "的路径配置";
         }
-        
-        musicPlayer->play();
-        musicPlaying = true;
+    } catch (...) {
+        qDebug() << "播放游戏音乐时发生异常，类型:" << static_cast<int>(type);
+        musicPlaying = false;
         musicPaused = false;
-        
-        qDebug() << "开始播放游戏音乐，类型:" << static_cast<int>(type) << "音量:" << musicAudioOutput->volume();
-    } else {
-        qDebug() << "错误：找不到音乐类型" << static_cast<int>(type) << "的路径配置";
     }
 }
 
 void AudioManager::stopCurrentMusic()
 {
     if (musicPlayer && musicPlaying) {
-        musicPlayer->stop();
-        musicPlaying = false;
-        musicPaused = false;
-        qDebug() << "停止当前音乐";
+        // 安全停止音乐播放
+        try {
+            if (musicPlayer->playbackState() != QMediaPlayer::StoppedState) {
+                musicPlayer->stop();
+            }
+            musicPlaying = false;
+            musicPaused = false;
+            qDebug() << "停止当前音乐";
+        } catch (...) {
+            qDebug() << "停止音乐时发生异常";
+            musicPlaying = false;
+            musicPaused = false;
+        }
     }
 }
 
 void AudioManager::pauseCurrentMusic()
 {
     if (musicPlayer && musicPlaying && !musicPaused) {
-        musicPlayer->pause();
-        musicPaused = true;
-        qDebug() << "暂停当前音乐";
+        try {
+            if (musicPlayer->playbackState() == QMediaPlayer::PlayingState) {
+                musicPlayer->pause();
+                musicPaused = true;
+                qDebug() << "暂停当前音乐";
+            }
+        } catch (...) {
+            qDebug() << "暂停音乐时发生异常";
+        }
     }
 }
 
 void AudioManager::resumeCurrentMusic()
 {
     if (musicPlayer && musicPlaying && musicPaused) {
-        musicPlayer->play();
-        musicPaused = false;
-        qDebug() << "恢复当前音乐";
+        try {
+            if (musicPlayer->playbackState() == QMediaPlayer::PausedState) {
+                musicPlayer->play();
+                musicPaused = false;
+                qDebug() << "恢复当前音乐";
+            }
+        } catch (...) {
+            qDebug() << "恢复音乐时发生异常";
+        }
     }
 }
 
 void AudioManager::playSound(SoundType type, const QString& soundFile)
 {
-    if (!soundEffect || !soundEnabled) return;
+    if (!soundEffect || !soundEnabled) {
+        qDebug() << "音效播放器未初始化或音效已禁用";
+        return;
+    }
     
     QString filePath;
     if (!soundFile.isEmpty()) {
@@ -215,28 +296,49 @@ void AudioManager::playSound(SoundType type, const QString& soundFile)
         return;
     }
     
-    soundEffect->setSource(QUrl(filePath));
-    soundEffect->play();
-    
-    qDebug() << "播放音效:" << filePath;
+    try {
+        // 安全设置音效源和播放
+        soundEffect->setSource(QUrl(filePath));
+        if (soundEffect->status() == QSoundEffect::Ready || 
+            soundEffect->status() == QSoundEffect::Loading) {
+            soundEffect->play();
+            qDebug() << "播放音效:" << filePath;
+        } else {
+            qDebug() << "音效文件加载失败:" << filePath;
+        }
+    } catch (...) {
+        qDebug() << "播放音效时发生异常:" << filePath;
+    }
 }
 
 void AudioManager::setMusicVolume(float volume)
 {
     musicVolume = qBound(0.0f, volume, 1.0f);
     if (musicAudioOutput) {
-        musicAudioOutput->setVolume(musicVolume * masterVolume);
+        try {
+            musicAudioOutput->setVolume(musicVolume * masterVolume);
+            qDebug() << "设置音乐音量:" << musicVolume;
+        } catch (...) {
+            qDebug() << "设置音乐音量时发生异常";
+        }
+    } else {
+        qDebug() << "音乐输出设备未初始化，无法设置音量";
     }
-    qDebug() << "设置音乐音量:" << musicVolume;
 }
 
 void AudioManager::setSoundVolume(float volume)
 {
     soundVolume = qBound(0.0f, volume, 1.0f);
     if (soundEffect) {
-        soundEffect->setVolume(soundVolume * masterVolume);
+        try {
+            soundEffect->setVolume(soundVolume * masterVolume);
+            qDebug() << "设置音效音量:" << soundVolume;
+        } catch (...) {
+            qDebug() << "设置音效音量时发生异常";
+        }
+    } else {
+        qDebug() << "音效播放器未初始化，无法设置音量";
     }
-    qDebug() << "设置音效音量:" << soundVolume;
 }
 
 void AudioManager::setMasterVolume(float volume)
@@ -244,14 +346,17 @@ void AudioManager::setMasterVolume(float volume)
     masterVolume = qBound(0.0f, volume, 1.0f);
     
     // 更新所有音频组件的音量
-    if (musicAudioOutput) {
-        musicAudioOutput->setVolume(musicVolume * masterVolume);
+    try {
+        if (musicAudioOutput) {
+            musicAudioOutput->setVolume(musicVolume * masterVolume);
+        }
+        if (soundEffect) {
+            soundEffect->setVolume(soundVolume * masterVolume);
+        }
+        qDebug() << "设置主音量:" << masterVolume;
+    } catch (...) {
+        qDebug() << "设置主音量时发生异常";
     }
-    if (soundEffect) {
-        soundEffect->setVolume(soundVolume * masterVolume);
-    }
-    
-    qDebug() << "设置主音量:" << masterVolume;
 }
 
 bool AudioManager::isMusicPlaying() const
