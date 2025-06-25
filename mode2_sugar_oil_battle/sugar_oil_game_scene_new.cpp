@@ -686,16 +686,21 @@ void SugarOilGameSceneNew::checkPlayerBulletEnemyCollisions()
             qreal distance = QLineF(bulletPos, enemyPos).length();
             
             if (distance < SUGAR_OIL_COLLISION_DISTANCE) {
+                // 添加调试信息
+                qDebug() << "Bullet collision detected! Distance:" << distance << "Bullet damage:" << bullet->getDamage();
+                
                 // 敌人受伤
                 enemy->takeDamage(bullet->getDamage());
                 
                 // 如果敌人死亡，标记为需要移除
                 if (enemy->getHP() <= 0) {
+                    qDebug() << "Enemy killed by bullet";
                     enemy->stopAI();
                     enemiesToRemove.append(enemy);
                 }
                 
                 // 标记子弹为需要移除
+                qDebug() << "Marking bullet for removal";
                 bulletsToRemove.append(bullet);
                 bulletHit = true;
                 break;
@@ -708,7 +713,9 @@ void SugarOilGameSceneNew::checkPlayerBulletEnemyCollisions()
     }
     
     // 移除被击中的子弹
+    qDebug() << "Removing" << bulletsToRemove.size() << "bullets from collision";
     for (BulletBase* bullet : bulletsToRemove) {
+        qDebug() << "Removing bullet from scene and returning to pool";
         mPlayerBullets.removeOne(bullet);
         removeItem(bullet);
         BulletBase::returnBulletToPool(bullet);
